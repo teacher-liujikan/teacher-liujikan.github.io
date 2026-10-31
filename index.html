@@ -1,0 +1,211 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="description" content="老師媽咪自製的國語、數學、英文與有趣課程學習網頁，免費提供老師與家長使用。">
+<title>老師媽咪的求生指南</title>
+<style>
+/* Layout: iOS「設定」式分組清單——大標題、灰底、白色圓角群組、分隔線、右側箭頭。國語用分段控制選版本與年級。 */
+:root{
+  --bg:#F2F2F7; --cell:#FFFFFF; --label:#000000; --label2:#6C6C72; --label3:#A1A1A8;
+  --sep:#D8D8DD; --fill:#E4E4EA; --tint:#007AFF; --press:#E5E5EA;
+  --red:#FF3B30; --orange:#FF9500; --yellow:#FFCC00; --green:#34C759; --teal:#30B0C7; --blue:#007AFF; --indigo:#5856D6; --purple:#AF52DE; --pink:#FF2D55; --gray:#8E8E93;
+  --seg-on:#FFFFFF; --seg-shadow:0 3px 8px rgba(0,0,0,.12),0 1px 1px rgba(0,0,0,.04);
+  --font:-apple-system,BlinkMacSystemFont,"SF Pro Text","PingFang TC","Noto Sans TC","Microsoft JhengHei",system-ui,sans-serif;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#000000; --cell:#1C1C1E; --label:#FFFFFF; --label2:#98989F; --label3:#636366;
+  --sep:#38383A; --fill:#2C2C2E; --tint:#0A84FF; --press:#2C2C2E;
+  --red:#FF453A; --orange:#FF9F0A; --yellow:#FFD60A; --green:#30D158; --teal:#40C8E0; --blue:#0A84FF; --indigo:#5E5CE6; --purple:#BF5AF2; --pink:#FF375F; --gray:#8E8E93;
+  --seg-on:#636366; --seg-shadow:0 3px 8px rgba(0,0,0,.3); color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#000000; --cell:#1C1C1E; --label:#FFFFFF; --label2:#98989F; --label3:#636366;
+  --sep:#38383A; --fill:#2C2C2E; --tint:#0A84FF; --press:#2C2C2E;
+  --red:#FF453A; --orange:#FF9F0A; --yellow:#FFD60A; --green:#30D158; --teal:#40C8E0; --blue:#0A84FF; --indigo:#5E5CE6; --purple:#BF5AF2; --pink:#FF375F; --gray:#8E8E93;
+  --seg-on:#636366; --seg-shadow:0 3px 8px rgba(0,0,0,.3); color-scheme:dark}
+
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{background:var(--bg);color:var(--label);font-family:var(--font);font-size:17px;line-height:1.35;-webkit-font-smoothing:antialiased}
+a{color:inherit;text-decoration:none}
+button{font:inherit;color:inherit;cursor:pointer;border:0;background:none;padding:0}
+:focus-visible{outline:3px solid var(--tint);outline-offset:2px;border-radius:10px}
+.wrap{max-width:680px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:20px 48px;display:flex;flex-direction:column;gap:28px}
+h1,h2,h3,p{margin:0}
+
+/* large title */
+.top{display:flex;flex-direction:column;gap:6px;padding:12px 4px 0}
+h1{font-size:clamp(30px,8vw,34px);font-weight:700;letter-spacing:.01em;line-height:1.2}
+.lead{font-size:15px;color:var(--label2);line-height:1.5}
+
+/* section */
+.sec{display:flex;flex-direction:column;gap:7px}
+.sec-h{font-size:13px;color:var(--label2);padding:0 16px;letter-spacing:.02em;display:flex;justify-content:space-between;gap:8px}
+.sec-h b{font-weight:400;font-variant-numeric:tabular-nums}
+.sec-f{font-size:13px;color:var(--label2);padding:0 16px;line-height:1.45}
+.group{background:var(--cell);border-radius:12px;overflow:hidden}
+
+/* row */
+.row{display:flex;align-items:center;gap:12px;padding-left:16px;min-height:44px;position:relative}
+a.row:active,a.row:hover{background:var(--press)}
+.row+.row::before{content:"";position:absolute;top:0;right:0;left:60px;height:.5px;background:var(--sep)}
+.row.plain+.row.plain::before{left:16px}
+.ic{flex:none;width:32px;height:32px;border-radius:8px;display:grid;place-items:center;color:#FFFFFF;font-size:16px;font-weight:600}
+.txt{flex:1;min-width:0;display:flex;flex-direction:column;gap:2px;padding:11px 0}
+.t{font-size:17px;display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+.s{font-size:14px;color:var(--label2);line-height:1.4}
+.tag{font-size:12px;color:var(--label2);background:var(--fill);border-radius:5px;padding:1px 6px}
+.end{flex:none;display:flex;align-items:center;gap:6px;padding-right:14px;color:var(--label3);font-size:15px}
+.chev{width:8px;height:14px;fill:none;stroke:var(--label3);stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.row.off .t{color:var(--label2)}
+.row.off .ic{opacity:.35}
+
+/* segmented control */
+.ctrls{padding:12px 16px;display:flex;flex-direction:column;gap:10px}
+.seg-l{font-size:13px;color:var(--label2)}
+.seg{display:grid;grid-auto-columns:1fr;grid-auto-flow:column;background:var(--fill);border-radius:9px;padding:2px;gap:2px}
+.seg button{border-radius:7px;padding:7px 4px;font-size:15px;font-weight:500;transition:background .2s}
+.seg button[aria-pressed="true"]{background:var(--seg-on);box-shadow:var(--seg-shadow);font-weight:600}
+.ctrl{display:flex;flex-direction:column;gap:6px}
+.ctrls+.row::before{left:16px}
+
+/* progress */
+.prog{display:flex;align-items:center;gap:10px;padding:0 16px 12px}
+.bar{flex:1;height:6px;border-radius:3px;background:var(--fill);overflow:hidden}
+.bar i{display:block;height:100%;background:var(--green);border-radius:3px}
+.prog span{font-size:13px;color:var(--label2);font-variant-numeric:tabular-nums;white-space:nowrap}
+
+.link{color:var(--tint)}
+footer{font-size:13px;color:var(--label2);padding:0 16px;display:flex;flex-direction:column;gap:6px;line-height:1.5}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+
+html{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}body{margin:0}
+</style>
+</head>
+<body>
+
+<div class="wrap">
+  <header class="top">
+    <h1>老師媽咪的求生指南</h1>
+    <p class="lead">生活亂成一鍋粥，我趁熱拿起來喝。<br>製作 AI 工具成癮的老師媽咪。</p>
+  </header>
+
+  <section class="sec" aria-labelledby="zh-h">
+    <h2 class="sec-h" id="zh-h"><span>國語</span><b id="zh-count"></b></h2>
+    <div class="group">
+      <div class="ctrls">
+        <div class="ctrl"><span class="seg-l" id="vl">版本</span><div class="seg" id="verSeg" role="group" aria-labelledby="vl"></div></div>
+        <div class="ctrl"><span class="seg-l" id="gl">年級（上學期）</span><div class="seg" id="gradeSeg" role="group" aria-labelledby="gl"></div></div>
+      </div>
+      <div class="prog"><div class="bar"><i id="barFill"></i></div><span id="progTxt"></span></div>
+    </div>
+    <div class="group" id="zhList"></div>
+    <div class="group" id="zhFinal"></div>
+    <p class="sec-f">照順序一關一關練，最後挑戰總複習。灰色的關卡還在製作中。</p>
+  </section>
+
+  <div id="others" style="display:contents"></div>
+
+  <section class="sec" aria-labelledby="me-h">
+    <h2 class="sec-h" id="me-h"><span>關於</span></h2>
+    <div class="group">
+      <a class="row" href="https://www.threads.com/@teacher_liujikan" target="_blank" rel="noopener">
+        <span class="ic" style="background:var(--label)"><span style="color:var(--cell)">@</span></span>
+        <span class="txt"><span class="t">在 Threads 追蹤老師媽咪</span><span class="s">@teacher_liujikan</span></span>
+        <span class="end"><svg class="chev" viewBox="0 0 8 14" aria-hidden="true"><path d="M1 1l6 6-6 6"/></svg></span>
+      </a>
+    </div>
+  </section>
+
+  <footer>
+    <p>建議用平板或電腦開啟，打開聲音效果更好。</p>
+    <p>這些都是老師媽咪自製的免費學習資源，提供老師與家長教學使用。國語課別範圍對應各版本課本，定義、例句與練習題皆為原創，不是出版社官方產品。</p>
+  </footer>
+</div>
+
+<script>
+const A="https://claude.ai/artifact/";
+const link=u=>/^https?:/.test(u)?u:A+u;
+const VERS=["翰林","康軒","南一"], GRADES=["三","四","五","六"];
+/* ===== 國語複習架構：每一冊同一套關卡，最後是總複習 =====
+   補內容：在 BOOKS 對應冊別填上網址，例如 "翰林三":{shape:"https://..."}。沒填的關卡自動顯示「製作中」。 */
+const SLOTS=[
+ {k:"char",  n:"生字注音",   ic:"字",c:"--blue",   d:"生字、注音和筆順，先把字認熟"},
+ {k:"shape", n:"形近字",     ic:"形",c:"--teal",   d:"長得很像的字比一比"},
+ {k:"poly",  n:"多音字",     ic:"音",c:"--indigo", d:"看語詞判斷要唸哪一個音"},
+ {k:"word",  n:"語詞填空",   ic:"詞",c:"--green",  d:"選出最適合的語詞填進句子"},
+ {k:"idiom", n:"成語練功房", ic:"成",c:"--orange", d:"選成語、填空、看漫畫、排字、翻牌"},
+ {k:"rhet",  n:"修辭小偵探", ic:"修",c:"--pink",   d:"修辭教室、總整理、闖關收集公仔"},
+ {k:"sent",  n:"句型與標點", ic:"句",c:"--purple", d:"照樣造句、句子重組、標點符號"},
+ {k:"read",  n:"閱讀理解",   ic:"讀",c:"--yellow", d:"讀短文，找重點、回答問題"}
+];
+const FINAL={k:"final",n:"總複習",ic:"★",c:"--red",d:"每一關的題目混在一起，從頭挑戰一次"};
+const BOOKS={
+ "翰林三":{rhet:"https://teacher-liujikan.github.io/rhetoric-detective-hanlin3/", idiom:"https://teacher-liujikan.github.io/idiom-hanlin-3a/"},
+ "翰林四":{rhet:"https://teacher-liujikan.github.io/rhetoric-detective-hanlin4/", idiom:"https://teacher-liujikan.github.io/idiom-hanlin-4a/"},
+ "翰林五":{rhet:"https://teacher-liujikan.github.io/rhetoric-detective-hanlin5/", idiom:"https://teacher-liujikan.github.io/idiom-hanlin-5a/"},
+ "翰林六":{rhet:"https://teacher-liujikan.github.io/rhetoric-detective-hanlin6/", idiom:"https://teacher-liujikan.github.io/idiom-hanlin-6a/"},
+ "康軒三":{rhet:"https://teacher-liujikan.github.io/rhetoric-detective-kanghsuan3/", idiom:"https://teacher-liujikan.github.io/idiom-kangxuan-3a/"},
+ "康軒四":{idiom:"https://teacher-liujikan.github.io/idiom-kangxuan-4a/"},
+ "康軒五":{idiom:"https://teacher-liujikan.github.io/idiom-kangxuan-5a/"},
+ "康軒六":{idiom:"https://teacher-liujikan.github.io/idiom-kangxuan-6a/"},
+ "南一三":{rhet:"XNh63s53X4RFStiC2YJouR", idiom:"2gABfv5sDSh8yW2RJ9bpV3"},
+ "南一四":{rhet:"https://teacher-liujikan.github.io/rhetoric-detective-nani4/", idiom:"E9nvD2HpAAnzT531CXqJ7C"},
+ "南一五":{rhet:"https://teacher-liujikan.github.io/rhetoric-detective-nani5/", idiom:"GxCwkAHp9wSMyM8wXEfBj7"},
+ "南一六":{rhet:"https://teacher-liujikan.github.io/rhetoric-detective-nani6/", idiom:"4dDBwo942DUcLccU7X4RAJ"}
+};
+const NOTE={"南一":{idiom:"期中考複習"}};
+
+const OTHERS=[
+ {n:"數學",items:[
+  {t:"九九乘法大冒險",ic:"九",c:"--blue",u:"https://teacher-liujikan.github.io/9-9-Adventure/",d:"一關一關過，通關解鎖打怪和快答"},
+  {t:"直式乘法小教室",ic:"乘",c:"--indigo",tag:"三年級",u:"9k88iLcJtTrN2Dy6BT3xdR",d:"看示範、自己算、錯題本、打怪"},
+  {t:"公分毫米大挑戰",ic:"尺",c:"--teal",u:"https://teacher-liujikan.github.io/cm-mm/",d:"1 公分 ＝ 10 毫米，四關加大混合"},
+  {t:"大約是幾百？",ic:"估",c:"--green",u:"https://teacher-liujikan.github.io/number-line-rounding/",d:"在數線上估到整十、整百、整千"}]},
+ {n:"英文",items:[
+  {t:"Feelings 單字闖關",ic:"Aa",c:"--purple",u:"https://teacher-liujikan.github.io/Vocabulary-Practice/",d:"聽、背、描寫、排字母，過關再玩"},
+  {t:"英文拼字遊戲",ic:"ABC",c:"--pink",u:"https://teacher-liujikan.github.io/spellgame/",d:"點單字會唸，拼錯的最後再練"}]},
+ {n:"有趣的課程",items:[
+  {t:"畫圖接力猜猜看",ic:"畫",c:"--orange",tag:"同樂會",u:"https://teacher-liujikan.github.io/draw-pass-guess/",d:"畫圖、傳下去、猜答案，最後全班大公開"},
+  {t:"破綻偵探社",ic:"偵",c:"--red",tag:"防詐",u:"GQuAoAoy9Y1oRrf9k3reK9",d:"找 AI 圖片破綻、判斷訊息能不能信"},
+  {t:"校園安全小偵探",ic:"安",c:"--green",tag:"校園安全",u:"9H6YsAssq7nt5vKSukdaX2",d:"做選擇，再看真實案例的後果"}]}
+];
+
+const $=id=>document.getElementById(id);
+const CHEV='<svg class="chev" viewBox="0 0 8 14" aria-hidden="true"><path d="M1 1l6 6-6 6"/></svg>';
+let pick={v:"翰林",g:"三"};
+try{const s=JSON.parse(localStorage.getItem("tm-pick")||"{}");if(VERS.includes(s.v))pick.v=s.v;if(GRADES.includes(s.g))pick.g=s.g}catch(e){}
+function save(){try{localStorage.setItem("tm-pick",JSON.stringify(pick))}catch(e){}}
+
+function row(o){
+  const ic=`<span class="ic" style="background:var(${o.c})${o.ic.length>1?";font-size:"+(o.ic.length>2?11:13)+"px":""}">${o.ic}</span>`;
+  const tag=o.tag?`<span class="tag">${o.tag}</span>`:"";
+  const txt=`<span class="txt"><span class="t">${o.t}${tag}</span><span class="s">${o.d}</span></span>`;
+  if(o.u) return `<a class="row" href="${link(o.u)}" target="_blank" rel="noopener">${ic}${txt}<span class="end">${CHEV}</span></a>`;
+  return `<div class="row off">${ic}${txt}<span class="end">製作中</span></div>`;
+}
+
+function renderZh(){
+  $("verSeg").innerHTML=VERS.map(v=>`<button aria-pressed="${pick.v===v}" data-v="${v}">${v}</button>`).join("");
+  $("gradeSeg").innerHTML=GRADES.map(g=>`<button aria-pressed="${pick.g===g}" data-g="${g}">${g}年級</button>`).join("");
+  const b=BOOKS[pick.v+pick.g]||{}, note=NOTE[pick.v]||{};
+  const all=[...SLOTS,FINAL], done=all.filter(s=>b[s.k]).length;
+  $("barFill").style.width=(done/all.length*100)+"%";
+  $("progTxt").textContent=`已上線 ${done} / ${all.length} 關`;
+  $("zh-count").textContent=`${pick.v}・${pick.g}年級上學期`;
+  $("zhList").innerHTML=SLOTS.map(s=>row({t:s.n,ic:s.ic,c:s.c,d:s.d,u:b[s.k],tag:note[s.k]})).join("");
+  $("zhFinal").innerHTML=row({t:FINAL.n,ic:FINAL.ic,c:FINAL.c,d:FINAL.d,u:b.final});
+}
+document.querySelector(".ctrls").addEventListener("click",e=>{
+  const btn=e.target.closest("button"); if(!btn)return;
+  if(btn.dataset.v)pick.v=btn.dataset.v;
+  if(btn.dataset.g)pick.g=btn.dataset.g;
+  save(); renderZh();
+});
+
+$("others").innerHTML=OTHERS.map(sec=>`<section class="sec"><h2 class="sec-h"><span>${sec.n}</span></h2><div class="group">${sec.items.map(row).join("")}</div></section>`).join("");
+renderZh();
+</script>
+
+</body>
+</html>
