@@ -10,28 +10,29 @@
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Huninn&family=LXGW+WenKai+TC:wght@400;700&family=Noto+Sans+TC:wght@400;500;700&display=swap">
 <style>
 /* Layout: 作品集單頁——頂部導覽 → 首屏（一句話＋數字）→ 精選 3 件 → 國語複習地圖（左選冊、右關卡）→ 全部作品（分類篩選格狀）→ 怎麼用 → 關於 → 聯絡。深藍墨水＋螢光筆黃，作品封面用科目色＋楷書大字。 */
+/* 童趣版：天空藍底、粗墨線貼紙卡片＋錯位實心陰影、飽和糖果色，每個科目一種顏色。 */
 :root{
-  --bg:#F5F6FA; --surface:#FFFFFF; --ink:#13213D; --ink2:#4E5A72; --ink3:#8A93A6; --line:#E1E4EC; --soft:#ECEEF4;
-  --hi:#FFD84D; --hi-ink:#13213D; --accent:#E5484D;
-  --zh:#E5484D; --math:#2F7FD8; --en:#7B5BD6; --fun:#22A06B;
-  --zh-bg:#FDE9E9; --math-bg:#E3EFFC; --en-bg:#EEE8FB; --fun-bg:#E1F5EC;
-  --shadow:0 1px 2px rgba(19,33,61,.06),0 8px 24px -12px rgba(19,33,61,.18);
+  --bg:#EAF5FF; --surface:#FFFFFF; --ink:#1F2A5A; --ink2:#4A5684; --ink3:#8790B5; --line:#1F2A5A; --soft:#F1F4FF;
+  --hi:#FFD23F; --hi-ink:#1F2A5A; --accent:#FF5A5F; --pink:#FF7AB6; --orange:#FF9F1C; --sky:#3EC5FF;
+  --zh:#FF5A5F; --math:#2E8BFF; --en:#9B5CFF; --fun:#18B46B;
+  --zh-bg:#FF5A5F; --math-bg:#2E8BFF; --en-bg:#9B5CFF; --fun-bg:#18B46B;
+  --pop:5px 5px 0 var(--ink); --pop-h:8px 8px 0 var(--ink); --shadow:var(--pop);
   --display:"Huninn","Noto Sans TC","PingFang TC","Microsoft JhengHei",sans-serif;
   --body:"Noto Sans TC","PingFang TC","Microsoft JhengHei",system-ui,sans-serif;
   --kai:"LXGW WenKai TC","BiauKai","DFKai-SB","KaiTi",serif;
 }
 @media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
-  --bg:#0E1524; --surface:#16203A; --ink:#EEF1F7; --ink2:#AEB7CA; --ink3:#7A859B; --line:#26314B; --soft:#1D2843;
-  --hi:#F5CB3B; --hi-ink:#13213D; --accent:#FF6B6F;
-  --zh:#FF6B6F; --math:#5EA4F0; --en:#A58BF2; --fun:#4FCB93;
-  --zh-bg:#3A2130; --math-bg:#1C2F4D; --en-bg:#2B2550; --fun-bg:#17372E;
-  --shadow:0 1px 2px rgba(0,0,0,.3),0 8px 24px -12px rgba(0,0,0,.6); color-scheme:dark}}
+  --bg:#14183A; --surface:#20264F; --ink:#F4F6FF; --ink2:#C3C9EA; --ink3:#8E96C4; --line:#0A0D24; --soft:#2A3163;
+  --hi:#FFD23F; --hi-ink:#1F2A5A; --accent:#FF6B70; --pink:#FF8CC2; --orange:#FFAE3D; --sky:#5CD0FF;
+  --zh:#FF6B70; --math:#4C9DFF; --en:#A97BFF; --fun:#2CC77F;
+  --zh-bg:#FF6B70; --math-bg:#4C9DFF; --en-bg:#A97BFF; --fun-bg:#2CC77F;
+  --pop:5px 5px 0 #0A0D24; --pop-h:8px 8px 0 #0A0D24; color-scheme:dark}}
 :root[data-theme="dark"]{
-  --bg:#0E1524; --surface:#16203A; --ink:#EEF1F7; --ink2:#AEB7CA; --ink3:#7A859B; --line:#26314B; --soft:#1D2843;
-  --hi:#F5CB3B; --hi-ink:#13213D; --accent:#FF6B6F;
-  --zh:#FF6B6F; --math:#5EA4F0; --en:#A58BF2; --fun:#4FCB93;
-  --zh-bg:#3A2130; --math-bg:#1C2F4D; --en-bg:#2B2550; --fun-bg:#17372E;
-  --shadow:0 1px 2px rgba(0,0,0,.3),0 8px 24px -12px rgba(0,0,0,.6); color-scheme:dark}
+  --bg:#14183A; --surface:#20264F; --ink:#F4F6FF; --ink2:#C3C9EA; --ink3:#8E96C4; --line:#0A0D24; --soft:#2A3163;
+  --hi:#FFD23F; --hi-ink:#1F2A5A; --accent:#FF6B70; --pink:#FF8CC2; --orange:#FFAE3D; --sky:#5CD0FF;
+  --zh:#FF6B70; --math:#4C9DFF; --en:#A97BFF; --fun:#2CC77F;
+  --zh-bg:#FF6B70; --math-bg:#4C9DFF; --en-bg:#A97BFF; --fun-bg:#2CC77F;
+  --pop:5px 5px 0 #0A0D24; --pop-h:8px 8px 0 #0A0D24; color-scheme:dark}
 
 *{box-sizing:border-box}
 html{scroll-behavior:smooth;scroll-padding-top:72px}
@@ -189,6 +190,72 @@ footer p{max-width:44em}
   .sec{padding-block:44px}
 }
 @media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}*{transition:none!important}}
+/* ===== 童趣覆寫 ===== */
+body{background-color:var(--bg);background-image:radial-gradient(var(--sky) 1.4px,transparent 1.6px);background-size:26px 26px;background-attachment:fixed}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]) body{background-image:radial-gradient(#2E3670 1.4px,transparent 1.6px)}}
+:root[data-theme="dark"] body{background-image:radial-gradient(#2E3670 1.4px,transparent 1.6px)}
+.nav{border-bottom:2.5px solid var(--line);background:color-mix(in srgb,var(--bg) 90%,transparent)}
+.logo i{border:2.5px solid var(--line);box-shadow:3px 3px 0 var(--line);transform:rotate(-6deg)}
+.links a{font-weight:700}
+.links a:hover{background:var(--hi);color:var(--hi-ink)}
+.eyebrow{display:inline-block;align-self:flex-start;background:var(--accent);color:#FFFFFF;padding:3px 12px;border-radius:999px;border:2px solid var(--line);letter-spacing:.12em;transform:rotate(-2deg)}
+.hero{position:relative;overflow:hidden}
+.hero h1{font-size:clamp(36px,6.6vw,64px)}
+.mark{background:linear-gradient(transparent 55%,var(--hi) 55% 95%,transparent 95%)}
+.btn{border:2.5px solid var(--line);box-shadow:var(--pop)}
+.btn.primary{background:var(--accent);color:#FFFFFF}
+.btn.ghost{background:var(--surface)}
+.btn:hover{transform:translate(-2px,-2px);box-shadow:var(--pop-h)}
+.stat{border:2.5px solid var(--line);box-shadow:var(--pop);color:#FFFFFF}
+.stat span{color:#FFFFFF;font-weight:700}
+.stat:nth-child(1){background:var(--hi);color:var(--hi-ink);transform:rotate(-2deg)}
+.stat:nth-child(1) span{color:var(--hi-ink)}
+.stat:nth-child(2){background:var(--math);transform:rotate(1.5deg)}
+.stat:nth-child(3){background:var(--fun);transform:rotate(1deg)}
+.stat:nth-child(4){background:var(--pink);transform:rotate(-1.5deg)}
+.deco{position:absolute;pointer-events:none;z-index:0}
+.hero .wrap{position:relative;z-index:1}
+.d1{top:28px;right:6%;width:54px;animation:spin 14s linear infinite}
+.d2{bottom:24px;left:3%;width:70px}
+.d3{top:72%;left:44%;width:34px;animation:bob 3.4s ease-in-out infinite}
+.d4{bottom:30px;right:30%;width:80px}
+@keyframes spin{to{transform:rotate(360deg)}}
+@keyframes bob{50%{transform:translateY(-10px)}}
+.sec+.sec{border-top:0}
+.sec{position:relative}
+.sec+.sec::before{content:"";position:absolute;left:0;right:0;top:-10px;height:20px;background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='80' height='20'%3E%3Cpath d='M0 10 Q20 0 40 10 T80 10' fill='none' stroke='%231F2A5A' stroke-width='2.5' stroke-linecap='round' opacity='.35'/%3E%3C/svg%3E") repeat-x center}
+.cover{border:2.5px solid var(--line);color:#FFFFFF;background:var(--cbg)}
+.cover::before{background-image:radial-gradient(#FFFFFF 2px,transparent 2.2px);background-size:18px 18px;opacity:.28}
+.cover b{text-shadow:3px 3px 0 rgba(31,42,90,.35)}
+.cover small{background:#FFFFFF;color:var(--c);padding:1px 9px;border-radius:999px;border:2px solid var(--line);opacity:1}
+.fcard,.wcard,.panel,.how li,.st a,.st div.box{border:2.5px solid var(--line);box-shadow:var(--pop)}
+.fcard:hover,.wcard:hover,.st a:hover{transform:translate(-3px,-3px) rotate(0deg);box-shadow:var(--pop-h);border-color:var(--line)}
+.fcard:nth-child(1){transform:rotate(-1.5deg)}
+.fcard:nth-child(3){transform:rotate(1.5deg)}
+.tag{background:var(--hi);color:var(--hi-ink);border:1.5px solid var(--line)}
+.go{color:var(--accent)}
+.seg{background:var(--soft);border:2px solid var(--line)}
+.seg button[aria-pressed="true"]{background:var(--hi);color:var(--hi-ink);box-shadow:2px 2px 0 var(--line)}
+.bar{border:2px solid var(--line);height:14px;border-radius:8px}
+.bar i{background:repeating-linear-gradient(45deg,var(--fun) 0 8px,#3ED68F 8px 16px)}
+.st .n{background:var(--sc);color:#FFFFFF;border:2px solid var(--line)}
+.st.off div.box{box-shadow:none;border-style:dashed;border-color:var(--ink3);background:color-mix(in srgb,var(--surface) 55%,transparent)}
+.st.off .n{background:var(--soft);color:var(--ink3);border-color:var(--ink3)}
+.st.final .n{background:var(--accent)}
+.st.final.off div.box{border-color:var(--accent)}
+.chip{border:2.5px solid var(--line);font-weight:700}
+.chip[aria-pressed="true"]{background:var(--hi);color:var(--hi-ink);border-color:var(--line);box-shadow:3px 3px 0 var(--line)}
+.how .k{background:var(--sc);color:#FFFFFF;border:2px solid var(--line)}
+.how li:nth-child(1){--sc:var(--accent)} .how li:nth-child(2){--sc:var(--math)} .how li:nth-child(3){--sc:var(--fun)}
+.about blockquote{border-left:0;padding:24px 26px;background:var(--hi);color:var(--hi-ink);border:2.5px solid var(--line);border-radius:24px;box-shadow:var(--pop);transform:rotate(-1.5deg)}
+.about blockquote cite{color:var(--hi-ink)}
+.promise span{border:2px solid var(--line)}
+.promise span:nth-child(2){background:var(--sky)} .promise span:nth-child(3){background:var(--pink)} .promise span:nth-child(4){background:#B8F0D2}
+.contact{background:var(--en);color:#FFFFFF;border:2.5px solid var(--line);box-shadow:var(--pop);position:relative;overflow:hidden}
+.contact::after{content:"★ ✦ ★";position:absolute;right:20px;top:8px;font-size:28px;letter-spacing:10px;color:var(--hi);opacity:.9}
+.contact .btn{background:var(--hi);color:var(--hi-ink)}
+@media (max-width:640px){.d3,.d4{display:none}.d1{width:40px;top:14px;right:16px}.stat{transform:none!important}.fcard{transform:none!important}}
+@media (prefers-reduced-motion:reduce){.deco{animation:none!important}}
 
 html{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}body{margin:0}
 </style>
@@ -205,6 +272,10 @@ html{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset
 </nav>
 
 <header class="hero" id="top">
+  <svg class="deco d1" viewBox="0 0 50 50" aria-hidden="true"><path d="M25 3l6 14 15 1-11 10 4 15-14-8-14 8 4-15L4 18l15-1z" fill="var(--hi)" stroke="var(--line)" stroke-width="2.5" stroke-linejoin="round"/></svg>
+  <svg class="deco d2" viewBox="0 0 70 70" aria-hidden="true"><circle cx="35" cy="35" r="26" fill="var(--pink)" stroke="var(--line)" stroke-width="2.5"/><circle cx="35" cy="35" r="10" fill="var(--surface)" stroke="var(--line)" stroke-width="2.5"/></svg>
+  <svg class="deco d3" viewBox="0 0 40 40" aria-hidden="true"><rect x="6" y="6" width="28" height="28" rx="6" fill="var(--sky)" stroke="var(--line)" stroke-width="2.5" transform="rotate(15 20 20)"/></svg>
+  <svg class="deco d4" viewBox="0 0 80 24" aria-hidden="true"><path d="M3 12 Q13 2 23 12 T43 12 T63 12 T78 12" fill="none" stroke="var(--fun)" stroke-width="5" stroke-linecap="round"/></svg>
   <div class="wrap">
     <div class="hero-copy">
       <span class="eyebrow">老師媽咪的求生指南</span>
@@ -298,14 +369,14 @@ const VERS=["翰林","康軒","南一"], GRADES=["三","四","五","六"];
 
 /* ===== 國語複習架構：每一冊同一套關卡，最後是總複習。補內容就在 BOOKS 填網址 ===== */
 const SLOTS=[
- {k:"char",n:"生字注音",ic:"字",d:"生字、注音和筆順，先把字認熟"},
- {k:"shape",n:"形近字",ic:"形",d:"長得很像的字比一比"},
- {k:"poly",n:"多音字",ic:"音",d:"看語詞判斷要唸哪一個音"},
- {k:"word",n:"語詞填空",ic:"詞",d:"選出最適合的語詞填進句子"},
- {k:"idiom",n:"成語練功房",ic:"成",d:"選成語、填空、看漫畫、排字、翻牌"},
- {k:"rhet",n:"修辭小偵探",ic:"修",d:"修辭教室、總整理、闖關收集公仔"},
- {k:"sent",n:"句型與標點",ic:"句",d:"照樣造句、句子重組、標點符號"},
- {k:"read",n:"閱讀理解",ic:"讀",d:"讀短文，找重點、回答問題"}
+ {k:"char",sc:"--math",n:"生字注音",ic:"字",d:"生字、注音和筆順，先把字認熟"},
+ {k:"shape",sc:"--sky",n:"形近字",ic:"形",d:"長得很像的字比一比"},
+ {k:"poly",sc:"--en",n:"多音字",ic:"音",d:"看語詞判斷要唸哪一個音"},
+ {k:"word",sc:"--fun",n:"語詞填空",ic:"詞",d:"選出最適合的語詞填進句子"},
+ {k:"idiom",sc:"--orange",n:"成語練功房",ic:"成",d:"選成語、填空、看漫畫、排字、翻牌"},
+ {k:"rhet",sc:"--pink",n:"修辭小偵探",ic:"修",d:"修辭教室、總整理、闖關收集公仔"},
+ {k:"sent",sc:"--zh",n:"句型與標點",ic:"句",d:"照樣造句、句子重組、標點符號"},
+ {k:"read",sc:"--hi",n:"閱讀理解",ic:"讀",d:"讀短文，找重點、回答問題"}
 ];
 const FINAL={k:"final",n:"總複習",ic:"★",d:"每一關的題目混在一起，像考試一樣從頭挑戰一次"};
 const BOOKS={
@@ -365,7 +436,7 @@ function save(){try{localStorage.setItem("tm-pick",JSON.stringify(pick))}catch(e
 function stepHTML(s,b,note,fin){
   const u=b[s.k], tag=note[s.k]?`<span class="tag">${note[s.k]}</span>`:"";
   const inner=`<span class="n">${s.ic}</span><span class="tx"><h4>${s.n}${tag}${u?"":'<span class="soon">製作中</span>'}</h4><p>${s.d}</p></span>`;
-  return `<li class="st ${u?"on":"off"}${fin?" final":""}">${u?`<a ${ext(u)}>${inner}<span class="go" aria-hidden="true"><span>→</span></span></a>`:`<div class="box">${inner}</div>`}</li>`;
+  return `<li class="st ${u?"on":"off"}${fin?" final":""}" style="--sc:var(${s.sc||"--accent"})">${u?`<a ${ext(u)}>${inner}<span class="go" aria-hidden="true"><span>→</span></span></a>`:`<div class="box">${inner}</div>`}</li>`;
 }
 function renderMap(){
   $("verSeg").innerHTML=VERS.map(v=>`<button aria-pressed="${pick.v===v}" data-v="${v}">${v}</button>`).join("");
