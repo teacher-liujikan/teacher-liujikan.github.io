@@ -7,378 +7,99 @@
 <title>老師媽咪的求生指南</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Huninn&family=LXGW+WenKai+TC:wght@400;700&family=Noto+Sans+TC:wght@400;500;700&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&display=swap">
 <style>
-/* Layout: 作品集單頁——頂部導覽 → 首屏（一句話＋數字）→ 精選 3 件 → 國語複習地圖（左選冊、右關卡）→ 全部作品（分類篩選格狀）→ 怎麼用 → 關於 → 聯絡。深藍墨水＋螢光筆黃，作品封面用科目色＋楷書大字。 */
-/* 童趣版：天空藍底、粗墨線貼紙卡片＋錯位實心陰影、飽和糖果色，每個科目一種顏色。 */
+/* Layout: 單欄、置中、留白。頁首 → 國語（選版本年級 → 遊戲清單）→ 其他科目清單 → 頁尾。只有一個強調色。 */
 :root{
-  --bg:#EAF5FF; --surface:#FFFFFF; --ink:#1F2A5A; --ink2:#4A5684; --ink3:#8790B5; --line:#1F2A5A; --soft:#F1F4FF;
-  --hi:#FFD23F; --hi-ink:#1F2A5A; --accent:#FF5A5F; --pink:#FF7AB6; --orange:#FF9F1C; --sky:#3EC5FF;
-  --zh:#FF5A5F; --math:#2E8BFF; --en:#9B5CFF; --fun:#18B46B;
-  --zh-bg:#FF5A5F; --math-bg:#2E8BFF; --en-bg:#9B5CFF; --fun-bg:#18B46B;
-  --pop:5px 5px 0 var(--ink); --pop-h:8px 8px 0 var(--ink); --shadow:var(--pop);
-  --display:"Huninn","Noto Sans TC","PingFang TC","Microsoft JhengHei",sans-serif;
-  --body:"Noto Sans TC","PingFang TC","Microsoft JhengHei",system-ui,sans-serif;
-  --kai:"LXGW WenKai TC","BiauKai","DFKai-SB","KaiTi",serif;
+  --bg:#F7F7F5; --card:#FFFFFF; --ink:#1A1D24; --ink2:#5F6570; --line:#E6E6E2; --soft:#EFEFEB;
+  --accent:#E8483F;
+  --font:"Noto Sans TC",-apple-system,BlinkMacSystemFont,"PingFang TC","Microsoft JhengHei",system-ui,sans-serif;
 }
 @media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
-  --bg:#14183A; --surface:#20264F; --ink:#F4F6FF; --ink2:#C3C9EA; --ink3:#8E96C4; --line:#0A0D24; --soft:#2A3163;
-  --hi:#FFD23F; --hi-ink:#1F2A5A; --accent:#FF6B70; --pink:#FF8CC2; --orange:#FFAE3D; --sky:#5CD0FF;
-  --zh:#FF6B70; --math:#4C9DFF; --en:#A97BFF; --fun:#2CC77F;
-  --zh-bg:#FF6B70; --math-bg:#4C9DFF; --en-bg:#A97BFF; --fun-bg:#2CC77F;
-  --pop:5px 5px 0 #0A0D24; --pop-h:8px 8px 0 #0A0D24; color-scheme:dark}}
+  --bg:#111215; --card:#1B1D22; --ink:#F1F2F4; --ink2:#A0A5AE; --line:#2B2E35; --soft:#24272D;
+  --accent:#FF6A61; color-scheme:dark}}
 :root[data-theme="dark"]{
-  --bg:#14183A; --surface:#20264F; --ink:#F4F6FF; --ink2:#C3C9EA; --ink3:#8E96C4; --line:#0A0D24; --soft:#2A3163;
-  --hi:#FFD23F; --hi-ink:#1F2A5A; --accent:#FF6B70; --pink:#FF8CC2; --orange:#FFAE3D; --sky:#5CD0FF;
-  --zh:#FF6B70; --math:#4C9DFF; --en:#A97BFF; --fun:#2CC77F;
-  --zh-bg:#FF6B70; --math-bg:#4C9DFF; --en-bg:#A97BFF; --fun-bg:#2CC77F;
-  --pop:5px 5px 0 #0A0D24; --pop-h:8px 8px 0 #0A0D24; color-scheme:dark}
+  --bg:#111215; --card:#1B1D22; --ink:#F1F2F4; --ink2:#A0A5AE; --line:#2B2E35; --soft:#24272D;
+  --accent:#FF6A61; color-scheme:dark}
 
 *{box-sizing:border-box}
-html{scroll-behavior:smooth;scroll-padding-top:72px}
-body{background:var(--bg);color:var(--ink);font-family:var(--body);font-size:16px;line-height:1.7;-webkit-font-smoothing:antialiased}
+body{background:var(--bg);color:var(--ink);font-family:var(--font);font-size:16px;line-height:1.6;-webkit-font-smoothing:antialiased}
 a{color:inherit;text-decoration:none}
 button{font:inherit;color:inherit;cursor:pointer;border:0;background:none;padding:0}
-:focus-visible{outline:3px solid var(--accent);outline-offset:3px;border-radius:10px}
-h1,h2,h3,h4,p{margin:0}
-h1,h2,h3{font-family:var(--display);font-weight:400;line-height:1.25;text-wrap:balance}
-.wrap{max-width:1120px;margin:0 auto;padding-left:max(20px,env(safe-area-inset-left,0px));padding-right:max(20px,env(safe-area-inset-right,0px))}
-.mark{background:linear-gradient(transparent 60%,var(--hi) 60% 92%,transparent 92%);padding:0 .06em}
+:focus-visible{outline:2px solid var(--accent);outline-offset:3px;border-radius:8px}
+h1,h2,h3,p{margin:0}
+.wrap{max-width:720px;margin:0 auto;padding-left:max(20px,env(safe-area-inset-left,0px));padding-right:max(20px,env(safe-area-inset-right,0px));padding-block:56px 48px;display:flex;flex-direction:column;gap:48px}
 
-/* nav */
-body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:20;background:var(--bg)}
-.nav{position:sticky;top:env(safe-area-inset-top,0px);z-index:10;background:color-mix(in srgb,var(--bg) 88%,transparent);backdrop-filter:saturate(1.4) blur(12px);-webkit-backdrop-filter:saturate(1.4) blur(12px);border-bottom:1px solid var(--line)}
-.nav .wrap{display:flex;align-items:center;gap:20px;height:60px}
-.logo{font-family:var(--display);font-size:20px;display:flex;align-items:center;gap:8px;flex:none}
-.logo i{width:30px;height:30px;border-radius:9px;background:var(--hi);color:var(--hi-ink);display:grid;place-items:center;font-style:normal;font-family:var(--kai);font-weight:700;font-size:18px}
-.links{display:flex;gap:4px;margin-left:auto;overflow-x:auto;scrollbar-width:none;min-width:0}
-.links a{flex:none;font-size:15px;font-weight:500;color:var(--ink2);padding:6px 12px;border-radius:999px}
-.links a:hover{background:var(--soft);color:var(--ink)}
+header{display:flex;flex-direction:column;gap:14px}
+h1{font-size:clamp(30px,6vw,40px);font-weight:700;letter-spacing:.01em;line-height:1.25}
+.lead{color:var(--ink2);font-size:17px;line-height:1.7}
+.threads{align-self:flex-start;font-size:15px;font-weight:500;color:var(--ink2);border-bottom:1px solid var(--line);padding-bottom:1px}
+.threads:hover{color:var(--accent);border-color:var(--accent)}
 
-/* hero */
-.hero .wrap{padding-block:64px 56px;display:grid;grid-template-columns:minmax(0,1.25fr) minmax(0,1fr);gap:48px;align-items:center}
-.eyebrow{font-size:13px;font-weight:700;letter-spacing:.14em;color:var(--accent);text-transform:uppercase}
-.hero-copy{display:flex;flex-direction:column;gap:18px;min-width:0}
-.hero h1{font-size:clamp(34px,6.2vw,60px);line-height:1.2}
-.hero .sub{font-size:clamp(16px,2.4vw,18px);color:var(--ink2);max-width:30em}
-.ctas{display:flex;flex-wrap:wrap;gap:10px;margin-top:4px}
-.btn{display:inline-flex;align-items:center;gap:8px;border-radius:999px;padding:12px 22px;font-weight:700;font-size:16px;transition:transform .15s,box-shadow .15s}
-.btn.primary{background:var(--ink);color:var(--bg)}
-.btn.ghost{border:1.5px solid var(--line);background:var(--surface)}
-.btn:hover{transform:translateY(-2px);box-shadow:var(--shadow)}
-.stats{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
-.stat{background:var(--surface);border:1px solid var(--line);border-radius:18px;padding:18px 18px 16px;display:flex;flex-direction:column;gap:2px}
-.stat b{font-family:var(--display);font-weight:400;font-size:clamp(30px,5vw,42px);line-height:1.1;font-variant-numeric:tabular-nums}
-.stat span{font-size:14px;color:var(--ink2)}
-.stat:first-child{background:var(--hi);border-color:var(--hi);color:var(--hi-ink)}
-.stat:first-child span{color:var(--hi-ink)}
+section{display:flex;flex-direction:column;gap:14px}
+h2{font-size:22px;font-weight:700}
 
-/* section */
-.sec{padding-block:56px}
-.sec+.sec{border-top:1px solid var(--line)}
-.sec-head{display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-between;gap:12px 24px;margin-bottom:28px}
-.sec-head>div{display:flex;flex-direction:column;gap:8px;min-width:0}
-.sec-head h2{font-size:clamp(26px,4.4vw,36px)}
-.sec-head p{color:var(--ink2);max-width:36em}
+.pickers{display:flex;flex-direction:column;gap:10px}
+.seg{display:grid;grid-auto-flow:column;grid-auto-columns:1fr;background:var(--soft);border-radius:10px;padding:3px;gap:3px}
+.seg button{border-radius:8px;padding:8px 4px;font-size:15px;font-weight:500;color:var(--ink2);transition:background .15s,color .15s}
+.seg button[aria-pressed="true"]{background:var(--card);color:var(--ink);font-weight:700;box-shadow:0 1px 3px rgba(0,0,0,.1)}
 
-/* cover tile */
-.cover{position:relative;border-radius:14px;overflow:hidden;display:grid;place-items:center;background:var(--cbg);color:var(--c);isolation:isolate}
-.cover::before{content:"";position:absolute;inset:0;background-image:radial-gradient(currentColor 1.2px,transparent 1.3px);background-size:16px 16px;opacity:.16;z-index:-1}
-.cover b{font-family:var(--kai);font-weight:700;line-height:1}
-.cover small{position:absolute;left:12px;bottom:10px;font-size:12px;font-weight:700;letter-spacing:.06em;opacity:.85}
+.list{background:var(--card);border:1px solid var(--line);border-radius:14px;overflow:hidden}
+.item{display:flex;align-items:center;gap:16px;padding:16px 18px;transition:background .15s}
+.item+.item{border-top:1px solid var(--line)}
+.item:hover{background:var(--soft)}
+.item .txt{flex:1;min-width:0;display:flex;flex-direction:column;gap:2px}
+.item .t{font-size:17px;font-weight:500;display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.item .d{font-size:14px;color:var(--ink2);line-height:1.5}
+.tag{font-size:12px;font-weight:500;color:var(--ink2);background:var(--soft);border-radius:5px;padding:1px 7px}
+.arrow{flex:none;color:var(--ink2);font-size:18px;transition:transform .15s,color .15s}
+.item:hover .arrow{color:var(--accent);transform:translateX(3px)}
 
-/* featured */
-.feat{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:20px}
-.fcard{background:var(--surface);border:1px solid var(--line);border-radius:22px;padding:14px;display:flex;flex-direction:column;gap:14px;transition:transform .2s,box-shadow .2s;min-width:0}
-.fcard:hover{transform:translateY(-4px);box-shadow:var(--shadow)}
-.fcard .cover{aspect-ratio:4/3;max-width:100%}
-.fcard .cover b{font-size:clamp(64px,9vw,96px)}
-.fbody{display:flex;flex-direction:column;gap:8px;padding:0 6px 6px;flex:1}
-.fbody h3{font-size:22px}
-.fbody p{color:var(--ink2);font-size:15px;flex:1}
-.tags{display:flex;flex-wrap:wrap;gap:6px}
-.tag{font-size:12px;font-weight:700;padding:2px 9px;border-radius:999px;background:var(--soft);color:var(--ink2)}
-.go{font-weight:700;color:var(--accent);font-size:15px;display:inline-flex;gap:6px;align-items:center}
-.go span{transition:transform .15s}
-a:hover .go span{transform:translateX(4px)}
-
-/* map */
-.map{display:grid;grid-template-columns:minmax(0,340px) minmax(0,1fr);gap:24px;align-items:start}
-.panel{background:var(--surface);border:1px solid var(--line);border-radius:22px;padding:22px;display:flex;flex-direction:column;gap:18px;position:sticky;top:84px}
-.ctl{display:flex;flex-direction:column;gap:8px}
-.ctl-l{font-size:13px;font-weight:700;color:var(--ink2);letter-spacing:.06em}
-.seg{display:grid;grid-auto-flow:column;grid-auto-columns:1fr;background:var(--soft);border-radius:12px;padding:3px;gap:3px}
-.seg button{border-radius:9px;padding:9px 4px;font-weight:500;font-size:15px;color:var(--ink2);transition:background .2s,color .2s}
-.seg button[aria-pressed="true"]{background:var(--surface);color:var(--ink);font-weight:700;box-shadow:0 1px 3px rgba(19,33,61,.15)}
-.prog{display:flex;flex-direction:column;gap:8px;padding-top:6px;border-top:1px dashed var(--line)}
-.prog-t{display:flex;justify-content:space-between;font-size:14px;color:var(--ink2);font-variant-numeric:tabular-nums}
-.prog-t b{color:var(--ink)}
-.bar{height:8px;border-radius:4px;background:var(--soft);overflow:hidden}
-.bar i{display:block;height:100%;background:var(--fun);border-radius:4px;transition:width .3s}
-.steps{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
-.st a,.st div.box{height:100%;display:flex;gap:14px;align-items:flex-start;padding:16px;border-radius:16px;background:var(--surface);border:1px solid var(--line);transition:border-color .15s,transform .15s}
-.st a:hover{border-color:var(--ink);transform:translateY(-2px)}
-.st.off div.box{background:transparent;border-style:dashed}
-.st .n{flex:none;width:44px;height:44px;border-radius:12px;display:grid;place-items:center;font-family:var(--kai);font-weight:700;font-size:22px;background:var(--zh-bg);color:var(--zh)}
-.st.off .n{background:var(--soft);color:var(--ink3)}
-.st .tx{display:flex;flex-direction:column;gap:3px;min-width:0;flex:1}
-.st h4{font-family:var(--display);font-weight:400;font-size:18px;line-height:1.3;display:flex;flex-wrap:wrap;gap:6px;align-items:center}
-.st p{font-size:14px;color:var(--ink2);line-height:1.5}
-.st.off h4,.st.off p{color:var(--ink3)}
-.soon{font-size:12px;font-weight:700;color:var(--ink3);border:1px solid var(--line);border-radius:999px;padding:0 8px}
-.st.final{grid-column:1/-1}
-.st.final .n{background:var(--accent);color:#FFFFFF}
-.st.final.off .n{background:var(--soft);color:var(--accent)}
-.st.final.off div.box{border-color:var(--accent);border-style:dashed}
-
-/* works */
-.filters{display:flex;gap:8px;overflow-x:auto;scrollbar-width:none;padding-bottom:2px}
-.chip{flex:none;border:1.5px solid var(--line);background:var(--surface);border-radius:999px;padding:7px 16px;font-size:15px;font-weight:500;display:inline-flex;gap:6px;align-items:center}
-.chip:hover{border-color:var(--ink)}
-.chip[aria-pressed="true"]{background:var(--ink);border-color:var(--ink);color:var(--bg)}
-.chip em{font-style:normal;font-size:12px;opacity:.65;font-variant-numeric:tabular-nums}
-.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,250px),1fr));gap:16px;margin-top:20px}
-.wcard{background:var(--surface);border:1px solid var(--line);border-radius:18px;padding:12px;display:flex;flex-direction:column;gap:12px;transition:transform .2s,box-shadow .2s;min-width:0}
-.wcard:hover{transform:translateY(-3px);box-shadow:var(--shadow)}
-.wcard .cover{aspect-ratio:16/9;max-width:100%}
-.wcard .cover b{font-size:52px}
-.wbody{display:flex;flex-direction:column;gap:6px;padding:0 4px 4px;flex:1}
-.wbody h3{font-size:19px}
-.wbody p{font-size:14px;color:var(--ink2);flex:1;line-height:1.6}
-
-/* how */
-.how{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px;list-style:none;margin:0;padding:0}
-.how li{background:var(--surface);border:1px solid var(--line);border-radius:18px;padding:20px;display:flex;flex-direction:column;gap:8px}
-.how .k{width:36px;height:36px;border-radius:50%;background:var(--ink);color:var(--bg);display:grid;place-items:center;font-weight:700}
-.how h3{font-size:20px}
-.how p{color:var(--ink2);font-size:15px}
-
-/* about */
-.about{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:40px;align-items:center}
-.about blockquote{margin:0;font-family:var(--kai);font-size:clamp(26px,4.4vw,38px);line-height:1.45;border-left:6px solid var(--hi);padding-left:22px}
-.about blockquote cite{display:block;margin-top:12px;font-family:var(--body);font-style:normal;font-size:15px;color:var(--ink2)}
-.about .txt{display:flex;flex-direction:column;gap:14px;color:var(--ink2);font-size:17px}
-.about .txt strong{color:var(--ink)}
-.promise{display:flex;flex-wrap:wrap;gap:8px}
-.promise span{font-size:14px;font-weight:700;padding:5px 12px;border-radius:999px;background:var(--hi);color:var(--hi-ink)}
-
-/* contact */
-.contact{background:var(--ink);color:var(--bg);border-radius:28px;padding:clamp(28px,5vw,48px);display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:20px}
-.contact h2{font-size:clamp(24px,4vw,34px)}
-.contact p{opacity:.8;margin-top:6px}
-.contact .btn{background:var(--hi);color:var(--hi-ink)}
-
-footer .wrap{padding-block:28px 48px;display:flex;flex-wrap:wrap;justify-content:space-between;gap:12px 24px;font-size:13px;color:var(--ink3)}
-footer p{max-width:44em}
-.top{color:var(--ink2);font-weight:700;flex:none}
-
-@media (max-width:900px){
-  .hero .wrap{grid-template-columns:minmax(0,1fr);padding-block:40px 40px;gap:28px}
-  .stats{grid-template-columns:repeat(4,minmax(0,1fr))}
-  .feat{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}
-  .map{grid-template-columns:minmax(0,1fr)}
-  .panel{position:static}
-  .about{grid-template-columns:minmax(0,1fr);gap:24px}
-}
-@media (max-width:640px){
-  .nav .logo span{display:none}
-  .stats{grid-template-columns:repeat(2,minmax(0,1fr))}
-  .feat{grid-template-columns:minmax(0,1fr)}
-  .fcard .cover{aspect-ratio:16/9}
-  .steps{grid-template-columns:minmax(0,1fr)}
-  .how{grid-template-columns:minmax(0,1fr)}
-  .sec{padding-block:44px}
-}
-@media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}*{transition:none!important}}
-/* ===== 童趣覆寫 ===== */
-body{background-color:var(--bg);background-image:radial-gradient(var(--sky) 1.4px,transparent 1.6px);background-size:26px 26px;background-attachment:fixed}
-@media (prefers-color-scheme: dark){:root:not([data-theme="light"]) body{background-image:radial-gradient(#2E3670 1.4px,transparent 1.6px)}}
-:root[data-theme="dark"] body{background-image:radial-gradient(#2E3670 1.4px,transparent 1.6px)}
-.nav{border-bottom:2.5px solid var(--line);background:color-mix(in srgb,var(--bg) 90%,transparent)}
-.logo i{border:2.5px solid var(--line);box-shadow:3px 3px 0 var(--line);transform:rotate(-6deg)}
-.links a{font-weight:700}
-.links a:hover{background:var(--hi);color:var(--hi-ink)}
-.eyebrow{display:inline-block;align-self:flex-start;background:var(--accent);color:#FFFFFF;padding:3px 12px;border-radius:999px;border:2px solid var(--line);letter-spacing:.12em;transform:rotate(-2deg)}
-.hero{position:relative;overflow:hidden}
-.hero h1{font-size:clamp(36px,6.6vw,64px)}
-.mark{background:linear-gradient(transparent 55%,var(--hi) 55% 95%,transparent 95%)}
-.btn{border:2.5px solid var(--line);box-shadow:var(--pop)}
-.btn.primary{background:var(--accent);color:#FFFFFF}
-.btn.ghost{background:var(--surface)}
-.btn:hover{transform:translate(-2px,-2px);box-shadow:var(--pop-h)}
-.stat{border:2.5px solid var(--line);box-shadow:var(--pop);color:#FFFFFF}
-.stat span{color:#FFFFFF;font-weight:700}
-.stat:nth-child(1){background:var(--hi);color:var(--hi-ink);transform:rotate(-2deg)}
-.stat:nth-child(1) span{color:var(--hi-ink)}
-.stat:nth-child(2){background:var(--math);transform:rotate(1.5deg)}
-.stat:nth-child(3){background:var(--fun);transform:rotate(1deg)}
-.stat:nth-child(4){background:var(--pink);transform:rotate(-1.5deg)}
-.deco{position:absolute;pointer-events:none;z-index:0}
-.hero .wrap{position:relative;z-index:1}
-.d1{top:28px;right:6%;width:54px;animation:spin 14s linear infinite}
-.d2{bottom:24px;left:3%;width:70px}
-.d3{top:72%;left:44%;width:34px;animation:bob 3.4s ease-in-out infinite}
-.d4{bottom:30px;right:30%;width:80px}
-@keyframes spin{to{transform:rotate(360deg)}}
-@keyframes bob{50%{transform:translateY(-10px)}}
-.sec+.sec{border-top:0}
-.sec{position:relative}
-.sec+.sec::before{content:"";position:absolute;left:0;right:0;top:-10px;height:20px;background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='80' height='20'%3E%3Cpath d='M0 10 Q20 0 40 10 T80 10' fill='none' stroke='%231F2A5A' stroke-width='2.5' stroke-linecap='round' opacity='.35'/%3E%3C/svg%3E") repeat-x center}
-.cover{border:2.5px solid var(--line);color:#FFFFFF;background:var(--cbg)}
-.cover::before{background-image:radial-gradient(#FFFFFF 2px,transparent 2.2px);background-size:18px 18px;opacity:.28}
-.cover b{text-shadow:3px 3px 0 rgba(31,42,90,.35)}
-.cover small{background:#FFFFFF;color:var(--c);padding:1px 9px;border-radius:999px;border:2px solid var(--line);opacity:1}
-.fcard,.wcard,.panel,.how li,.st a,.st div.box{border:2.5px solid var(--line);box-shadow:var(--pop)}
-.fcard:hover,.wcard:hover,.st a:hover{transform:translate(-3px,-3px) rotate(0deg);box-shadow:var(--pop-h);border-color:var(--line)}
-.fcard:nth-child(1){transform:rotate(-1.5deg)}
-.fcard:nth-child(3){transform:rotate(1.5deg)}
-.tag{background:var(--hi);color:var(--hi-ink);border:1.5px solid var(--line)}
-.go{color:var(--accent)}
-.seg{background:var(--soft);border:2px solid var(--line)}
-.seg button[aria-pressed="true"]{background:var(--hi);color:var(--hi-ink);box-shadow:2px 2px 0 var(--line)}
-.bar{border:2px solid var(--line);height:14px;border-radius:8px}
-.bar i{background:repeating-linear-gradient(45deg,var(--fun) 0 8px,#3ED68F 8px 16px)}
-.st .n{background:var(--sc);color:#FFFFFF;border:2px solid var(--line)}
-.st.off div.box{box-shadow:none;border-style:dashed;border-color:var(--ink3);background:color-mix(in srgb,var(--surface) 55%,transparent)}
-.st.off .n{background:var(--soft);color:var(--ink3);border-color:var(--ink3)}
-.st.final .n{background:var(--accent)}
-.st.final.off div.box{border-color:var(--accent)}
-.chip{border:2.5px solid var(--line);font-weight:700}
-.chip[aria-pressed="true"]{background:var(--hi);color:var(--hi-ink);border-color:var(--line);box-shadow:3px 3px 0 var(--line)}
-.how .k{background:var(--sc);color:#FFFFFF;border:2px solid var(--line)}
-.how li:nth-child(1){--sc:var(--accent)} .how li:nth-child(2){--sc:var(--math)} .how li:nth-child(3){--sc:var(--fun)}
-.about blockquote{border-left:0;padding:24px 26px;background:var(--hi);color:var(--hi-ink);border:2.5px solid var(--line);border-radius:24px;box-shadow:var(--pop);transform:rotate(-1.5deg)}
-.about blockquote cite{color:var(--hi-ink)}
-.promise span{border:2px solid var(--line)}
-.promise span:nth-child(2){background:var(--sky)} .promise span:nth-child(3){background:var(--pink)} .promise span:nth-child(4){background:#B8F0D2}
-.contact{background:var(--en);color:#FFFFFF;border:2.5px solid var(--line);box-shadow:var(--pop);position:relative;overflow:hidden}
-.contact::after{content:"★ ✦ ★";position:absolute;right:20px;top:8px;font-size:28px;letter-spacing:10px;color:var(--hi);opacity:.9}
-.contact .btn{background:var(--hi);color:var(--hi-ink)}
-@media (max-width:640px){.d3,.d4{display:none}.d1{width:40px;top:14px;right:16px}.stat{transform:none!important}.fcard{transform:none!important}}
-@media (prefers-reduced-motion:reduce){.deco{animation:none!important}}
+footer{border-top:1px solid var(--line);padding-top:20px;font-size:13px;color:var(--ink2);line-height:1.6}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
 
 html{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}body{margin:0}
 </style>
 </head>
 <body>
 
-<nav class="nav" aria-label="主選單">
-  <div class="wrap">
-    <a class="logo" href="#top"><i>媽</i><span>老師媽咪</span></a>
-    <div class="links">
-      <a href="#featured">精選</a><a href="#map">國語複習</a><a href="#works">全部作品</a><a href="#how">怎麼用</a><a href="#about">關於</a>
-    </div>
-  </div>
-</nav>
+<div class="wrap">
+  <header>
+    <h1>老師媽咪的求生指南</h1>
+    <p class="lead">生活亂成一鍋粥，我趁熱拿起來喝。<br>製作 AI 工具成癮的老師媽咪。</p>
+    <a class="threads" href="https://www.threads.com/@teacher_liujikan" target="_blank" rel="noopener">Threads @teacher_liujikan ↗</a>
+  </header>
 
-<header class="hero" id="top">
-  <svg class="deco d1" viewBox="0 0 50 50" aria-hidden="true"><path d="M25 3l6 14 15 1-11 10 4 15-14-8-14 8 4-15L4 18l15-1z" fill="var(--hi)" stroke="var(--line)" stroke-width="2.5" stroke-linejoin="round"/></svg>
-  <svg class="deco d2" viewBox="0 0 70 70" aria-hidden="true"><circle cx="35" cy="35" r="26" fill="var(--pink)" stroke="var(--line)" stroke-width="2.5"/><circle cx="35" cy="35" r="10" fill="var(--surface)" stroke="var(--line)" stroke-width="2.5"/></svg>
-  <svg class="deco d3" viewBox="0 0 40 40" aria-hidden="true"><rect x="6" y="6" width="28" height="28" rx="6" fill="var(--sky)" stroke="var(--line)" stroke-width="2.5" transform="rotate(15 20 20)"/></svg>
-  <svg class="deco d4" viewBox="0 0 80 24" aria-hidden="true"><path d="M3 12 Q13 2 23 12 T43 12 T63 12 T78 12" fill="none" stroke="var(--fun)" stroke-width="5" stroke-linecap="round"/></svg>
-  <div class="wrap">
-    <div class="hero-copy">
-      <span class="eyebrow">老師媽咪的求生指南</span>
-      <h1>生活亂成一鍋粥，<br>我<span class="mark">趁熱拿起來喝</span>。</h1>
-      <p class="sub">製作 AI 工具成癮的老師媽咪。把課堂上要複習的東西，做成孩子會想玩的小遊戲，免費給老師和家長用。</p>
-      <div class="ctas">
-        <a class="btn primary" href="#map">找我的課本遊戲 →</a>
-        <a class="btn ghost" href="#works">看全部作品</a>
-      </div>
+  <section aria-labelledby="zh-h">
+    <h2 id="zh-h">國語</h2>
+    <div class="pickers">
+      <div class="seg" id="verSeg" role="group" aria-label="版本"></div>
+      <div class="seg" id="gradeSeg" role="group" aria-label="年級"></div>
     </div>
-    <div class="stats" id="stats"></div>
-  </div>
-</header>
-
-<main>
-  <section class="sec" id="featured" aria-labelledby="f-h">
-    <div class="wrap">
-      <div class="sec-head"><div><span class="eyebrow">Featured</span><h2 id="f-h">先從這幾個玩起</h2><p>第一次來的話，從這三個開始：一個全班同樂、一個國語複習、一個數學闖關。</p></div></div>
-      <div class="feat" id="featList"></div>
-    </div>
+    <div class="list" id="zhList"></div>
   </section>
 
-  <section class="sec" id="map" aria-labelledby="m-h">
-    <div class="wrap">
-      <div class="sec-head"><div><span class="eyebrow">Chinese Review</span><h2 id="m-h">國語複習地圖</h2><p>選你的版本和年級，從生字一路練到總複習。灰色虛線的關卡還在製作中。</p></div></div>
-      <div class="map">
-        <div class="panel">
-          <div class="ctl"><span class="ctl-l" id="vl">版本</span><div class="seg" id="verSeg" role="group" aria-labelledby="vl"></div></div>
-          <div class="ctl"><span class="ctl-l" id="gl">年級（上學期）</span><div class="seg" id="gradeSeg" role="group" aria-labelledby="gl"></div></div>
-          <div class="prog"><div class="prog-t"><span id="bookName"></span><span>已上線 <b id="doneN"></b> 關</span></div><div class="bar"><i id="barFill"></i></div></div>
-        </div>
-        <ol class="steps" id="steps"></ol>
-      </div>
-    </div>
-  </section>
+  <div id="others" style="display:contents"></div>
 
-  <section class="sec" id="works" aria-labelledby="w-h">
-    <div class="wrap">
-      <div class="sec-head"><div><span class="eyebrow">All Works</span><h2 id="w-h">全部作品</h2><p>依科目分類，點卡片就會打開，不用下載也不用登入。</p></div></div>
-      <div class="filters" id="filters" role="group" aria-label="科目篩選"></div>
-      <div class="grid" id="grid"></div>
-    </div>
-  </section>
-
-  <section class="sec" id="how" aria-labelledby="h-h">
-    <div class="wrap">
-      <div class="sec-head"><div><span class="eyebrow">How to use</span><h2 id="h-h">在班上或家裡怎麼用</h2></div></div>
-      <ol class="how">
-        <li><span class="k">1</span><h3>挑一個作品</h3><p>國語照版本和年級找，其他科目看分類。每個作品都是一個網頁。</p></li>
-        <li><span class="k">2</span><h3>投影或傳給孩子</h3><p>上課可以投影全班一起玩；很多作品附 QR Code，孩子用平板一掃就能開。</p></li>
-        <li><span class="k">3</span><h3>玩完再練錯的</h3><p>大部分遊戲會把答錯的題目留下來，再練一次就記住了。</p></li>
-      </ol>
-    </div>
-  </section>
-
-  <section class="sec" id="about" aria-labelledby="a-h">
-    <div class="wrap about">
-      <blockquote>生活亂成一鍋粥，<br>我趁熱拿起來喝。<cite>— 老師媽咪</cite></blockquote>
-      <div class="txt">
-        <span class="eyebrow">About</span>
-        <h2 id="a-h" style="color:var(--ink)">嗨，我是老師媽咪</h2>
-        <p>白天在教室，晚上在家裡，兩邊都有孩子要顧。課堂上缺什麼練習，我就用 AI 做一個出來，做著做著就上癮了。</p>
-        <p>這裡的作品都是我自己設計的：<strong>例句和題目是原創的</strong>，注音參考教育部辭典。歡迎老師和家長直接拿去用。</p>
-        <div class="promise"><span>免費</span><span>免下載</span><span>免登入</span><span>平板手機都能玩</span></div>
-      </div>
-    </div>
-  </section>
-
-  <section class="sec" aria-label="追蹤">
-    <div class="wrap">
-      <div class="contact">
-        <div><h2>新作品會先在 Threads 分享</h2><p>想知道下一個做什麼、或想許願題目，來 Threads 找我。</p></div>
-        <a class="btn" href="https://www.threads.com/@teacher_liujikan" target="_blank" rel="noopener">追蹤 @teacher_liujikan ↗</a>
-      </div>
-    </div>
-  </section>
-</main>
-
-<footer>
-  <div class="wrap">
-    <p>這些都是老師媽咪自製的免費學習資源，提供老師與家長教學使用，不作商業用途。國語課別範圍對應各版本課本，定義、例句與練習題皆為原創，不是出版社官方產品。</p>
-    <a class="top" href="#top">回到頂端 ↑</a>
-  </div>
-</footer>
+  <footer>老師媽咪自製的免費學習資源，提供老師與家長教學使用。國語課別範圍對應各版本課本，例句與練習題皆為原創，不是出版社官方產品。</footer>
+</div>
 
 <script>
 const A="https://claude.ai/artifact/", G="https://teacher-liujikan.github.io/";
 const link=u=>/^https?:/.test(u)?u:A+u;
-const SUB={zh:{n:"國語",c:"--zh",b:"--zh-bg"},math:{n:"數學",c:"--math",b:"--math-bg"},en:{n:"英文",c:"--en",b:"--en-bg"},fun:{n:"有趣的課程",c:"--fun",b:"--fun-bg"}};
 const VERS=["翰林","康軒","南一"], GRADES=["三","四","五","六"];
-
-/* ===== 國語複習架構：每一冊同一套關卡，最後是總複習。補內容就在 BOOKS 填網址 ===== */
+/* 國語：每一冊有哪些遊戲。新增作品就在對應冊別加一個 key 和網址；SLOTS 決定顯示順序與說明。沒有網址的不會顯示。 */
 const SLOTS=[
- {k:"char",sc:"--math",n:"生字注音",ic:"字",d:"生字、注音和筆順，先把字認熟"},
- {k:"shape",sc:"--sky",n:"形近字",ic:"形",d:"長得很像的字比一比"},
- {k:"poly",sc:"--en",n:"多音字",ic:"音",d:"看語詞判斷要唸哪一個音"},
- {k:"word",sc:"--fun",n:"語詞填空",ic:"詞",d:"選出最適合的語詞填進句子"},
- {k:"idiom",sc:"--orange",n:"成語練功房",ic:"成",d:"選成語、填空、看漫畫、排字、翻牌"},
- {k:"rhet",sc:"--pink",n:"修辭小偵探",ic:"修",d:"修辭教室、總整理、闖關收集公仔"},
- {k:"sent",sc:"--zh",n:"句型與標點",ic:"句",d:"照樣造句、句子重組、標點符號"},
- {k:"read",sc:"--hi",n:"閱讀理解",ic:"讀",d:"讀短文，找重點、回答問題"}
+ {k:"char",n:"生字注音",d:"生字、注音和筆順"},
+ {k:"shape",n:"形近字",d:"長得很像的字比一比"},
+ {k:"poly",n:"多音字",d:"看語詞判斷要唸哪一個音"},
+ {k:"word",n:"語詞填空",d:"選出最適合的語詞填進句子"},
+ {k:"idiom",n:"成語練功房",d:"選成語、填空、看漫畫、排字、翻牌配對"},
+ {k:"rhet",n:"修辭小偵探",d:"修辭教室、總整理、闖關收集公仔"},
+ {k:"sent",n:"句型與標點",d:"照樣造句、句子重組、標點符號"},
+ {k:"read",n:"閱讀理解",d:"讀短文，找重點、回答問題"},
+ {k:"final",n:"總複習",d:"每一關的題目混在一起，從頭挑戰一次"}
 ];
-const FINAL={k:"final",n:"總複習",ic:"★",d:"每一關的題目混在一起，像考試一樣從頭挑戰一次"};
 const BOOKS={
  "翰林三":{rhet:G+"rhetoric-detective-hanlin3/",idiom:G+"idiom-hanlin-3a/"},
  "翰林四":{rhet:G+"rhetoric-detective-hanlin4/",idiom:G+"idiom-hanlin-4a/"},
@@ -394,73 +115,39 @@ const BOOKS={
  "南一六":{rhet:G+"rhetoric-detective-nani6/",idiom:"4dDBwo942DUcLccU7X4RAJ"}
 };
 const NOTE={"南一":{idiom:"期中考複習"}};
-
-/* ===== 全部作品 ===== */
-const WORKS=[
- {s:"zh",t:"修辭小偵探",ic:"修",tag:"三版本・三～六上",series:true,d:"對照課本每一課的修辭：修辭教室、總整理、闖關遊戲和公仔圖鑑。到國語複習地圖選你的冊別。"},
- {s:"zh",t:"成語練功房",ic:"成",tag:"三版本・三～六上",series:true,d:"看意思選成語、填空、找缺字、看漫畫、排字、翻牌配對，錯題可以再練。"},
- {s:"math",t:"九九乘法大冒險",ic:"九",u:G+"9-9-Adventure/",d:"2 到 9 一關一關過，通過總測驗解鎖打怪、流星雨、60 秒快答。玩 25 分鐘會提醒休息。"},
- {s:"math",t:"直式乘法小教室",ic:"乘",tag:"三年級",u:"9k88iLcJtTrN2Dy6BT3xdR",d:"整十整百、二三位數乘一位數。看示範、自己算、錯題本，最後打怪挑戰。"},
- {s:"math",t:"公分毫米大挑戰",ic:"尺",u:G+"cm-mm/",d:"1 公分 ＝ 10 毫米。四個關卡加大混合，一直練到又快又準。"},
- {s:"math",t:"大約是幾百？",ic:"估",u:G+"number-line-rounding/",d:"在數線上一步一步估：找出兩個整百，看中點判斷靠近誰。"},
- {s:"en",t:"Feelings 單字闖關",ic:"Aa",u:G+"Vocabulary-Practice/",d:"先聽、先背 5 個心情單字，再描寫和排字母，全過關才能玩遊戲。"},
- {s:"en",t:"英文拼字遊戲",ic:"ABC",u:G+"spellgame/",d:"點單字就會唸。每個遊戲都把單字考一遍，拼錯的最後再練一次。"},
- {s:"fun",t:"畫圖接力猜猜看",ic:"畫",tag:"同樂會・破冰",u:G+"draw-pass-guess/",d:"抽題目、畫出來、傳給下一位猜，最後全班一起大公開。成語和生字也能畫。"},
-];
-const FEATURED=[
- {t:"畫圖接力猜猜看",s:"fun",ic:"畫",cap:"有趣的課程",tags:["同樂會","破冰","全班一起"],u:G+"draw-pass-guess/",d:"抽題目、畫出來、把平板傳給下一位猜，再接著畫。最後全班大公開，「長頸鹿」可能變成「棒棒糖」。"},
- {t:"修辭小偵探",s:"zh",ic:"修",cap:"國語・9 冊",tags:["翰林","康軒","南一"],href:"#map",d:"對照課本每一課的修辭，先學概念、再總整理，最後闖關收集公仔。選你的版本年級就能開始。"},
- {t:"九九乘法大冒險",s:"math",ic:"九",cap:"數學",tags:["二年級起","通關制"],u:G+"9-9-Adventure/",d:"每一關全對才過關，通過總測驗解鎖打怪和流星雨。玩 25 分鐘會提醒孩子起來休息。"}
+const OTHERS=[
+ {n:"數學",items:[
+  {t:"九九乘法大冒險",u:G+"9-9-Adventure/",d:"一關一關過，通關解鎖打怪和快答"},
+  {t:"直式乘法小教室",tag:"三年級",u:"9k88iLcJtTrN2Dy6BT3xdR",d:"看示範、自己算、錯題本、打怪挑戰"},
+  {t:"公分毫米大挑戰",u:G+"cm-mm/",d:"1 公分 ＝ 10 毫米，四關加大混合"},
+  {t:"大約是幾百？",u:G+"number-line-rounding/",d:"在數線上估到整十、整百、整千"}]},
+ {n:"英文",items:[
+  {t:"Feelings 單字闖關",u:G+"Vocabulary-Practice/",d:"聽、背、描寫、排字母，過關再玩遊戲"},
+  {t:"英文拼字遊戲",u:G+"spellgame/",d:"點單字會唸，拼錯的最後再練一次"}]},
+ {n:"有趣的課程",items:[
+  {t:"畫圖接力猜猜看",tag:"同樂會",u:G+"draw-pass-guess/",d:"畫圖、傳下去、猜答案，最後全班大公開"}]}
 ];
 
 const $=id=>document.getElementById(id);
-const cover=(s,ic,cap)=>`<div class="cover" style="--c:var(${SUB[s].c});--cbg:var(${SUB[s].b})"><b style="${ic.length>1?"font-size:"+(ic.length>2?"34px":"44px")+";font-family:var(--display)":""}">${ic}</b>${cap?`<small>${cap}</small>`:""}</div>`;
-const ext=u=>`href="${link(u)}" target="_blank" rel="noopener"`;
+const item=o=>`<a class="item" href="${link(o.u)}" target="_blank" rel="noopener"><span class="txt"><span class="t">${o.t}${o.tag?`<span class="tag">${o.tag}</span>`:""}</span><span class="d">${o.d}</span></span><span class="arrow" aria-hidden="true">→</span></a>`;
 
-/* stats */
-const zhCount=Object.values(BOOKS).reduce((n,b)=>n+Object.keys(b).length,0);
-const total=zhCount+WORKS.filter(w=>!w.series).length;
-$("stats").innerHTML=[[total,"個學習網頁"],[3,"家版本都有對應"],["三～六","年級可以用"],[0,"元，全部免費"]]
-  .map(([b,s])=>`<div class="stat"><b>${b}</b><span>${s}</span></div>`).join("");
-
-/* featured */
-$("featList").innerHTML=FEATURED.map(f=>`<a class="fcard" ${f.u?ext(f.u):`href="${f.href}"`}>${cover(f.s,f.ic,f.cap)}
-  <div class="fbody"><div class="tags">${f.tags.map(t=>`<span class="tag">${t}</span>`).join("")}</div><h3>${f.t}</h3><p>${f.d}</p><span class="go">${f.u?"開始玩":"選我的冊別"} <span aria-hidden="true">→</span></span></div></a>`).join("");
-
-/* map */
 let pick={v:"翰林",g:"三"};
 try{const s=JSON.parse(localStorage.getItem("tm-pick")||"{}");if(VERS.includes(s.v))pick.v=s.v;if(GRADES.includes(s.g))pick.g=s.g}catch(e){}
 function save(){try{localStorage.setItem("tm-pick",JSON.stringify(pick))}catch(e){}}
-function stepHTML(s,b,note,fin){
-  const u=b[s.k], tag=note[s.k]?`<span class="tag">${note[s.k]}</span>`:"";
-  const inner=`<span class="n">${s.ic}</span><span class="tx"><h4>${s.n}${tag}${u?"":'<span class="soon">製作中</span>'}</h4><p>${s.d}</p></span>`;
-  return `<li class="st ${u?"on":"off"}${fin?" final":""}" style="--sc:var(${s.sc||"--accent"})">${u?`<a ${ext(u)}>${inner}<span class="go" aria-hidden="true"><span>→</span></span></a>`:`<div class="box">${inner}</div>`}</li>`;
-}
-function renderMap(){
+
+function renderZh(){
   $("verSeg").innerHTML=VERS.map(v=>`<button aria-pressed="${pick.v===v}" data-v="${v}">${v}</button>`).join("");
-  $("gradeSeg").innerHTML=GRADES.map(g=>`<button aria-pressed="${pick.g===g}" data-g="${g}">${g}年級</button>`).join("");
-  const b=BOOKS[pick.v+pick.g]||{}, note=NOTE[pick.v]||{}, all=[...SLOTS,FINAL], done=all.filter(s=>b[s.k]).length;
-  $("bookName").textContent=`${pick.v}版・${pick.g}年級上學期`;
-  $("doneN").textContent=`${done} / ${all.length}`;
-  $("barFill").style.width=(done/all.length*100)+"%";
-  $("steps").innerHTML=SLOTS.map(s=>stepHTML(s,b,note,false)).join("")+stepHTML(FINAL,b,note,true);
+  $("gradeSeg").innerHTML=GRADES.map(g=>`<button aria-pressed="${pick.g===g}" data-g="${g}">${g}上</button>`).join("");
+  const b=BOOKS[pick.v+pick.g]||{}, note=NOTE[pick.v]||{};
+  $("zhList").innerHTML=SLOTS.filter(s=>b[s.k]).map(s=>item({t:s.n,d:s.d,u:b[s.k],tag:note[s.k]})).join("");
 }
-document.querySelector(".panel").addEventListener("click",e=>{
+document.querySelector(".pickers").addEventListener("click",e=>{
   const x=e.target.closest("button"); if(!x)return;
-  if(x.dataset.v)pick.v=x.dataset.v; if(x.dataset.g)pick.g=x.dataset.g; save(); renderMap();
+  if(x.dataset.v)pick.v=x.dataset.v; if(x.dataset.g)pick.g=x.dataset.g; save(); renderZh();
 });
 
-/* works */
-let filt="all";
-function renderWorks(){
-  const keys=["all","zh","math","en","fun"];
-  $("filters").innerHTML=keys.map(k=>`<button class="chip" aria-pressed="${filt===k}" data-f="${k}">${k==="all"?"全部":SUB[k].n} <em>${k==="all"?WORKS.length:WORKS.filter(w=>w.s===k).length}</em></button>`).join("");
-  $("grid").innerHTML=WORKS.filter(w=>filt==="all"||w.s===filt).map(w=>`<a class="wcard" ${w.series?'href="#map"':ext(w.u)}>${cover(w.s,w.ic,SUB[w.s].n)}
-    <div class="wbody">${w.tag?`<div class="tags"><span class="tag">${w.tag}</span></div>`:""}<h3>${w.t}</h3><p>${w.d}</p><span class="go">${w.series?"選我的冊別":"開始玩"} <span aria-hidden="true">→</span></span></div></a>`).join("");
-}
-$("filters").addEventListener("click",e=>{const x=e.target.closest("button");if(!x)return;filt=x.dataset.f;renderWorks()});
-
-renderMap(); renderWorks();
+$("others").innerHTML=OTHERS.map(s=>`<section><h2>${s.n}</h2><div class="list">${s.items.map(item).join("")}</div></section>`).join("");
+renderZh();
 </script>
 
 </body>
