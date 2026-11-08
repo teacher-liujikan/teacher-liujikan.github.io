@@ -1,0 +1,501 @@
+<!doctype html><html lang="zh-Hant"><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>段考花園看板</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Chiron+GoRound+TC:wght@400;600;800&family=Fredoka:wght@500;600;700&display=swap">
+<script src="https://cdn.jsdelivr.net/npm/pinyin-pro@3.26.0/dist/index.js"></script>
+<style>
+/* Layout: one fixed 16:9 stage (1600×900 design px) scaled to fit the screen. Left: clock + live countdown on top, attendance and teacher note below. Right: today's exam list, full height. Optional zhuyin beside every Chinese character. */
+:root{
+  --bg:#eaf5df; --ground:#d6ebc3; --card:#fffdf6; --ink:#2c3a24; --soft:#647357; --line:#cfe0bc;
+  --grass:#4f9d3a; --grass-deep:#357a26; --sun:#f6c445; --petal-red:#e5604f; --petal-blue:#4a8fd8; --petal-purple:#9a6bd1; --petal-pink:#e77fa8;
+  --warn:#e5604f; --done:#a9b59d; --frame:#c3dbab; --alert-bg:#fff3c9;
+  --f-display:"Chiron GoRound TC","Noto Sans TC","PingFang TC","Microsoft JhengHei",sans-serif;
+  --f-num:"Fredoka","Chiron GoRound TC",ui-rounded,system-ui,sans-serif;
+  --f-zy:"PingFang TC","Microsoft JhengHei","Noto Sans TC","Chiron GoRound TC",sans-serif;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#17231a; --ground:#1e2e21; --card:#223326; --ink:#eef4e4; --soft:#a8b99c; --line:#34483a;
+  --grass:#7cc964; --grass-deep:#9ad884; --sun:#f6cf5e; --petal-red:#f07a69; --petal-blue:#74aceb; --petal-purple:#b691e3; --petal-pink:#f095b9;
+  --warn:#f07a69; --done:#5d6e5f; --frame:#0f1811; --alert-bg:#3a3317; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#17231a; --ground:#1e2e21; --card:#223326; --ink:#eef4e4; --soft:#a8b99c; --line:#34483a;
+  --grass:#7cc964; --grass-deep:#9ad884; --sun:#f6cf5e; --petal-red:#f07a69; --petal-blue:#74aceb; --petal-purple:#b691e3; --petal-pink:#f095b9;
+  --warn:#f07a69; --done:#5d6e5f; --frame:#0f1811; --alert-bg:#3a3317; color-scheme:dark}
+
+*{box-sizing:border-box}
+html,body{height:100%}
+body{background:var(--frame);color:var(--ink);font-family:var(--f-display);font-size:16px;line-height:1.5;overflow:hidden;
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:16px}
+button,input,textarea{font:inherit;color:inherit}
+button{cursor:pointer}
+:focus-visible{outline:3px solid var(--petal-blue);outline-offset:2px;border-radius:10px}
+
+/* zhuyin beside a character */
+.zy{display:inline-flex;align-items:center;vertical-align:bottom;line-height:1}
+.zy .bp{display:inline-flex;align-items:center;margin:0 .08em 0 .03em;font-family:var(--f-zy);font-weight:500}
+.zy .sy{writing-mode:vertical-rl;text-orientation:upright;font-size:.3em;line-height:1;letter-spacing:0}
+.zy .tn{font-size:.3em;line-height:1;align-self:center;margin-top:-.2em}
+
+.fit{position:relative;width:100%;height:100%}
+.stage{position:absolute;left:50%;top:50%;width:1600px;height:900px;transform-origin:0 0;
+  background:var(--bg);border-radius:28px;overflow:hidden;padding:24px 36px 32px;
+  display:grid;grid-template-columns:minmax(0,1fr) 500px;grid-template-rows:auto minmax(0,1fr);gap:20px 24px;
+  background-image:radial-gradient(circle at 6% 112%,var(--ground) 0 18%,transparent 18.2%),radial-gradient(circle at 60% 118%,var(--ground) 0 16%,transparent 16.2%)}
+
+header{grid-column:1/-1;display:flex;align-items:center;gap:18px;min-height:60px}
+header h1{margin:0;font-size:38px;font-weight:800;display:flex;align-items:center;gap:12px;white-space:nowrap}
+header .date{color:var(--soft);font-size:24px;font-weight:600;white-space:nowrap}
+.tools{margin-left:auto;display:flex;gap:8px;align-items:center}
+.tbtn{border:2px solid var(--line);background:var(--card);border-radius:999px;padding:6px 16px;font-weight:600;font-size:17px;white-space:nowrap}
+.tbtn:hover{border-color:var(--grass)}
+.tog[aria-pressed="true"]{background:var(--grass);border-color:var(--grass);color:var(--card)}
+.tog .st{font-size:.85em;opacity:.85;margin-left:4px}
+
+.left{display:grid;grid-template-rows:minmax(0,1fr) 300px;gap:20px;min-height:0}
+.lower{display:grid;grid-template-columns:400px minmax(0,1fr);gap:20px;min-height:0}
+.card{background:var(--card);border:2px solid var(--line);border-radius:28px;padding:20px 28px;min-width:0;min-height:0}
+.label{font-size:20px;font-weight:600;color:var(--soft);letter-spacing:.08em;margin:0}
+
+.top{display:grid;grid-template-columns:auto minmax(0,1fr);gap:28px;align-items:stretch}
+.clockbox{display:flex;flex-direction:column;justify-content:center}
+.clock{font-family:var(--f-num);font-weight:600;font-size:136px;line-height:1;font-variant-numeric:tabular-nums}
+.clock .sec{font-size:52px;color:var(--soft);margin-left:6px}
+.now{border-radius:22px;background:var(--ground);padding:22px 26px;display:flex;flex-direction:column;justify-content:center;gap:12px;min-width:0}
+.now-top{display:flex;align-items:center;gap:14px;flex-wrap:wrap}
+.now-subj{font-size:68px;font-weight:800;line-height:1.15;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.now-time{color:var(--soft);font-family:var(--f-num);font-size:24px}
+.remain{display:flex;align-items:baseline;gap:12px}
+.remain-num{font-family:var(--f-num);font-weight:700;font-size:96px;line-height:1;font-variant-numeric:tabular-nums;color:var(--grass-deep)}
+.remain-cap{font-size:28px;color:var(--soft);font-weight:600}
+.now.warn .remain-num{color:var(--warn)}
+.now.warn .vine-fill{background:var(--warn)}
+.pill{display:inline-block;border-radius:999px;padding:3px 16px;font-size:20px;font-weight:600;background:var(--grass);color:var(--card)}
+.now.warn .pill{background:var(--warn)}
+.now.rest .pill{background:var(--sun);color:#3b2f07}
+
+.vine{position:relative;height:24px;border-radius:999px;background:var(--card);border:2px solid var(--line);margin:8px 18px 4px 0}
+.vine-fill{position:absolute;inset:0 auto 0 0;width:0;border-radius:999px;background:var(--grass);transition:width .8s linear}
+.vine-bud{position:absolute;top:50%;width:38px;height:38px;transform:translate(-50%,-58%);left:0;transition:left .8s linear}
+.vine-flag{position:absolute;right:-18px;top:50%;transform:translateY(-55%);width:36px;height:36px}
+@media (prefers-reduced-motion:reduce){.vine-fill,.vine-bud{transition:none}}
+
+.right{display:flex;flex-direction:column;gap:12px}
+.sched{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:6px;flex:1;min-height:0;justify-content:space-evenly}
+.sched li{display:grid;grid-template-columns:52px minmax(0,1fr) auto;align-items:center;gap:16px;padding:8px 14px;border-radius:18px;border:2px solid transparent}
+.dot{width:52px;height:52px}
+.s-name{font-size:58px;font-weight:800;line-height:1.15;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.s-time{font-family:var(--f-num);font-size:24px;color:var(--soft);font-variant-numeric:tabular-nums}
+.s-tag{font-size:20px;font-weight:600;color:var(--soft);white-space:nowrap}
+.sched li.cur{border-color:var(--grass);background:var(--ground)}
+.sched li.cur .s-tag{color:var(--grass-deep)}
+.sched li.done .s-name,.sched li.done .s-time{color:var(--done)}
+.sched li.done .s-name{text-decoration:line-through;text-decoration-thickness:3px}
+.sched li.brk{padding-block:2px}
+.sched li.brk .dot{width:30px;height:30px;justify-self:center}
+.sched li.brk .s-name{font-size:22px;font-weight:600;color:var(--soft)}
+
+.att{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin-top:10px}
+.att-box{display:grid;gap:6px;justify-items:center;text-align:center}
+.att-num{font-family:var(--f-num);font-weight:700;font-size:78px;line-height:1;font-variant-numeric:tabular-nums}
+.att-box.absent .att-num{color:var(--petal-red)}
+.att-box.absent.zero .att-num{color:var(--grass-deep)}
+.step{display:flex;gap:8px;height:38px}
+.step button{width:38px;height:38px;border-radius:50%;border:2px solid var(--line);background:var(--bg);font-weight:700;font-size:20px;line-height:1}
+.step button:hover{border-color:var(--grass)}
+.att-note{margin:14px 0 0;color:var(--soft);font-size:22px;text-align:center}
+
+.notecard{display:flex;flex-direction:column;gap:10px}
+.note-head{display:flex;align-items:center;gap:10px}
+.note-head svg{width:30px;height:30px}
+.note,.note-view{flex:1;width:100%;min-height:0;border:2px dashed var(--line);border-radius:18px;background:var(--bg);padding:12px 18px;
+  font-size:32px;line-height:1.5;font-weight:600}
+.note{resize:none}
+.note:focus{border-style:solid;border-color:var(--grass);outline:none}
+.note-view{overflow:hidden;white-space:pre-wrap;cursor:text;line-height:1.35}
+.hint{font-size:16px;color:var(--soft);margin:0}
+
+/* five-minute alert */
+.alert{position:absolute;left:50%;top:110px;transform:translateX(-50%);z-index:5;width:1120px;
+  background:var(--alert-bg);border:4px solid var(--warn);border-radius:32px;padding:26px 40px;
+  display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:26px;align-items:center;box-shadow:0 18px 50px color-mix(in srgb,var(--ink) 25%,transparent)}
+.alert svg{width:96px;height:96px}
+.alert-big{font-size:58px;font-weight:800;color:var(--warn);line-height:1.15}
+.alert-sub{font-size:38px;font-weight:700;line-height:1.3;margin-top:6px}
+.alert .tbtn{font-size:20px}
+@media (prefers-reduced-motion:no-preference){.alert:not([hidden]){animation:pop .45s ease-out}}
+@keyframes pop{from{transform:translateX(-50%) scale(.9);opacity:.4}to{transform:translateX(-50%) scale(1);opacity:1}}
+
+/* settings panel (not scaled) */
+.panel{position:fixed;inset:0;background:color-mix(in srgb,var(--ink) 45%,transparent);display:grid;place-items:center;z-index:20;
+  padding:max(16px,env(safe-area-inset-top,0px)) max(16px,env(safe-area-inset-right,0px)) max(16px,env(safe-area-inset-bottom,0px)) max(16px,env(safe-area-inset-left,0px))}
+.panel-box{background:var(--card);border-radius:24px;padding:22px;width:min(660px,100%);max-height:100%;overflow:auto;display:grid;gap:14px}
+.panel-box h2{margin:0;font-size:1.4rem}
+.panel-box h3{margin:6px 0 0;font-size:1.1rem}
+.panel .tbtn{font-size:16px}
+.field{display:grid;gap:4px}
+.field label{font-size:.9rem;color:var(--soft);font-weight:600}
+.inp{border:2px solid var(--line);border-radius:12px;background:var(--bg);padding:8px 10px;min-width:0;width:100%}
+textarea.inp{min-height:120px;resize:vertical;font-size:1rem;line-height:1.6}
+.rows{display:grid;gap:8px}
+.row{display:grid;grid-template-columns:110px 110px minmax(0,1fr) auto;gap:8px;align-items:center}
+@media (max-width:520px){.row{grid-template-columns:1fr 1fr}.row .inp-subj{grid-column:1/-1}}
+.xbtn{border:none;background:none;color:var(--petal-red);font-weight:700;padding:6px 8px}
+.panel-actions{display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end}
+.primary{background:var(--grass);color:var(--card);border-color:var(--grass)}
+</style>
+
+<div class="fit" id="fit">
+<div class="stage" id="stage">
+  <header>
+    <h1><svg width="44" height="44" viewBox="0 0 40 40" aria-hidden="true"><path d="M20 36V18" stroke="var(--grass-deep)" stroke-width="3" stroke-linecap="round" fill="none"/><path d="M20 22c-8 0-12-5-12-11 7 0 12 4 12 11z" fill="var(--grass)"/><path d="M20 18c0-7 5-12 13-12 0 7-5 12-13 12z" fill="var(--grass)"/></svg><span id="ttl"></span></h1>
+    <span class="date" id="date"></span>
+    <div class="tools">
+      <button class="tbtn tog" id="zyBtn" type="button" aria-pressed="false">注音<span class="st" id="zySt">關</span></button>
+      <button class="tbtn tog" id="sndBtn" type="button" aria-pressed="false">五分鐘提醒聲<span class="st" id="sndSt">關</span></button>
+      <button class="tbtn" id="testBtn" type="button">試聽</button>
+      <button class="tbtn" id="fsBtn" type="button">全螢幕</button>
+      <button class="tbtn" id="editBtn" type="button">編輯考程</button>
+    </div>
+  </header>
+
+  <div class="left">
+    <div class="card top">
+      <div class="clockbox">
+        <p class="label t" data-t="現在時間"></p>
+        <div class="clock" id="clock">--:--<span class="sec">--</span></div>
+      </div>
+      <div class="now" id="now">
+        <div class="now-top"><span class="pill" id="nowPill"></span><span class="now-time" id="nowTime"></span></div>
+        <div class="now-subj" id="nowSubj"></div>
+        <div class="remain" id="remain"><span class="remain-cap" id="remainCap"></span><span class="remain-num" id="remainNum">--:--</span></div>
+        <div class="vine" aria-hidden="true">
+          <div class="vine-fill" id="vineFill"></div>
+          <svg class="vine-flag" viewBox="0 0 30 30"><g fill="var(--petal-pink)"><circle cx="15" cy="8" r="6"/><circle cx="22" cy="14" r="6"/><circle cx="18" cy="22" r="6"/><circle cx="10" cy="21" r="6"/><circle cx="8" cy="13" r="6"/></g><circle cx="15" cy="15" r="5" fill="var(--sun)"/></svg>
+          <svg class="vine-bud" id="vineBud" viewBox="0 0 34 34"><path d="M17 26c-7 0-10-5-10-10 6 0 10 4 10 10z" fill="var(--grass)"/><path d="M17 22c0-7 4-11 11-11 0 6-4 11-11 11z" fill="var(--grass-deep)"/><circle cx="17" cy="27" r="4" fill="var(--sun)"/></svg>
+        </div>
+      </div>
+    </div>
+
+    <div class="lower">
+      <div class="card">
+        <p class="label t" data-t="出席人數"></p>
+        <div class="att">
+          <div class="att-box"><span class="label t" data-t="應到"></span><span class="att-num" id="should">0</span>
+            <div class="step"><button type="button" data-k="should" data-d="-1" aria-label="應到減一">−</button><button type="button" data-k="should" data-d="1" aria-label="應到加一">＋</button></div></div>
+          <div class="att-box"><span class="label t" data-t="實到"></span><span class="att-num" id="actual">0</span>
+            <div class="step"><button type="button" data-k="actual" data-d="-1" aria-label="實到減一">−</button><button type="button" data-k="actual" data-d="1" aria-label="實到加一">＋</button></div></div>
+          <div class="att-box absent" id="absBox"><span class="label t" data-t="缺席"></span><span class="att-num" id="absent">0</span><div class="step"></div></div>
+        </div>
+        <p class="att-note" id="attNote"></p>
+      </div>
+
+      <div class="card notecard">
+        <div class="note-head">
+          <svg viewBox="0 0 30 30" aria-hidden="true"><g fill="var(--sun)"><circle cx="15" cy="7" r="5"/><circle cx="23" cy="13" r="5"/><circle cx="20" cy="22" r="5"/><circle cx="10" cy="22" r="5"/><circle cx="7" cy="13" r="5"/></g><circle cx="15" cy="15" r="4.5" fill="var(--petal-red)"/></svg>
+          <label class="label t" for="note" data-t="老師留言"></label>
+          <span class="hint" style="margin-left:auto">點一下就可以修改</span>
+        </div>
+        <textarea class="note" id="note"></textarea>
+        <div class="note-view" id="noteView" tabindex="0" role="button" aria-label="修改老師留言" hidden></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card right">
+    <p class="label t" data-t="今日考程"></p>
+    <ul class="sched" id="sched"></ul>
+  </div>
+
+  <div class="alert" id="alert" role="alert" hidden>
+    <svg viewBox="0 0 96 96" aria-hidden="true"><circle cx="48" cy="52" r="36" fill="var(--card)" stroke="var(--warn)" stroke-width="6"/><path d="M48 30v24l14 9" stroke="var(--warn)" stroke-width="7" stroke-linecap="round" fill="none"/><path d="M48 16c-4-8-12-10-18-8 1 7 8 12 18 8zM48 16c4-8 12-10 18-8-1 7-8 12-18 8z" fill="var(--grass)"/></svg>
+    <div>
+      <div class="alert-big" id="alertBig"></div>
+      <div class="alert-sub" id="alertSub"></div>
+    </div>
+    <button class="tbtn" id="alertClose" type="button">知道了</button>
+  </div>
+</div>
+</div>
+
+<div class="panel" id="panel" hidden>
+  <div class="panel-box" role="dialog" aria-modal="true" aria-labelledby="pTitle">
+    <h2 id="pTitle">編輯考程</h2>
+    <div class="field"><label for="inTitle">看板標題</label><input class="inp" id="inTitle"></div>
+    <p class="hint">每一列填開始、結束時間和科目。科目寫「下課」會顯示成休息時間。</p>
+    <div class="rows" id="rows"></div>
+    <div class="panel-actions" style="justify-content:flex-start">
+      <button class="tbtn" id="addRow" type="button">＋ 新增一節</button>
+      <button class="tbtn" id="resetBtn" type="button">考程恢復範例</button>
+    </div>
+    <h3>注音讀音修正</h3>
+    <div class="field">
+      <label for="inFix">注音是自動標的，遇到破音字或臺灣讀音不同時，在這裡寫正確的讀音，一行一個，格式是「字或詞=注音」，音和音之間空一格。</label>
+      <textarea class="inp" id="inFix"></textarea>
+    </div>
+    <div class="panel-actions">
+      <button class="tbtn" id="cancelBtn" type="button">取消</button>
+      <button class="tbtn primary" id="saveBtn" type="button">儲存</button>
+    </div>
+  </div>
+</div>
+
+<script>
+(function(){
+  const KEY='examGardenBoard.v1';
+  const DEFAULT_FIX='期=ㄑㄧˊ\n還有=ㄏㄞˊ ㄧㄡˇ\n還沒=ㄏㄞˊ ㄇㄟˊ\n還是=ㄏㄞˊ ㄕˋ\n還要=ㄏㄞˊ ㄧㄠˋ\n還在=ㄏㄞˊ ㄗㄞˋ';
+  const SAMPLE={
+    title:'三年一班 期中段考',
+    should:28, actual:27, zy:false, sound:false, fix:DEFAULT_FIX,
+    note:'寫完記得檢查姓名、座號！\n寫完的同學請安靜看書。',
+    rows:[
+      {s:'08:40',e:'09:20',n:'國語'},
+      {s:'09:20',e:'09:30',n:'下課'},
+      {s:'09:30',e:'10:10',n:'數學'},
+      {s:'10:10',e:'10:30',n:'下課'},
+      {s:'10:30',e:'11:10',n:'社會'},
+      {s:'11:10',e:'11:20',n:'下課'},
+      {s:'11:20',e:'12:00',n:'自然'}
+    ]
+  };
+  const COLORS=['--petal-red','--petal-blue','--sun','--petal-purple','--petal-pink','--grass'];
+  let st;
+  try{st=JSON.parse(localStorage.getItem(KEY))}catch(e){st=null}
+  if(!st||!Array.isArray(st.rows))st=JSON.parse(JSON.stringify(SAMPLE));
+  for(const k of ['zy','sound','fix'])if(st[k]===undefined)st[k]=SAMPLE[k];
+  const save=()=>{try{localStorage.setItem(KEY,JSON.stringify(st))}catch(e){}};
+  const $=id=>document.getElementById(id);
+  const pad=n=>String(n).padStart(2,'0');
+  const toDate=hm=>{const[h,m]=hm.split(':').map(Number);const d=new Date();d.setHours(h,m||0,0,0);return d};
+  const isBreak=n=>/下課|休息|午休|午餐/.test(n);
+  const WEEK='日一二三四五六';
+  const esc=t=>String(t).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+
+  /* ---------- zhuyin ---------- */
+  const INI=['zh','ch','sh','b','p','m','f','d','t','n','l','g','k','h','j','q','x','r','z','c','s'];
+  const IM={b:'ㄅ',p:'ㄆ',m:'ㄇ',f:'ㄈ',d:'ㄉ',t:'ㄊ',n:'ㄋ',l:'ㄌ',g:'ㄍ',k:'ㄎ',h:'ㄏ',j:'ㄐ',q:'ㄑ',x:'ㄒ',zh:'ㄓ',ch:'ㄔ',sh:'ㄕ',r:'ㄖ',z:'ㄗ',c:'ㄘ',s:'ㄙ'};
+  const FM={a:'ㄚ',o:'ㄛ',e:'ㄜ','ê':'ㄝ',ai:'ㄞ',ei:'ㄟ',ao:'ㄠ',ou:'ㄡ',an:'ㄢ',en:'ㄣ',ang:'ㄤ',eng:'ㄥ',er:'ㄦ',i:'ㄧ',ia:'ㄧㄚ',ie:'ㄧㄝ',iao:'ㄧㄠ',iu:'ㄧㄡ',ian:'ㄧㄢ',in:'ㄧㄣ',iang:'ㄧㄤ',ing:'ㄧㄥ',iong:'ㄩㄥ',io:'ㄧㄛ',u:'ㄨ',ua:'ㄨㄚ',uo:'ㄨㄛ',uai:'ㄨㄞ',ui:'ㄨㄟ',uan:'ㄨㄢ',un:'ㄨㄣ',uang:'ㄨㄤ',ong:'ㄨㄥ',ueng:'ㄨㄥ','ü':'ㄩ','üe':'ㄩㄝ','üan':'ㄩㄢ','ün':'ㄩㄣ'};
+  const TONE={1:'',2:'ˊ',3:'ˇ',4:'ˋ',5:'˙',0:'˙'};
+  function py2zy(p,num){
+    p=p.toLowerCase().replace(/v/g,'ü');
+    if(p==='yi')p='i';else if(p==='wu')p='u';else if(p==='yu')p='ü';
+    else if(/^y/.test(p)){p=p.slice(1);if(/^u/.test(p))p='ü'+p.slice(1);else if(!/^i/.test(p))p='i'+p}
+    else if(/^w/.test(p)){p='u'+p.slice(1);if(p==='uei')p='ui';if(p==='uen')p='un'}
+    let ini='';for(const i of INI)if(p.startsWith(i)){ini=i;break}
+    let fin=p.slice(ini.length);
+    if(/^[jqx]$/.test(ini)&&/^u/.test(fin))fin='ü'+fin.slice(1);
+    if(/^(zh|ch|sh|r|z|c|s)$/.test(ini)&&fin==='i')fin='';
+    if(fin==='iou')fin='iu';
+    const f=fin?FM[fin]:'';
+    if(f===undefined||(!ini&&!fin))return '';
+    const t=TONE[num]??'';
+    return t==='˙'?'˙'+(IM[ini]||'')+f:(IM[ini]||'')+f+t;
+  }
+  let fixList=[];
+  function parseFix(){
+    fixList=String(st.fix||'').split(/\n/).map(l=>l.trim()).filter(l=>l.includes('=')).map(l=>{
+      const [w,z]=l.split('=');return{w:w.trim(),z:z.trim().split(/\s+/)}}).filter(o=>o.w&&o.z.length===[...o.w].length);
+    fixList.sort((a,b)=>b.w.length-a.w.length);zyCache.clear();
+  }
+  const zyCache=new Map();
+  const HAN=/[㐀-鿿豈-﫿]/;
+  function zyHTML(text){
+    if(zyCache.has(text))return zyCache.get(text);
+    const chars=[...text];
+    const sy=new Array(chars.length).fill('');
+    if(window.pinyinPro){
+      try{
+        const r=pinyinPro.pinyin(text,{type:'all',toneType:'none',toneSandhi:false});
+        let i=0;for(const o of r){const len=[...o.origin].length;if(o.isZh&&len===1)sy[i]=py2zy(o.pinyin,o.num);i+=len}
+      }catch(e){}
+    }
+    for(const f of fixList){
+      const w=[...f.w];
+      for(let i=0;i+w.length<=chars.length;i++){
+        if(w.every((c,j)=>chars[i+j]===c))w.forEach((c,j)=>sy[i+j]=f.z[j]);
+      }
+    }
+    const out=chars.map((c,i)=>{
+      if(!HAN.test(c)||!sy[i])return esc(c);
+      let s=sy[i],tn='';
+      const m=s.match(/[ˊˇˋ]$/);if(m){tn=m[0];s=s.slice(0,-1)}
+      return `<span class="zy"><span class="hz">${esc(c)}</span><span class="bp" aria-hidden="true"><span class="sy">${s}</span>${tn?`<span class="tn">${tn}</span>`:''}</span></span>`;
+    }).join('');
+    zyCache.set(text,out);return out;
+  }
+  function setT(el,text){
+    text=text==null?'':String(text);
+    const key=(st.zy?'1':'0')+text;
+    if(el._k===key)return;el._k=key;
+    el.innerHTML=st.zy?zyHTML(text):esc(text);
+  }
+  const T=(text)=>st.zy?zyHTML(text):esc(text);
+
+  /* ---------- fit 16:9 ---------- */
+  function fit(){
+    const f=$('fit'),s=$('stage');
+    const k=Math.min(f.clientWidth/1600,f.clientHeight/900);
+    s.style.transform=`scale(${k}) translate(-50%,-50%)`;
+  }
+  window.addEventListener('resize',fit);
+  if(window.ResizeObserver)new ResizeObserver(fit).observe($('fit'));
+
+  /* ---------- sound ---------- */
+  let actx=null;
+  function ensureAudio(){
+    try{
+      if(!actx){const A=window.AudioContext||window.webkitAudioContext;if(A)actx=new A()}
+      if(actx&&actx.state==='suspended')actx.resume().catch(()=>{});
+    }catch(e){}
+  }
+  function chime(){
+    if(!actx)return;
+    const notes=[784,988,1175,784,988,1175];
+    notes.forEach((f,i)=>{
+      const t=actx.currentTime+i*0.42+(i>2?0.5:0);
+      const o=actx.createOscillator(),g=actx.createGain();
+      o.type='sine';o.frequency.value=f;
+      g.gain.setValueAtTime(0.0001,t);g.gain.exponentialRampToValueAtTime(0.35,t+0.03);g.gain.exponentialRampToValueAtTime(0.0001,t+0.9);
+      o.connect(g).connect(actx.destination);o.start(t);o.stop(t+1);
+    });
+  }
+  function speak(){
+    try{
+      if(!window.speechSynthesis)return;
+      speechSynthesis.cancel();
+      const u=new SpeechSynthesisUtterance('剩下五分鐘，請再次檢查班級、座號、姓名。');
+      u.lang='zh-TW';u.rate=0.9;
+      const v=speechSynthesis.getVoices().find(v=>/zh[-_]TW/i.test(v.lang));if(v)u.voice=v;
+      speechSynthesis.speak(u);
+    }catch(e){}
+  }
+  let alertTimer=null;
+  function showAlert(withSound){
+    setT($('alertBig'),'剩下五分鐘！');
+    setT($('alertSub'),'請再次檢查班級、座號、姓名');
+    $('alert').hidden=false;
+    clearTimeout(alertTimer);alertTimer=setTimeout(()=>{$('alert').hidden=true},45000);
+    if(withSound){ensureAudio();chime();setTimeout(speak,3200)}
+  }
+  $('alertClose').onclick=()=>{$('alert').hidden=true;clearTimeout(alertTimer)};
+  $('testBtn').onclick=()=>{ensureAudio();showAlert(true)};
+  document.addEventListener('pointerdown',()=>{if(st.sound)ensureAudio()});
+  const fired=new Set();
+
+  /* ---------- render ---------- */
+  const flower=c=>`<svg class="dot" viewBox="0 0 38 38" aria-hidden="true"><g fill="var(${c})"><circle cx="19" cy="10" r="7"/><circle cx="28" cy="17" r="7"/><circle cx="24" cy="28" r="7"/><circle cx="14" cy="28" r="7"/><circle cx="10" cy="17" r="7"/></g><circle cx="19" cy="20" r="6" fill="var(--card)"/></svg>`;
+  const seed=()=>`<svg class="dot" viewBox="0 0 38 38" aria-hidden="true"><ellipse cx="19" cy="20" rx="9" ry="7" fill="var(--line)"/></svg>`;
+
+  function renderStatic(){
+    document.querySelectorAll('.t').forEach(el=>setT(el,el.dataset.t));
+    setT($('ttl'),st.title);
+    renderNote();renderAtt();
+    $('zyBtn').setAttribute('aria-pressed',st.zy);$('zySt').textContent=st.zy?'開':'關';
+    $('sndBtn').setAttribute('aria-pressed',st.sound);$('sndSt').textContent=st.sound?'開':'關';
+    if(!$('alert').hidden){setT($('alertBig'),'剩下五分鐘！');setT($('alertSub'),'請再次檢查班級、座號、姓名')}
+  }
+
+  function renderSched(now){
+    let ci=0;
+    $('sched').innerHTML=st.rows.map(r=>{
+      const s=toDate(r.s),e=toDate(r.e),brk=isBreak(r.n);
+      const cls=[brk?'brk':'',now>=e?'done':'',now>=s&&now<e?'cur':''].join(' ');
+      const tag=now>=e?'結束':(now>=s?(brk?'休息中':'考試中'):'');
+      const icon=brk?seed():flower(COLORS[(ci++)%COLORS.length]);
+      return `<li class="${cls}">${icon}<div style="min-width:0"><div class="s-name">${T(r.n)}</div>${brk?'':`<div class="s-time">${r.s} – ${r.e}</div>`}</div><span class="s-tag">${T(tag)}</span></li>`;
+    }).join('');
+  }
+
+  function renderNow(now){
+    const box=$('now');box.classList.remove('warn','rest');
+    const rows=st.rows.map(r=>({...r,sd:toDate(r.s),ed:toDate(r.e)}));
+    const cur=rows.find(r=>now>=r.sd&&now<r.ed);
+    const next=rows.find(r=>r.sd>now&&!isBreak(r.n));
+    const fmt=ms=>{const t=Math.max(0,Math.ceil(ms/1000));return pad(Math.floor(t/60))+':'+pad(t%60)};
+    let pill,subj,time='',cap='',num='',pct=0;
+    if(cur&&!isBreak(cur.n)){
+      const left=cur.ed-now;
+      pill='考試中';subj=cur.n;$('nowSubj').classList.remove('nx');time=`${cur.s} – ${cur.e}`;cap='剩下';num=fmt(left);
+      pct=(now-cur.sd)/(cur.ed-cur.sd);
+      if(left<=5*60000){box.classList.add('warn');pill='最後五分鐘'}
+      const key=now.toDateString()+cur.s;
+      if(left<=5*60000&&left>5*60000-15000&&!fired.has(key)){fired.add(key);showAlert(st.sound)}
+    }else if(next){
+      box.classList.add('rest');pill=cur?'下課':'還沒開始';subj='下一節：'+next.n;$('nowSubj').classList.add('nx');time=`${next.s} – ${next.e}`;
+      cap='距離開始還有';num=fmt(next.sd-now);
+      pct=cur?(now-cur.sd)/(next.sd-cur.sd):0;
+    }else{
+      box.classList.add('rest');pill='全部考完';subj='今天辛苦了！';pct=1;
+    }
+    setT($('nowPill'),pill);setT($('nowSubj'),subj);$('nowTime').textContent=time;
+    setT($('remainCap'),cap);$('remainNum').textContent=num;$('remain').style.visibility=cap?'visible':'hidden';
+    const p=Math.min(1,Math.max(0,pct))*100;
+    $('vineFill').style.width=p+'%';$('vineBud').style.left=p+'%';
+  }
+
+  function renderAtt(){
+    $('should').textContent=st.should;$('actual').textContent=st.actual;
+    const a=Math.max(0,st.should-st.actual);$('absent').textContent=a;
+    $('absBox').classList.toggle('zero',a===0);
+    setT($('attNote'),a===0?'全員到齊！':`今天有 ${a} 位同學沒有來`);
+  }
+
+  const note=$('note'),view=$('noteView');
+  function renderNote(){
+    if(document.activeElement===note)return;
+    if(st.zy){view.hidden=false;note.hidden=true;view._k=null;setT(view,st.note)}
+    else{view.hidden=true;note.hidden=false;note.value=st.note}
+  }
+  function editNote(){view.hidden=true;note.hidden=false;note.value=st.note;note.focus()}
+  view.addEventListener('click',editNote);
+  view.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();editNote()}});
+  note.addEventListener('input',()=>{st.note=note.value;save()});
+  note.addEventListener('blur',()=>{if(st.zy)renderNote()});
+
+  let lastMin=-1;
+  function tick(force){
+    const now=new Date();
+    $('clock').innerHTML=`${pad(now.getHours())}:${pad(now.getMinutes())}<span class="sec">${pad(now.getSeconds())}</span>`;
+    setT($('date'),`${now.getMonth()+1} 月 ${now.getDate()} 日（${WEEK[now.getDay()]}）`);
+    renderNow(now);
+    if(force===true||now.getMinutes()!==lastMin){renderSched(now);lastMin=now.getMinutes()}
+  }
+
+  document.querySelectorAll('.step button[data-k]').forEach(b=>b.addEventListener('click',()=>{
+    const k=b.dataset.k;st[k]=Math.max(0,Math.min(99,st[k]+Number(b.dataset.d)));
+    if(st.actual>st.should)st.actual=st.should;
+    renderAtt();save();
+  }));
+
+  $('zyBtn').onclick=()=>{st.zy=!st.zy;save();renderStatic();tick(true)};
+  $('sndBtn').onclick=()=>{st.sound=!st.sound;save();if(st.sound){ensureAudio();chime()}renderStatic()};
+
+  /* ---------- settings ---------- */
+  let draft;
+  const rowHTML=(r,i)=>`<div class="row"><input class="inp" type="time" value="${r.s}" aria-label="開始時間" id="rs${i}"><input class="inp" type="time" value="${r.e}" aria-label="結束時間" id="re${i}"><input class="inp inp-subj" value="${esc(r.n)}" aria-label="科目" id="rn${i}"><button class="xbtn" type="button" data-del="${i}">刪除</button></div>`;
+  const drawRows=()=>{$('rows').innerHTML=draft.map(rowHTML).join('')};
+  const readRows=()=>{draft=[...$('rows').querySelectorAll('.row')].map(el=>{const q=el.querySelectorAll('input');return{s:q[0].value||'08:00',e:q[1].value||'08:40',n:q[2].value.trim()||'科目'}})};
+  $('editBtn').onclick=()=>{draft=JSON.parse(JSON.stringify(st.rows));$('inTitle').value=st.title;$('inFix').value=st.fix;drawRows();$('panel').hidden=false;$('inTitle').focus()};
+  $('rows').addEventListener('click',e=>{const d=e.target.dataset.del;if(d!==undefined){readRows();draft.splice(+d,1);drawRows()}});
+  $('addRow').onclick=()=>{readRows();const last=draft[draft.length-1];draft.push({s:last?last.e:'08:40',e:last?last.e:'09:20',n:'科目'});drawRows()};
+  $('resetBtn').onclick=()=>{draft=JSON.parse(JSON.stringify(SAMPLE.rows));drawRows()};
+  $('cancelBtn').onclick=()=>{$('panel').hidden=true};
+  $('saveBtn').onclick=()=>{
+    readRows();draft.sort((a,b)=>a.s.localeCompare(b.s));st.rows=draft;
+    st.title=$('inTitle').value.trim()||SAMPLE.title;st.fix=$('inFix').value;
+    parseFix();save();$('panel').hidden=true;
+    document.querySelectorAll('[id]').forEach(el=>el._k=null);document.querySelectorAll('.t').forEach(el=>el._k=null);
+    renderStatic();tick(true);
+  };
+  document.addEventListener('keydown',e=>{if(e.key==='Escape')$('panel').hidden=true});
+
+  $('fsBtn').onclick=async()=>{try{if(document.fullscreenElement)await document.exitFullscreen();else await document.documentElement.requestFullscreen()}catch(e){}};
+  async function wake(){try{if(navigator.wakeLock)await navigator.wakeLock.request('screen')}catch(e){}}
+  wake();document.addEventListener('visibilitychange',()=>{if(!document.hidden)wake()});
+
+  parseFix();fit();renderStatic();tick(true);setInterval(tick,1000);
+})();
+</script>
+
+</body></html>
