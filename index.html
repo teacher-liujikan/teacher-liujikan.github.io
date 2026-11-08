@@ -114,7 +114,7 @@ const BOOKS={
  "南一五":{rhet:G+"rhetoric-detective-nani5/",idiom:G+"idiompractice/#g5"},
  "南一六":{rhet:G+"rhetoric-detective-nani6/",idiom:G+"idiompractice/#g6"}
 };
-const NOTE={"南一":{idiom:"期中考複習"}};
+const NOTE={"南一五":{idiom:"第1～6課"},"南一六":{idiom:"第1～6課"}};
 const OTHERS=[
  {n:"學力檢測",items:[
   {t:"學力檢測 自己來訂正",tag:"新",u:G+"literacy-review/",d:"三年級數學 111～114 年：紙本檢討或平板線上測驗、一步一步看詳解、收集徽章；國語製作中"}]},
@@ -142,7 +142,7 @@ function save(){try{localStorage.setItem("tm-pick",JSON.stringify(pick))}catch(e
 function renderZh(){
   $("verSeg").innerHTML=VERS.map(v=>`<button aria-pressed="${pick.v===v}" data-v="${v}">${v}</button>`).join("");
   $("gradeSeg").innerHTML=GRADES.map(g=>`<button aria-pressed="${pick.g===g}" data-g="${g}">${g}上</button>`).join("");
-  const b=BOOKS[pick.v+pick.g]||{}, note=NOTE[pick.v]||{};
+  const b=BOOKS[pick.v+pick.g]||{}, note=NOTE[pick.v+pick.g]||{};
   $("zhList").innerHTML=SLOTS.filter(s=>b[s.k]).map(s=>item({t:s.n,d:s.d,u:b[s.k],tag:note[s.k]})).join("");
 }
 document.querySelector(".pickers").addEventListener("click",e=>{
