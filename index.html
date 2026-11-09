@@ -55,6 +55,15 @@ h2{font-size:22px;font-weight:700}
 .arrow{flex:none;color:var(--ink2);font-size:18px;transition:transform .15s,color .15s}
 .item:hover .arrow{color:var(--accent);transform:translateX(3px)}
 
+.me{padding:18px 20px;display:flex;flex-direction:column;gap:14px}
+.facts{margin:0;padding-left:1.2em;display:flex;flex-direction:column;gap:6px;font-size:16px}
+.facts li::marker{color:var(--accent)}
+.contact{border-top:1px solid var(--line);padding-top:12px;display:flex;flex-direction:column;gap:6px}
+.c-l{font-size:14px;color:var(--ink2)}
+.c-row{display:flex;flex-wrap:wrap;align-items:center;gap:10px}
+.mail{font-weight:500;user-select:all;overflow-wrap:anywhere}
+.copy{font-size:14px;font-weight:500;border:1px solid var(--line);border-radius:8px;padding:4px 12px;background:var(--soft)}
+.copy:hover{border-color:var(--accent);color:var(--accent)}
 .visits{font-size:14px;color:var(--ink2);text-align:center}
 .visits b{color:var(--ink);font-variant-numeric:tabular-nums}
 footer{border-top:1px solid var(--line);padding-top:20px;font-size:13px;color:var(--ink2);line-height:1.6}
@@ -82,6 +91,22 @@ html{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset
   </section>
 
   <div id="others" style="display:contents"></div>
+
+  <section aria-labelledby="me-h">
+    <h2 id="me-h">老師媽咪是誰？</h2>
+    <div class="list me">
+      <ul class="facts">
+        <li>目前任職於府城的國小，是正式教師</li>
+        <li>有國小教師證，以及國中、高中數學教師證</li>
+        <li>熱愛教學和設計教材，還有一點點分享欲</li>
+        <li>三大 AI 的每月投資人</li>
+      </ul>
+      <div class="contact">
+        <span class="c-l">有教學交流需要，歡迎聯繫</span>
+        <div class="c-row"><span class="mail" id="mail">tina12345920@ymes.tn.edu.tw</span><button class="copy" id="copyMail" type="button">複製</button></div>
+      </div>
+    </div>
+  </section>
 
   <p class="visits" id="visits" hidden>累計瀏覽 <b id="visitN"></b> 次</p>
   <footer>老師媽咪自製的免費學習資源，提供老師與家長教學使用。國語課別範圍對應各版本課本，例句與練習題皆為原創，不是出版社官方產品。</footer>
@@ -157,6 +182,10 @@ document.querySelector(".pickers").addEventListener("click",e=>{
 $("others").innerHTML=OTHERS.map(s=>`<section><h2>${s.n}</h2><div class="list">${s.items.map(item).join("")}</div></section>`).join("");
 renderZh();
 
+$("copyMail").addEventListener("click",e=>{const b=e.currentTarget,txt=$("mail").textContent;
+  const done=()=>{b.textContent="已複製";setTimeout(()=>b.textContent="複製",1500)};
+  const sel=()=>{const r=document.createRange();r.selectNodeContents($("mail"));const s=getSelection();s.removeAllRanges();s.addRange(r);b.textContent="已選取，請按 Ctrl+C"};
+  try{navigator.clipboard.writeText(txt).then(done,sel)}catch(err){sel()}});
 /* 累計瀏覽：GoatCounter 全站總數 */
 fetch("https://teacher-liujikan.goatcounter.com/counter/TOTAL.json").then(r=>r.ok?r.json():null).then(d=>{if(d&&d.count){$("visitN").textContent=d.count;$("visits").hidden=false}}).catch(()=>{});
 </script>
