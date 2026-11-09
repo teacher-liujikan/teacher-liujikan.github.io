@@ -1,0 +1,789 @@
+<!doctype html><html lang="zh-Hant"><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>段考成績單產生器</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@600;800&family=Noto+Sans+TC:wght@400;500;700&display=swap">
+<style>
+/* 版面：上方設定列 → 分頁（輸入成績／學生成績單／全班總表）；列印時只輸出目前要印的那一份 */
+:root{
+  --bg:#f3f5f2; --paper:#ffffff; --ink:#1d2a2a; --muted:#5d6b68;
+  --line:#d5dcd8; --accent:#2f5d50; --accent-soft:#e3ece8; --warn:#b4472d; --flag:#fbf0c9;
+  --display:"Noto Serif TC","Songti TC","PMingLiU",serif;
+  --body:"Noto Sans TC","PingFang TC","Microsoft JhengHei",sans-serif;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#141a19; --paper:#1c2423; --ink:#e4ebe8; --muted:#9aa9a5;
+  --line:#33403d; --accent:#7fbfa8; --accent-soft:#24332f; --warn:#e48a72; --flag:#3d3520; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#141a19; --paper:#1c2423; --ink:#e4ebe8; --muted:#9aa9a5;
+  --line:#33403d; --accent:#7fbfa8; --accent-soft:#24332f; --warn:#e48a72; --flag:#3d3520; color-scheme:dark}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+.drop{border:2px dashed var(--line);border-radius:10px;padding:24px 16px;text-align:center;cursor:pointer;display:block;color:var(--ink)}
+.drop:hover,.drop.over,.drop:focus-visible{border-color:var(--accent);background:var(--accent-soft);outline:none}
+.drop strong{font-size:1.05rem}
+.thumb{width:52px;height:68px;object-fit:cover;border:1px solid var(--line);border-radius:3px;cursor:zoom-in;display:block;margin:auto;background:#fff}
+#scanTable td{vertical-align:middle}
+#scanTable input{border:1px solid var(--line);text-align:center;width:4.6em;padding:4px}
+#scanTable input.nm{width:7em;text-align:left}
+#scanTable tr.unsure td{background:var(--flag)}
+#scanTable td.fn{font-size:.8rem;color:var(--muted);text-align:left;max-width:12em;overflow-wrap:anywhere}
+#scanTable td.st{text-align:left;min-width:9em}
+.chip{display:inline-block;border-radius:999px;padding:1px 9px;font-size:.8rem;white-space:nowrap}
+.chip.ok{background:var(--accent-soft);color:var(--accent)}
+.chip.flag{background:var(--flag);color:var(--warn);border:1px solid var(--warn)}
+.chip.skip,.chip.wait{color:var(--muted);border:1px solid var(--line)}
+.chip.run{color:var(--accent);border:1px solid var(--accent)}
+.note{display:block;font-size:.78rem;color:var(--muted)}
+.zoom{position:fixed;inset:0;background:rgba(0,0,0,.8);display:flex;align-items:center;justify-content:center;z-index:50;cursor:zoom-out;
+  padding:max(16px,env(safe-area-inset-top,0px)) max(16px,env(safe-area-inset-right,0px)) max(16px,env(safe-area-inset-bottom,0px)) max(16px,env(safe-area-inset-left,0px))}
+.zoom img{max-width:100%;max-height:100%;background:#fff}
+.pdfhost{position:fixed;left:-10000px;top:0;width:760px;background:#fff;color:#1d2a2a;padding:8px;
+  --bg:#f3f5f2;--paper:#fff;--ink:#1d2a2a;--muted:#5d6b68;--line:#c8d0cc;--accent:#2f5d50;--accent-soft:#e3ece8;--warn:#b4472d}
+.pdfhost .card{border:none}
+.pdfhost.wide .card{display:grid;grid-template-columns:1.2fr 1fr;column-gap:22px;align-content:start}
+.pdfhost.wide .card>h3,.pdfhost.wide .card>.meta{grid-column:1/-1}
+.pdfhost.wide .card>table{grid-column:1;grid-row:3/span 3;align-self:start}
+.pdfhost.wide .card>.sum,.pdfhost.wide .card>.msg,.pdfhost.wide .card>.sign{grid-column:2}
+.pdfhost.wide .msg{min-height:56px}.pdfhost .panel{border:none;background:#fff}
+.guide{border-top:1px solid var(--line);padding-top:14px;display:flex;flex-direction:column;gap:10px}
+.guide h3{font-family:var(--display);font-size:1.05rem;margin:0}
+.guide ol{margin:0;padding-left:1.5em;display:flex;flex-direction:column;gap:6px;max-width:70ch}
+.guide a{color:var(--accent)}
+pre.prompt{white-space:pre-wrap;overflow-wrap:anywhere;background:var(--bg);border:1px solid var(--line);border-radius:8px;padding:12px 14px;margin:0;font-family:var(--body);font-size:.9rem;line-height:1.7}
+html,body{margin:0}
+body{background:var(--bg);color:var(--ink);font-family:var(--body);font-size:15px;line-height:1.6;
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:20px 60px}
+.wrap{max-width:1100px;margin:0 auto;display:flex;flex-direction:column;gap:18px}
+h1{font-family:var(--display);font-weight:800;font-size:1.7rem;margin:0;text-wrap:balance}
+.sub{color:var(--muted);margin:0}
+.panel{background:var(--paper);border:1px solid var(--line);border-radius:10px;padding:16px;display:flex;flex-direction:column;gap:12px}
+.panel h2{font-family:var(--display);font-size:1.1rem;margin:0}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:10px 14px}
+label.f{display:flex;flex-direction:column;gap:4px;font-size:.85rem;color:var(--muted);min-width:0}
+input,textarea,select{font:inherit;color:var(--ink);background:var(--bg);border:1px solid var(--line);border-radius:6px;padding:6px 8px;width:100%}
+input:focus-visible,textarea:focus-visible,button:focus-visible,select:focus-visible{outline:2px solid var(--accent);outline-offset:1px}
+.subjects{display:flex;flex-wrap:wrap;gap:8px}
+.subj{display:flex;gap:6px;align-items:center;background:var(--accent-soft);border-radius:8px;padding:6px 8px}
+.subj input{width:5.5em}.subj input.full{width:4.2em}
+.subj span{font-size:.8rem;color:var(--muted)}
+.toggles{display:flex;flex-wrap:wrap;gap:8px 20px}
+.toggles label{display:flex;align-items:center;gap:6px;cursor:pointer}
+.toggles input{width:auto;accent-color:var(--accent);transform:scale(1.2)}
+.tabs{display:flex;gap:6px;flex-wrap:wrap;border-bottom:2px solid var(--line)}
+.tab{font:inherit;background:none;border:none;padding:8px 14px;cursor:pointer;color:var(--muted);border-bottom:3px solid transparent;margin-bottom:-2px}
+.tab[aria-selected="true"]{color:var(--accent);border-color:var(--accent);font-weight:700}
+.btn{font:inherit;border:1px solid var(--accent);background:var(--accent);color:var(--paper);border-radius:6px;padding:7px 14px;cursor:pointer;font-weight:500}
+.btn.ghost{background:transparent;color:var(--accent)}
+.btn.danger{border-color:var(--warn);color:var(--warn);background:transparent}
+.bar{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.hint{font-size:.85rem;color:var(--muted);margin:0}
+.notice{background:var(--accent-soft);border-radius:8px;padding:8px 12px;font-size:.9rem}
+.scroll{overflow-x:auto}
+table{border-collapse:collapse;width:100%;font-variant-numeric:tabular-nums}
+th,td{border:1px solid var(--line);padding:4px 6px;text-align:center}
+th{background:var(--accent-soft);font-weight:700;white-space:nowrap}
+#entry td input{border:none;background:transparent;text-align:center;padding:4px;min-width:3.6em}
+#entry td.nm input{text-align:left;min-width:6em}
+#entry td.cm input{text-align:left;min-width:14em}
+#entry td.calc{color:var(--muted);white-space:nowrap}
+#entry tr:hover td{background:var(--accent-soft)}
+input.bad{color:var(--warn);font-weight:700}
+.low{color:var(--warn);font-weight:700}
+/* 學生成績單 */
+.cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,460px),1fr));gap:16px}
+.card{background:#fff;color:#1d2a2a;border:1px solid #c8d0cc;border-radius:6px;padding:22px 24px;display:flex;flex-direction:column;gap:12px}
+.card h3{font-family:var(--display);font-size:1.25rem;margin:0;text-align:center;letter-spacing:.08em}
+.card .meta{display:flex;flex-wrap:wrap;justify-content:space-between;gap:4px 12px;font-size:.95rem;border-bottom:2px solid #2f5d50;padding-bottom:6px}
+.card table th{background:#e3ece8;border-color:#b9c4bf}
+.card table td{border-color:#b9c4bf}
+.card td.sc{font-size:1.15rem;font-weight:700}
+.meter{position:relative;height:10px;background:#edf1ef;border-radius:5px;min-width:80px}
+.meter i{position:absolute;left:0;top:0;bottom:0;background:#2f5d50;border-radius:5px}
+.meter b{position:absolute;top:-3px;bottom:-3px;width:2px;background:#b4472d}
+.legend{font-size:.8rem;color:#5d6b68;text-align:right}
+.legend b{display:inline-block;width:2px;height:10px;background:#b4472d;vertical-align:middle;margin:0 4px 0 8px}
+.msg{border:1px solid #b9c4bf;border-radius:4px;padding:8px 10px;min-height:72px;white-space:pre-wrap}
+.msg .lbl{font-weight:700;font-size:.9rem;display:block;margin-bottom:2px}
+.sign{display:flex;justify-content:flex-end;gap:24px;font-size:.95rem;flex-wrap:wrap}
+.sign span{border-bottom:1px solid #1d2a2a;min-width:9em;display:inline-block}
+.sum{display:flex;justify-content:center;gap:28px;font-size:1rem}
+.sum strong{font-size:1.2rem}
+.example-tag{font-size:.75rem;background:#fbe9e4;color:#b4472d;border-radius:4px;padding:1px 6px}
+@media (max-width:520px){.card{padding:16px}.sum{gap:14px}}
+@media print{
+  @page{size:A4;margin:12mm}
+  body{background:#fff;padding:0}
+  .no-print,.tabs,.panel.settings{display:none!important}
+  .view{display:none!important}
+  body.p-students #v-students,body.p-summary #v-summary{display:block!important}
+  .cards{display:block}
+  .card{border:none;border-radius:0;padding:0 0 8mm;break-inside:avoid}
+  body.per-1 .card{break-after:page}
+  body.per-2 .card{height:132mm;overflow:hidden;border-bottom:1px dashed #999;margin-bottom:6mm}
+  body.per-2 .card:nth-child(2n){break-after:page;border-bottom:none}
+  body.per-3 .card{height:84mm;overflow:hidden;border-bottom:1px dashed #999;margin-bottom:5mm;padding-bottom:3mm;font-size:12px;
+    display:grid;grid-template-columns:1.2fr 1fr;column-gap:16px;align-content:start}
+  body.per-3 .card>h3,body.per-3 .card>.meta{grid-column:1/-1}
+  body.per-3 .card>table{grid-column:1;grid-row:3/span 3;align-self:start}
+  body.per-3 .card>.sum,body.per-3 .card>.msg,body.per-3 .card>.sign{grid-column:2}
+  body.per-3 .card h3{font-size:15px}body.per-3 .msg{min-height:44px}
+  body.per-3 .card:nth-child(3n){break-after:page;border-bottom:none}
+  body.per-4 .cards{display:block;font-size:0}
+  body.per-4 .card{display:inline-flex;vertical-align:top;width:calc(50% - 3mm);height:132mm;overflow:hidden;font-size:11px;
+    padding:3mm;margin:0 0 6mm;border:1px dashed #999;break-inside:avoid}
+  body.per-4 .card:nth-child(2n+1){margin-right:6mm}
+  body.per-4 .card h3{font-size:14px}body.per-4 .card td.sc{font-size:13px}body.per-4 .msg{min-height:40px}
+  #v-summary .panel{border:none;padding:0;background:#fff;color:#000}
+  #v-summary th{background:#e8e8e8}
+  body,.card,.meter,th{-webkit-print-color-adjust:exact;print-color-adjust:exact}
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="no-print">
+    <h1>段考成績單產生器</h1>
+    <p class="sub">輸入各科總分，自動算出總分、平均與全班統計，產生給家長的成績單和老師用的全班總表。資料只存在這台電腦的瀏覽器裡。</p>
+  </header>
+
+  <section class="panel settings">
+    <h2>考試設定</h2>
+    <div class="grid">
+      <label class="f">學校名稱<input id="school" placeholder="○○國小"></label>
+      <label class="f">班級<input id="cls" placeholder="三年○班"></label>
+      <label class="f">考試名稱<input id="exam" placeholder="115學年度上學期第一次定期評量"></label>
+      <label class="f">學生人數<input id="count" type="number" min="1" max="60"></label>
+    </div>
+    <div>
+      <div class="hint" style="margin-bottom:6px">科目與滿分（可改名稱，例如把「自然」改成「自然科學」）</div>
+      <div class="subjects" id="subjects"></div>
+    </div>
+    <div class="toggles">
+      <label><input type="checkbox" id="showAvg"> 學生成績單顯示全班平均</label>
+      <label><input type="checkbox" id="showSign"> 學生成績單加家長簽名欄</label>
+      <label><input type="checkbox" id="showMsg"> 學生成績單加「導師的話」欄</label>
+      <label class="f" style="flex-direction:row;align-items:center;gap:6px;color:var(--ink)">列印時每張 A4
+        <select id="perPage" style="width:auto"><option value="1">印 1 位</option><option value="2">印 2 位（上下各一）</option><option value="3">印 3 位（上中下各一）</option><option value="4">印 4 位（上下左右各一）</option></select></label>
+    </div>
+  </section>
+
+  <nav class="tabs no-print" role="tablist">
+    <button class="tab" role="tab" data-v="entry" id="t-entry">① 輸入成績</button>
+    <button class="tab" role="tab" data-v="students" id="t-students">② 學生成績單</button>
+    <button class="tab" role="tab" data-v="summary" id="t-summary">③ 全班總表</button>
+    <button class="tab" role="tab" data-v="scan" id="t-scan">④ 上傳考卷讀分</button>
+  </nav>
+
+  <section class="view" id="v-scan">
+    <div class="panel">
+      <h2>上傳考卷讀分</h2>
+      <div id="scanOff" class="notice">正在確認這個功能能不能使用…</div>
+      <div id="scanOn" hidden style="display:flex;flex-direction:column;gap:12px">
+        <p class="hint">考卷要<strong>先批改好、總分寫在卷面上</strong>。Claude 只負責讀出每張考卷的座號、姓名和老師寫的總分，不會幫忙批改。<br>
+        使用的是<strong>您自己 Claude 帳號</strong>的額度，第一次使用時會詢問是否允許。掃描檔只會送到您自己的帳號讀取，不會傳給這個網頁的作者或其他人。</p>
+        <div class="bar"><label for="scanSubj">這批考卷是哪一科？</label><select id="scanSubj" style="width:auto"></select></div>
+        <label class="drop" id="drop" for="scanFile" tabindex="0"><strong>把掃描檔拖到這裡，或點一下選擇檔案</strong><br>
+          <span class="hint">可一次選多個。支援 JPG、PNG、PDF（PDF 的每一頁算一張）。</span>
+          <input type="file" id="scanFile" multiple accept="image/*,application/pdf" hidden></label>
+        <div class="bar">
+          <button class="btn" id="scanRun" disabled>開始讀分</button>
+          <button class="btn ghost" id="scanStop" hidden>停止</button>
+          <span class="hint" id="scanStatus"></span>
+        </div>
+        <div class="scroll"><table id="scanTable" hidden></table></div>
+        <div class="bar" id="scanApplyBar" hidden>
+          <button class="btn" id="scanApply">填入成績表</button>
+          <button class="btn danger" id="scanClear">清除這批檔案</button>
+          <span class="hint">黃色列請您對照縮圖確認，座號、姓名、分數都可以直接修改。點縮圖可以放大。</span>
+        </div>
+      </div>
+      <div class="guide" id="guide">
+        <h3>用自己的 Claude 對話讀分</h3>
+        <p class="hint">只要有 Claude 帳號就能用。考卷要先批改好、總分寫在卷面上。</p>
+        <div class="bar">
+          <label for="guideSubj">科目</label><select id="guideSubj" style="width:auto"></select>
+          <span class="hint" id="guideCount"></span>
+        </div>
+        <ol>
+          <li>確認上面的科目和「考試設定」裡的學生人數都對，再按<strong>「複製這段話」</strong>。</li>
+          <li>打開 Claude（<a href="https://claude.ai/new" target="_blank" rel="noopener">claude.ai</a>），開一個新對話。把這一科的考卷掃描檔拖進對話框（可以一次放很多張，或一個 PDF），貼上剛剛複製的話，送出。</li>
+          <li>Claude 回覆後，先看它列出的「看不清楚的分數」，對照考卷確認。</li>
+          <li><strong>貼姓名（只要做一次）：</strong>回覆最下面有兩個灰色區塊，按第一個（姓名）右上角的複製鈕。回到這個網頁的「① 輸入成績」，點 1 號的<strong>姓名</strong>格，按 Ctrl+V 貼上。</li>
+          <li><strong>貼分數：</strong>按第二個區塊（分數）的複製鈕，點 1 號在<strong>這一科</strong>的格子，按 Ctrl+V，分數會自動往下填。</li>
+          <li>換下一科時，回到這裡改科目、重新複製，從第 2 步再做一次（不用再貼姓名）。</li>
+        </ol>
+        <pre class="prompt" id="guideText"></pre>
+        <div class="bar"><button class="btn" id="guideCopy">複製這段話</button><span class="hint" id="guideMsg"></span></div>
+      </div>
+    </div>
+  </section>
+  <div class="zoom" id="zoom" hidden><img id="zoomImg" alt="考卷放大圖"></div>
+
+  <section class="view" id="v-entry">
+    <div class="panel">
+      <div id="exampleNote" class="notice" hidden>目前顯示的是<strong>範例資料</strong>。按「清除範例」後就能輸入您班上的成績。
+        <button class="btn ghost" id="clearExample" style="margin-left:6px">清除範例</button></div>
+      <p class="hint">可以從 Excel 或 Google 試算表複製一整塊成績，點第一格後貼上，會自動往右、往下填入。欄位順序：姓名、各科分數、導師的話。缺考或未輸入請留空。</p>
+      <div class="scroll"><table id="entry"></table></div>
+      <div class="bar no-print">
+        <button class="btn danger" id="clearAll">清空所有成績</button>
+        <span class="hint" id="saved"></span>
+      </div>
+    </div>
+  </section>
+
+  <section class="view" id="v-students">
+    <div class="bar no-print" style="margin-bottom:12px">
+      <button class="btn" data-dl="students" data-fmt="pdf">下載 PDF</button>
+      <button class="btn" data-dl="students" data-fmt="docx">下載 Word</button>
+      <button class="btn ghost" id="printStudents">列印</button>
+      <span class="hint dlMsg">PDF 適合直接列印；Word 可以再自己修改內容。</span>
+    </div>
+    <div class="cards" id="cards"></div>
+  </section>
+
+  <section class="view" id="v-summary">
+    <div class="bar no-print" style="margin-bottom:12px">
+      <button class="btn" data-dl="summary" data-fmt="pdf">下載 PDF</button>
+      <button class="btn" data-dl="summary" data-fmt="docx">下載 Word</button>
+      <button class="btn ghost" id="printSummary">列印</button>
+      <span class="hint dlMsg"></span>
+    </div>
+    <div class="panel" id="summary"></div>
+  </section>
+</div>
+
+<script>
+const KEY='exam-report-maker-v1';
+const SUBJ=['國語','英語','數學','自然','社會'];
+const blankRow=()=>({name:'',scores:['','','','',''],comment:''});
+function defaults(){
+  const ex=[
+    ['王小明',[92,88,95,90,86],'上課專心，數學進步很多，繼續保持！'],
+    ['林小華',[85,96,78,88,91],'英語表現亮眼，數學計算可以再細心一點。'],
+    ['陳小安',[76,70,82,',',80],''],
+    ['張小宇',[98,93,90,94,97],'各科表現平均，閱讀習慣很好。'],
+    ['李小晴',[58,74,66,72,69],'國語生字要多練習，一起加油。']
+  ].map(([n,s,c])=>({name:n,scores:s.map(v=>v===','?'':v),comment:c}));
+  return {school:'',cls:'',exam:'',count:5,subjects:SUBJ.map(n=>({name:n,full:100})),
+    showAvg:true,showSign:true,showMsg:true,perPage:'1',students:ex,example:true,view:'entry'};
+}
+let S;
+try{S=JSON.parse(localStorage.getItem(KEY))}catch(e){S=null}
+if(!S||!S.students)S=defaults();
+function save(){try{localStorage.setItem(KEY,JSON.stringify(S));$('saved').textContent='已自動儲存'}catch(e){$('saved').textContent='這個瀏覽器無法自動儲存，關閉前請先列印或存成 PDF'}}
+const $=id=>document.getElementById(id);
+const num=v=>v===''||v==null||isNaN(+v)?null:+v;
+const fmt=v=>v==null?'—':(Math.round(v*10)/10).toString();
+
+function fitCount(){
+  const n=Math.max(1,Math.min(60,parseInt(S.count)||1));S.count=n;
+  while(S.students.length<n)S.students.push(blankRow());
+  S.students.length=n;
+}
+function stats(){
+  const per=S.subjects.map((_,j)=>{
+    const vals=S.students.map(s=>num(s.scores[j])).filter(v=>v!=null);
+    const full=+S.subjects[j].full||100;
+    return {n:vals.length,avg:vals.length?vals.reduce((a,b)=>a+b,0)/vals.length:null,
+      max:vals.length?Math.max(...vals):null,min:vals.length?Math.min(...vals):null,
+      pass:vals.filter(v=>v>=full*0.6).length,vals,full};
+  });
+  const rows=S.students.map(s=>{
+    const v=s.scores.map(num).filter(x=>x!=null);
+    return {total:v.length?v.reduce((a,b)=>a+b,0):null,avg:v.length?v.reduce((a,b)=>a+b,0)/v.length:null,n:v.length};
+  });
+  const totals=rows.map(r=>r.total).filter(v=>v!=null);
+  return {per,rows,totalAvg:totals.length?totals.reduce((a,b)=>a+b,0)/totals.length:null};
+}
+function esc(t){return String(t??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]))}
+
+function renderSettings(){
+  ['school','cls','exam','count'].forEach(k=>$(k).value=S[k]);
+  ['showAvg','showSign','showMsg'].forEach(k=>$(k).checked=!!S[k]);
+  $('perPage').value=S.perPage;
+  $('subjects').innerHTML=S.subjects.map((s,j)=>`<div class="subj">
+    <input id="sn${j}" data-j="${j}" class="sname" value="${esc(s.name)}" aria-label="科目名稱">
+    <span>滿分</span><input id="sf${j}" data-j="${j}" class="full" type="number" min="1" value="${s.full}" aria-label="${esc(s.name)}滿分"></div>`).join('');
+}
+function renderEntry(){
+  const st=stats();
+  let h='<thead><tr><th>座號</th><th>姓名</th>'+S.subjects.map(s=>`<th>${esc(s.name)}</th>`).join('')+'<th>總分</th><th>平均</th><th>導師的話</th></tr></thead><tbody>';
+  S.students.forEach((s,i)=>{
+    h+=`<tr><td>${i+1}</td><td class="nm"><input id="c${i}_0" data-r="${i}" data-c="0" value="${esc(s.name)}"></td>`;
+    s.scores.forEach((v,j)=>{const n=num(v),bad=v!==''&&(n==null||n<0||n>(+S.subjects[j].full||100));
+      h+=`<td><input id="c${i}_${j+1}" data-r="${i}" data-c="${j+1}" inputmode="decimal" value="${esc(v)}" class="${bad?'bad':''}"></td>`});
+    h+=`<td class="calc">${fmt(st.rows[i].total)}</td><td class="calc">${fmt(st.rows[i].avg)}</td>
+      <td class="cm"><input id="c${i}_6" data-r="${i}" data-c="6" value="${esc(s.comment)}"></td></tr>`;
+  });
+  h+='</tbody><tfoot><tr><th colspan="2">全班平均</th>'+st.per.map(p=>`<th>${fmt(p.avg)}</th>`).join('')+`<th>${fmt(st.totalAvg)}</th><th colspan="2"></th></tr></tfoot>`;
+  $('entry').innerHTML=h;
+  $('exampleNote').hidden=!S.example;
+}
+function updateCalc(){ // 只更新計算欄，避免打字時游標跳走
+  const st=stats();const trs=$('entry').tBodies[0].rows;
+  S.students.forEach((s,i)=>{const c=trs[i].querySelectorAll('td.calc');c[0].textContent=fmt(st.rows[i].total);c[1].textContent=fmt(st.rows[i].avg)});
+  const f=$('entry').tFoot.rows[0].cells;st.per.forEach((p,j)=>f[j+1].textContent=fmt(p.avg));f[6].textContent=fmt(st.totalAvg);
+}
+function renderCards(){
+  const st=stats();
+  const head=esc(S.exam||'定期評量')+' 成績通知單';
+  $('cards').innerHTML=S.students.map((s,i)=>{
+    const has=s.name||s.scores.some(v=>v!=='');
+    if(!has)return '';
+    let rows=S.subjects.map((sub,j)=>{
+      const v=num(s.scores[j]),avg=st.per[j].avg;
+      return `<tr><td>${esc(sub.name)}</td><td class="sc">${v==null?'—':fmt(v)}</td>
+        ${S.showAvg?`<td>${fmt(avg)}</td>`:''}</tr>`}).join('');
+    return `<article class="card">
+      <h3>${head}</h3>
+      <div class="meta"><span>${esc(S.school)} ${esc(S.cls)}</span><span>座號：${i+1}　姓名：${esc(s.name)||'＿＿＿＿'}</span></div>
+      <table><thead><tr><th>科目</th><th>得分</th>${S.showAvg?'<th>全班平均</th>':''}</tr></thead><tbody>${rows}</tbody></table>
+      <div class="sum"><span>總分　<strong>${fmt(st.rows[i].total)}</strong></span><span>平均　<strong>${fmt(st.rows[i].avg)}</strong></span></div>
+      ${S.showMsg?`<div class="msg"><span class="lbl">導師的話</span>${esc(s.comment)}</div>`:''}
+      ${S.showSign?'<div class="sign"><div>家長簽名：<span></span></div><div>日期：<span style="min-width:6em"></span></div></div>':''}
+    </article>`}).join('')||'<p class="hint">還沒有成績，請先到「輸入成績」填入。</p>';
+}
+function renderSummary(){
+  const st=stats();
+  let h=`<h2 style="font-family:var(--display);margin:0">${esc(S.school)} ${esc(S.cls)}　${esc(S.exam||'定期評量')}　全班成績總表</h2>
+  <div class="scroll"><table><thead><tr><th>座號</th><th>姓名</th>${S.subjects.map(s=>`<th>${esc(s.name)}</th>`).join('')}<th>總分</th><th>平均</th></tr></thead><tbody>`;
+  S.students.forEach((s,i)=>{
+    h+=`<tr><td>${i+1}</td><td style="text-align:left">${esc(s.name)}</td>`+s.scores.map((v,j)=>{const n=num(v);
+      return `<td class="${n!=null&&n<(+S.subjects[j].full||100)*0.6?'low':''}">${n==null?'—':fmt(n)}</td>`}).join('')+
+      `<td>${fmt(st.rows[i].total)}</td><td>${fmt(st.rows[i].avg)}</td></tr>`});
+  const row=(label,f)=>`<tr><th colspan="2">${label}</th>${st.per.map(f).join('')}<th colspan="2"></th></tr>`;
+  h+='</tbody><tfoot>'+row('全班平均',p=>`<th>${fmt(p.avg)}</th>`)+row('最高分',p=>`<th>${fmt(p.max)}</th>`)+
+    row('最低分',p=>`<th>${fmt(p.min)}</th>`)+row('應考人數',p=>`<th>${p.n}</th>`)+
+    row('及格人數（60%以上）',p=>`<th>${p.pass}</th>`)+'</tfoot></table></div>';
+  const bands=[[90,101,'90 分以上'],[80,90,'80–89'],[70,80,'70–79'],[60,70,'60–69'],[0,60,'59 分以下']];
+  h+=`<h2 style="font-size:1rem">分數分布（人數，依滿分 100 換算）</h2><div class="scroll"><table><thead><tr><th>區間</th>${S.subjects.map(s=>`<th>${esc(s.name)}</th>`).join('')}</tr></thead><tbody>`+
+    bands.map(([lo,hi,l])=>`<tr><td>${l}</td>${st.per.map(p=>`<td>${p.vals.filter(v=>{const x=v/p.full*100;return x>=lo&&x<hi}).length}</td>`).join('')}</tr>`).join('')+'</tbody></table></div>';
+  h+='<p class="hint">紅字為未達該科滿分 60% 的成績。</p>';
+  $('summary').innerHTML=h;
+}
+function show(v){
+  S.view=v;document.querySelectorAll('.tab').forEach(t=>t.setAttribute('aria-selected',t.dataset.v===v));
+  document.querySelectorAll('.view').forEach(x=>x.hidden=x.id!=='v-'+v);
+  if(v==='entry')renderEntry();if(v==='students')renderCards();if(v==='summary')renderSummary();if(v==='scan')renderScan();save();
+}
+function all(){fitCount();renderSettings();show(S.view||'entry')}
+
+// 設定欄位
+['school','cls','exam'].forEach(k=>$(k).addEventListener('input',e=>{S[k]=e.target.value;save()}));
+$('count').addEventListener('change',e=>{S.count=e.target.value;fitCount();$('count').value=S.count;show(S.view)});
+['showAvg','showSign','showMsg'].forEach(k=>$(k).addEventListener('change',e=>{S[k]=e.target.checked;show(S.view)}));
+$('perPage').addEventListener('change',e=>{S.perPage=e.target.value;save()});
+$('subjects').addEventListener('input',e=>{const j=+e.target.dataset.j;
+  if(e.target.classList.contains('sname'))S.subjects[j].name=e.target.value;else S.subjects[j].full=e.target.value;save()});
+$('subjects').addEventListener('change',()=>show(S.view));
+document.querySelectorAll('.tab').forEach(t=>t.addEventListener('click',()=>show(t.dataset.v)));
+
+// 成績輸入
+function setCell(r,c,v){const s=S.students[r];if(!s)return;
+  if(c===0)s.name=v;else if(c===6)s.comment=v;else if(c>=1&&c<=5)s.scores[c-1]=v.trim()}
+$('entry').addEventListener('input',e=>{const t=e.target;if(!t.dataset.r)return;
+  setCell(+t.dataset.r,+t.dataset.c,t.value);
+  const c=+t.dataset.c;if(c>=1&&c<=5){const n=num(t.value);t.classList.toggle('bad',t.value!==''&&(n==null||n<0||n>(+S.subjects[c-1].full||100)))}
+  updateCalc();save()});
+$('entry').addEventListener('paste',e=>{const t=e.target;if(!t.dataset.r)return;
+  const txt=(e.clipboardData||window.clipboardData).getData('text');
+  if(!/[\t\n]/.test(txt.trim()))return;
+  e.preventDefault();
+  const r0=+t.dataset.r,c0=+t.dataset.c;
+  const lines=txt.replace(/\r/g,'').replace(/\n$/,'').split('\n');
+  if(r0+lines.length>S.students.length){S.count=r0+lines.length;fitCount();$('count').value=S.count}
+  lines.forEach((ln,i)=>ln.split('\t').forEach((v,k)=>{if(c0+k<=6)setCell(r0+i,c0+k,v)}));
+  S.example=false;renderEntry();save()});
+$('entry').addEventListener('keydown',e=>{const t=e.target;if(!t.dataset.r)return;
+  if(e.key==='Enter'){e.preventDefault();const n=$(`c${+t.dataset.r+1}_${t.dataset.c}`);if(n){n.focus();n.select()}}});
+$('clearExample').addEventListener('click',()=>{S.students=[];S.example=false;fitCount();show('entry')});
+let armed=false;
+$('clearAll').addEventListener('click',e=>{
+  if(!armed){armed=true;e.target.textContent='再按一次確認清空';setTimeout(()=>{armed=false;e.target.textContent='清空所有成績'},3000);return}
+  armed=false;e.target.textContent='清空所有成績';S.students=[];S.example=false;fitCount();show('entry')});
+
+// 列印
+function doPrint(cls){document.body.className=cls+' per-'+S.perPage;
+  if(cls==='p-students')renderCards();else renderSummary();
+  setTimeout(()=>{window.print();},50)}
+window.addEventListener('afterprint',()=>{document.body.className=''});
+$('printStudents').addEventListener('click',()=>doPrint('p-students'));
+$('printSummary').addEventListener('click',()=>doPrint('p-summary'));
+
+// ===== 在 claude.ai 裡開啟時：下載列印檔、上傳考卷讀分 =====
+const inViewer=!!window.claude;
+let dlApi=null,sampleFn=null,imgLim=null;
+function setScanOff(t){$('scanOff').hidden=false;$('scanOff').textContent=t;$('scanOn').hidden=true}
+if(!inViewer){
+  setScanOff('離線檔案沒有自動讀分功能，請改用下面「用自己的 Claude 對話讀分」的方法。');
+}else{
+  ['printStudents','printSummary'].forEach(id=>$(id).hidden=true);
+  claude.use('downloads').then(d=>{dlApi=d}).catch(()=>{});
+  claude.use('sample').then(async s=>{
+    const lim=s?await s.limits().catch(()=>null):null;
+    if(s&&lim&&lim.images){sampleFn=s;imgLim=lim.images;$('scanOff').hidden=true;$('scanOn').hidden=false;$('scanOn').style.display='flex'}
+    else if(!s)setScanOff('這裡的自動讀分目前無法使用（代碼 A），請改用下面「用自己的 Claude 對話讀分」的方法。');
+    else setScanOff('這裡的自動讀分目前無法使用（代碼 B），請改用下面「用自己的 Claude 對話讀分」的方法。');
+  }).catch(()=>setScanOff('這裡的自動讀分目前無法使用（代碼 C），請改用下面「用自己的 Claude 對話讀分」的方法。'));
+}
+
+// --- 下載 PDF / Word ---
+const LIB={jspdf:'https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js',
+  h2c:'https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js',
+  docx:'https://cdn.jsdelivr.net/npm/docx@8.5.0/build/index.umd.js'};
+const fileBase=label=>[S.cls,S.exam,label].filter(Boolean).join('_').replace(/[\\/:*?"<>|]/g,'-');
+async function saveFile(name,blob){
+  if(dlApi)return dlApi.save({filename:name,data:blob});
+  if(inViewer)throw {code:'unavailable'};
+  const u=URL.createObjectURL(blob),a=document.createElement('a');a.href=u;a.download=name;document.body.appendChild(a);a.click();a.remove();
+  setTimeout(()=>URL.revokeObjectURL(u),5000);return {status:'saved'};
+}
+// PDF：把畫面上的成績單轉成圖片，排進 A4
+async function buildPdf(kind){
+  if(!window.jspdf)await loadScript(LIB.jspdf);
+  if(!window.html2canvas)await loadScript(LIB.h2c);
+  if(document.fonts&&document.fonts.ready)await document.fonts.ready;
+  const pdf=new jspdf.jsPDF({unit:'mm',format:'a4'}),M=12,W=210-2*M,H=297-2*M;
+  const host=document.createElement('div');host.className='pdfhost';document.body.appendChild(host);
+  const shot=async el=>{host.innerHTML='';host.appendChild(el);return html2canvas(el,{scale:2,backgroundColor:'#ffffff',logging:false})};
+  try{
+    if(kind==='students'){
+      renderCards();const cards=[...$('cards').querySelectorAll('.card')];
+      if(!cards.length)throw {code:'empty'};
+      const per=+S.perPage||1,cols=per===4?2:1,rowsN=per===1?1:per===3?3:2;
+      const slotW=cols===2?(W-6)/2:W,slotH=(H-6*(rowsN-1))/rowsN;
+      host.style.width=cols===2?'420px':per===3?'900px':'760px';
+      if(per===3)host.classList.add('wide');
+      pdf.setLineDashPattern([2,2],0);pdf.setDrawColor(150);
+      for(let i=0;i<cards.length;i++){
+        const cv=await shot(cards[i].cloneNode(true));
+        let w=slotW,h=cv.height*slotW/cv.width;if(h>slotH){h=slotH;w=cv.width*slotH/cv.height}
+        const pos=i%per;
+        if(i>0&&pos===0)pdf.addPage();
+        if(pos===0&&per>1){for(let r=1;r<rowsN;r++)pdf.line(M,M+r*(slotH+6)-3,M+W,M+r*(slotH+6)-3);if(cols===2)pdf.line(M+slotW+3,M,M+slotW+3,M+H)}
+        const x=M+(pos%cols)*(slotW+6),y=M+Math.floor(pos/cols)*(slotH+6);
+        pdf.addImage(cv.toDataURL('image/jpeg',.92),'JPEG',x+(slotW-w)/2,y,w,h);
+      }
+    }else{
+      renderSummary();const el=$('summary').cloneNode(true);el.removeAttribute('id');
+      const cv=await shot(el),pxPerMm=cv.width/W,pageH=Math.floor(H*pxPerMm);
+      for(let y=0,p=0;y<cv.height;y+=pageH,p++){
+        const h=Math.min(pageH,cv.height-y),c=document.createElement('canvas');c.width=cv.width;c.height=h;
+        const ctx=c.getContext('2d');ctx.fillStyle='#fff';ctx.fillRect(0,0,c.width,h);ctx.drawImage(cv,0,y,cv.width,h,0,0,cv.width,h);
+        if(p>0)pdf.addPage();pdf.addImage(c.toDataURL('image/jpeg',.92),'JPEG',M,M,W,h/pxPerMm);
+      }
+    }
+  }finally{host.remove()}
+  return pdf.output('blob');
+}
+// Word：用真正的 Word 表格產生，可以再編輯
+/*DOCX-START*/
+function buildDocx(kind,D){
+  const {Document,Paragraph,TextRun,Table,TableRow,TableCell,WidthType,AlignmentType,BorderStyle,ShadingType,VerticalAlign,HeightRule}=D;
+  const st=stats(),C=AlignmentType.CENTER;
+  const run=(t,o={})=>new TextRun({text:String(t),...o});
+  const para=(kids,o={})=>new Paragraph({children:Array.isArray(kids)?kids:[run(kids)],...o});
+  const cell=(t,o={})=>new TableCell({verticalAlign:VerticalAlign.CENTER,
+    shading:o.head?{fill:'E3ECE8',type:ShadingType.CLEAR,color:'auto'}:undefined,columnSpan:o.span,
+    margins:{top:60,bottom:60,left:80,right:80},
+    children:[para([run(t,{bold:!!o.head||!!o.bold,color:o.color,size:o.size})],{alignment:o.left?AlignmentType.LEFT:C})]});
+  const table=rows=>new Table({width:{size:100,type:WidthType.PERCENTAGE},rows});
+  const children=[];
+  if(kind==='students'){
+    const per=+S.perPage||1,list=[];
+    S.students.forEach((s,i)=>{if(s.name||s.scores.some(v=>v!==''))list.push([s,i])});
+    if(!list.length)throw {code:'empty'};
+    const parts=(s,i,small,z0)=>{
+      const z=z0||(small?.72:1),sz=n=>Math.round(n*z),out=[];
+      out.push(para([run((S.exam||'定期評量')+' 成績通知單',{bold:true,size:sz(34)})],{alignment:C,spacing:{after:sz(120)}}));
+      const meta=small?[run(`${S.cls} 座號：${i+1}　姓名：${s.name||'＿＿＿＿'}`.trim(),{size:sz(26)})]
+        :[run(`${S.school} ${S.cls}`.trim()),run(`\t座號：${i+1}　姓名：${s.name||'＿＿＿＿'}`)];
+      out.push(para(meta,{tabStops:small?undefined:[{type:'right',position:9600}],border:{bottom:{style:BorderStyle.SINGLE,size:12,color:'2F5D50',space:2}},spacing:{after:sz(160)}}));
+      const hr=[cell('科目',{head:1,size:sz(26)}),cell('得分',{head:1,size:sz(26)})];if(S.showAvg)hr.push(cell('全班平均',{head:1,size:sz(26)}));
+      const rows=[new TableRow({tableHeader:!small,children:hr})];
+      S.subjects.forEach((sub,j)=>{const v=num(s.scores[j]);
+        const r=[cell(sub.name,{size:sz(26)}),cell(v==null?'—':fmt(v),{bold:1,size:sz(30)})];if(S.showAvg)r.push(cell(fmt(st.per[j].avg),{size:sz(26)}));
+        rows.push(new TableRow({children:r}))});
+      const head=out.splice(0),tbl=table(rows);
+      out.push(para([run('總分　',{size:sz(26)}),run(fmt(st.rows[i].total),{bold:true,size:sz(32)}),run('　　平均　',{size:sz(26)}),run(fmt(st.rows[i].avg),{bold:true,size:sz(32)})],{alignment:C,spacing:{before:sz(200),after:sz(200)}}));
+      if(S.showMsg)out.push(new Table({width:{size:100,type:WidthType.PERCENTAGE},rows:[new TableRow({height:{value:sz(1300),rule:HeightRule.ATLEAST},
+        children:[new TableCell({margins:{top:80,bottom:80,left:120,right:120},children:[para([run('導師的話',{bold:true,size:sz(26)})]),para([run(s.comment||'',{size:sz(26)})])]})]})]}));
+      if(S.showSign)out.push(para([run(small?'家長簽名：＿＿＿＿＿＿':'家長簽名：＿＿＿＿＿＿＿＿　　日期：＿＿＿＿＿＿',{size:sz(26)})],{alignment:AlignmentType.RIGHT,spacing:{before:sz(280)}}));
+      return {head,tbl,rest:out};
+    };
+    const card=(s,i,small)=>{const p=parts(s,i,small);return [...p.head,p.tbl,...p.rest,para('')]};
+    const wideCard=(s,i)=>{const p=parts(s,i,true,.8),none={style:BorderStyle.NONE,size:0,color:'FFFFFF'},nb={top:none,bottom:none,left:none,right:none};
+      return [...p.head,new Table({width:{size:100,type:WidthType.PERCENTAGE},borders:{...nb,insideHorizontal:none,insideVertical:none},rows:[new TableRow({children:[
+        new TableCell({width:{size:55,type:WidthType.PERCENTAGE},borders:nb,margins:{right:200},children:[p.tbl,para('')]}),
+        new TableCell({width:{size:45,type:WidthType.PERCENTAGE},borders:nb,margins:{left:200},children:[...p.rest,para('')]})]})]})]};
+    if(per===3){
+      list.forEach(([s,i],k)=>{
+        if(k>0&&k%3===0)children.push(para('',{pageBreakBefore:true}));
+        else if(k>0)children.push(para('- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -',{alignment:C,spacing:{before:160,after:160}}));
+        children.push(...wideCard(s,i));
+      });
+    }else if(per===4){
+      const none={style:BorderStyle.NONE,size:0,color:'FFFFFF'},dash={style:BorderStyle.DASHED,size:6,color:'999999'};
+      for(let g=0;g<list.length;g+=4){
+        const grp=list.slice(g,g+4),rows=[];
+        for(let r=0;r<2;r++){
+          const cells=[0,1].map(c=>{const it=grp[r*2+c];
+            return new TableCell({width:{size:50,type:WidthType.PERCENTAGE},margins:{top:120,bottom:120,left:160,right:160},
+              borders:{top:none,left:none,bottom:r===0?dash:none,right:c===0?dash:none},
+              children:it?card(it[0],it[1],true):[para('')]})});
+          rows.push(new TableRow({cantSplit:true,children:cells}));
+        }
+        if(g>0)children.push(para('',{pageBreakBefore:true}));
+        children.push(new Table({width:{size:100,type:WidthType.PERCENTAGE},rows}));
+      }
+    }else{
+      list.forEach(([s,i],k)=>{
+        const blocks=card(s,i,false);
+        if(k>0&&k%per===0)blocks[0]=new Paragraph({...{},children:[run((S.exam||'定期評量')+' 成績通知單',{bold:true,size:34})],alignment:C,pageBreakBefore:true,spacing:{after:120}});
+        else if(k>0)children.push(para('- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -',{alignment:C,spacing:{before:240,after:240}}));
+        children.push(...blocks);
+      });
+    }
+
+  }else{
+    children.push(para([run(`${S.school} ${S.cls}　${S.exam||'定期評量'}　全班成績總表`.trim(),{bold:true,size:30})],{alignment:C,spacing:{after:200}}));
+    const rows=[new TableRow({tableHeader:true,children:[cell('座號',{head:1}),cell('姓名',{head:1}),...S.subjects.map(s=>cell(s.name,{head:1})),cell('總分',{head:1}),cell('平均',{head:1})]})];
+    S.students.forEach((s,i)=>rows.push(new TableRow({children:[cell(i+1),cell(s.name,{left:1}),
+      ...s.scores.map((v,j)=>{const n=num(v);return cell(n==null?'—':fmt(n),{color:n!=null&&n<(+S.subjects[j].full||100)*0.6?'B4472D':undefined,bold:n!=null&&n<(+S.subjects[j].full||100)*0.6})}),
+      cell(fmt(st.rows[i].total)),cell(fmt(st.rows[i].avg))]})));
+    const foot=(l,f)=>rows.push(new TableRow({children:[cell(l,{head:1,span:2}),...st.per.map(p=>cell(f(p),{head:1})),cell('',{head:1}),cell('',{head:1})]}));
+    foot('全班平均',p=>fmt(p.avg));foot('最高分',p=>fmt(p.max));foot('最低分',p=>fmt(p.min));foot('應考人數',p=>p.n);foot('及格人數（60%以上）',p=>p.pass);
+    children.push(table(rows));
+    children.push(para([run('分數分布（人數，依滿分 100 換算）',{bold:true})],{spacing:{before:300,after:120}}));
+    const bands=[[90,101,'90 分以上'],[80,90,'80–89'],[70,80,'70–79'],[60,70,'60–69'],[0,60,'59 分以下']];
+    children.push(table([new TableRow({children:[cell('區間',{head:1}),...S.subjects.map(s=>cell(s.name,{head:1}))]}),
+      ...bands.map(([lo,hi,l])=>new TableRow({children:[cell(l),...st.per.map(p=>cell(p.vals.filter(v=>{const x=v/p.full*100;return x>=lo&&x<hi}).length))]}))]));
+    children.push(para([run('紅字為未達該科滿分 60% 的成績。',{color:'5D6B68',size:20})],{spacing:{before:160}}));
+  }
+  return new Document({
+    styles:{default:{document:{run:{font:{ascii:'Times New Roman',hAnsi:'Times New Roman',eastAsia:'標楷體'},size:26}}}},
+    sections:[{properties:{page:{size:{width:11906,height:16838},margin:{top:900,bottom:900,left:1000,right:1000}}},children}]});
+}
+/*DOCX-END*/
+async function download(kind,fmtName,btn){
+  const msg=document.querySelector(`#v-${kind} .dlMsg`),label=kind==='students'?'學生成績單':'全班成績總表';
+  const btns=document.querySelectorAll(`#v-${kind} [data-dl]`);btns.forEach(b=>b.disabled=true);
+  msg.textContent=fmtName==='pdf'?'正在產生 PDF，學生多的話要等幾秒…':'正在產生 Word 檔…';
+  try{
+    let blob;
+    if(fmtName==='pdf')blob=await buildPdf(kind);
+    else{if(!window.docx)await loadScript(LIB.docx);blob=await docx.Packer.toBlob(buildDocx(kind,docx))}
+    await saveFile(fileBase(label)+'.'+fmtName,blob);
+    msg.textContent='已下載。';
+  }catch(e){
+    const c=e&&e.code;
+    msg.textContent=c==='declined'?'':c==='empty'?'還沒有成績，請先到「輸入成績」填入。':
+      c==='unavailable'?'這個開啟方式不能下載檔案，請改用 Claude 網頁版開啟。':
+      e&&e.type==='error'?'需要網路才能產生檔案，請確認有連上網路後再試。':'產生檔案時出了問題，請再試一次。';
+  }finally{btns.forEach(b=>b.disabled=false)}
+}
+document.querySelectorAll('[data-dl]').forEach(b=>b.addEventListener('click',()=>download(b.dataset.dl,b.dataset.fmt,b)));
+
+// --- 上傳考卷讀分 ---
+let items=[],running=false,ctl=null,halt=false,uid=0,applyArmed=false;
+function renderScan(){
+  const sel=$('scanSubj'),cur=sel.value;
+  sel.innerHTML=S.subjects.map((s,j)=>`<option value="${j}">${esc(s.name)}（滿分 ${esc(s.full)}）</option>`).join('');
+  if(cur!=='')sel.value=cur;
+  const g=$('guideSubj'),gc=g.value;
+  g.innerHTML=S.subjects.map((s,j)=>`<option value="${j}">${esc(s.name)}</option>`).join('');
+  if(gc!=='')g.value=gc;
+  renderGuide();
+  renderScanTable();
+}
+function guideText(){
+  const sub=S.subjects[+$('guideSubj').value||0]||{name:''},n=S.count;
+  return `這些是國小「${sub.name}」科已經批改好的考卷，班上共 ${n} 人。
+請只讀出每張考卷上的座號、姓名和老師寫在卷面上的總分，不要自己批改，也不要自己加總。
+1. 先整理成表格：座號、姓名、分數，從 1 號排到 ${n} 號。沒有考卷的座號留空。
+2. 看不清楚、被塗改或不確定的分數，請在表格下方列出來讓我確認。
+3. 最後給我兩個程式碼區塊：第一個只放姓名，第二個只放分數。都是一行一位，從 1 號排到 ${n} 號，剛好 ${n} 行；沒有考卷的座號那一行留空。區塊裡不要加座號、標題或其他文字。`;
+}
+function renderGuide(){$('guideText').textContent=guideText();$('guideCount').textContent=`班級人數：${S.count} 人（在上方「考試設定」修改）`;$('guideMsg').textContent=''}
+$('guideSubj').addEventListener('change',renderGuide);
+$('guideCopy').addEventListener('click',()=>{
+  const t=guideText();
+  const fallback=()=>{const r=document.createRange();r.selectNodeContents($('guideText'));const s=getSelection();s.removeAllRanges();s.addRange(r);
+    $('guideMsg').textContent='已幫您選取文字，請按 Ctrl+C（Mac 按 ⌘+C）複製。'};
+  try{navigator.clipboard.writeText(t).then(()=>$('guideMsg').textContent='已複製，可以到 Claude 對話裡貼上。',fallback)}catch(e){fallback()}
+});
+function loadScript(src){return new Promise((ok,no)=>{const s=document.createElement('script');s.src=src;s.onload=ok;s.onerror=no;document.head.appendChild(s)})}
+const PDFJS='https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/';
+async function ensurePdf(){if(window.pdfjsLib&&window.pdfjsWorker)return;
+  await loadScript(PDFJS+'pdf.min.js');await loadScript(PDFJS+'pdf.worker.min.js');
+  pdfjsLib.GlobalWorkerOptions.workerSrc=PDFJS+'pdf.worker.min.js'}
+const toJpeg=c=>new Promise(r=>c.toBlob(r,'image/jpeg',.88));
+async function toImage(file){
+  if(imgLim.mediaTypes.includes(file.type)&&file.size<=imgLim.maxInputBytes)return file;
+  const bmp=await createImageBitmap(file);const k=Math.min(1,2000/Math.max(bmp.width,bmp.height));
+  const c=document.createElement('canvas');c.width=Math.round(bmp.width*k);c.height=Math.round(bmp.height*k);
+  c.getContext('2d').drawImage(bmp,0,0,c.width,c.height);return toJpeg(c);
+}
+function addItem(blob,label){items.push({id:++uid,blob,url:URL.createObjectURL(blob),label,status:'wait',seat:'',name:'',score:'',note:''})}
+async function addFiles(files){
+  const list=[...files];if(!list.length||running)return;
+  $('scanStatus').textContent='正在準備檔案…';
+  let bad=0;
+  for(const f of list){
+    try{
+      if(f.type==='application/pdf'||/\.pdf$/i.test(f.name)){
+        await ensurePdf();
+        const doc=await pdfjsLib.getDocument({data:new Uint8Array(await f.arrayBuffer()),isEvalSupported:false}).promise;
+        for(let p=1;p<=doc.numPages;p++){
+          $('scanStatus').textContent=`正在準備 ${f.name} 第 ${p}/${doc.numPages} 頁…`;
+          const page=await doc.getPage(p),v1=page.getViewport({scale:1});
+          const vp=page.getViewport({scale:Math.min(3,2000/Math.max(v1.width,v1.height))});
+          const c=document.createElement('canvas');c.width=Math.round(vp.width);c.height=Math.round(vp.height);
+          const ctx=c.getContext('2d');ctx.fillStyle='#fff';ctx.fillRect(0,0,c.width,c.height);
+          await page.render({canvasContext:ctx,viewport:vp}).promise;
+          addItem(await toJpeg(c),`${f.name} 第${p}頁`);
+        }
+      }else addItem(await toImage(f),f.name);
+    }catch(e){bad++}
+  }
+  $('scanStatus').textContent=`共 ${items.length} 張考卷，按「開始讀分」。`+(bad?`有 ${bad} 個檔案打不開，請改用 JPG、PNG 或 PDF。`:'');
+  renderScanTable();
+}
+const fullOf=()=>+S.subjects[+$('scanSubj').value]?.full||100;
+function checkItems(){
+  const seen={};
+  items.forEach(it=>{it.dup=false;const s=parseInt(it.seat);if(it.status==='skip'||it.score===''||!s)return;(seen[s]=seen[s]||[]).push(it)});
+  Object.values(seen).forEach(a=>{if(a.length>1)a.forEach(it=>it.dup=true)});
+}
+function issue(it){
+  if(it.status!=='ok'&&it.status!=='flag')return '';
+  const s=parseInt(it.seat),sc=num(it.score);
+  if(!s)return '找不到座號';
+  if(it.score===''||sc==null)return '找不到分數';
+  if(sc<0||sc>fullOf())return '分數超過滿分';
+  if(it.dup)return '座號重複';
+  if(it.status==='flag')return it.note||'請確認';
+  return '';
+}
+function renderScanTable(){
+  const t=$('scanTable');
+  $('scanRun').disabled=running||!items.some(i=>i.status==='wait'||i.status==='error');
+  $('scanApplyBar').hidden=!items.length||running;
+  if(!items.length){t.hidden=true;t.innerHTML='';return}
+  checkItems();t.hidden=false;
+  t.innerHTML='<thead><tr><th>考卷</th><th>檔案</th><th>座號</th><th>姓名</th><th>分數</th><th>狀態</th></tr></thead><tbody>'+
+    items.map(it=>{
+      const prob=issue(it);let chip;
+      if(it.status==='wait')chip='<span class="chip wait">等待讀取</span>';
+      else if(it.status==='reading')chip='<span class="chip run">讀取中…</span>';
+      else if(it.status==='skip')chip=`<span class="chip skip">沒有總分，略過</span>${it.note?`<span class="note">${esc(it.note)}</span>`:''}`;
+      else if(it.status==='error')chip=`<span class="chip flag">讀取失敗</span><span class="note">${esc(it.note)}</span>`;
+      else chip=prob?`<span class="chip flag">${esc(prob)}</span>`:'<span class="chip ok">完成</span>';
+      const ed=it.status==='ok'||it.status==='flag'||it.status==='skip';
+      const unsure=it.status==='error'||(it.status!=='skip'&&prob!=='');
+      return `<tr class="${unsure&&it.status!=='wait'&&it.status!=='reading'?'unsure':''}" data-id="${it.id}">
+        <td><img class="thumb" src="${it.url}" alt="考卷縮圖" data-zoom="${it.id}"></td><td class="fn">${esc(it.label)}</td>
+        <td><input id="ss${it.id}" data-k="seat" inputmode="numeric" value="${esc(it.seat)}" ${ed?'':'disabled'} aria-label="座號"></td>
+        <td><input id="sn${it.id}x" class="nm" data-k="name" value="${esc(it.name)}" ${ed?'':'disabled'} aria-label="姓名"></td>
+        <td><input id="sc${it.id}" data-k="score" inputmode="decimal" value="${esc(it.score)}" ${ed?'':'disabled'} aria-label="分數"></td>
+        <td class="st">${chip}</td></tr>`}).join('')+'</tbody>';
+}
+$('scanTable').addEventListener('change',e=>{const k=e.target.dataset.k;if(!k)return;
+  const it=items.find(i=>i.id==e.target.closest('tr').dataset.id);it[k]=e.target.value.trim();
+  if(it.status==='skip'&&k==='score'&&it.score!=='')it.status='flag';
+  if(it.status==='flag'){it.status='ok';it.note=''}
+  applyArmed=false;$('scanApply').textContent='填入成績表';renderScanTable()});
+$('scanTable').addEventListener('click',e=>{const id=e.target.dataset.zoom;if(!id)return;
+  $('zoomImg').src=items.find(i=>i.id==id).url;$('zoom').hidden=false});
+$('zoom').addEventListener('click',()=>$('zoom').hidden=true);
+document.addEventListener('keydown',e=>{if(e.key==='Escape')$('zoom').hidden=true});
+const drop=$('drop');
+$('scanFile').addEventListener('change',e=>{addFiles(e.target.files);e.target.value=''});
+drop.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();$('scanFile').click()}});
+['dragenter','dragover'].forEach(n=>drop.addEventListener(n,e=>{e.preventDefault();drop.classList.add('over')}));
+['dragleave','drop'].forEach(n=>drop.addEventListener(n,e=>{e.preventDefault();drop.classList.remove('over')}));
+drop.addEventListener('drop',e=>addFiles(e.dataTransfer.files));
+
+function scanPrompt(){
+  const sub=S.subjects[+$('scanSubj').value]||{name:'',full:100};
+  return `這張圖片是台灣國小「${sub.name}」定期評量考卷的掃描頁，滿分 ${sub.full} 分，老師已經批改完畢。
+請只「讀出」卷面上已寫好的資料，不要自己批改、不要自己加總或推算分數：
+1. seat：學生座號（數字）。找不到就填 null。
+2. name：學生姓名（照卷面寫的字）。找不到就填 ""。
+3. score：老師寫在卷面上的總分（通常是紅筆，寫在卷首的分數欄或角落，可能被圈起來）。這一頁沒有寫總分（例如是背面或第二頁）就填 null。
+4. sure：三項都清楚可讀就填 true；字跡模糊、被塗改、看不清楚，或分數可能有兩種讀法時填 false。
+5. note：sure 為 false 時，用一句繁體中文簡短說明哪裡不確定；否則填 ""。
+只回覆一個 JSON 物件，例如：{"seat":12,"name":"王小明","score":92,"sure":true,"note":""}`;
+}
+async function runScan(){
+  if(running||!sampleFn)return;
+  const todo=items.filter(i=>i.status==='wait'||i.status==='error');if(!todo.length)return;
+  running=true;halt=false;ctl=new AbortController();
+  $('scanStop').hidden=false;applyArmed=false;$('scanApply').textContent='填入成績表';
+  let next=0,done=0,stopMsg='';
+  const P=scanPrompt(),names=S.students.map(s=>s.name.trim());
+  const status=()=>$('scanStatus').textContent=`讀取中：${done}/${todo.length} 張（第一次使用會先詢問是否允許）`;
+  status();renderScanTable();
+  const worker=async()=>{
+    while(next<todo.length&&!halt){
+      const it=todo[next++];it.status='reading';renderScanTable();
+      try{
+        const r=await sampleFn.json(P,{images:[it.blob],signal:ctl.signal});
+        const seat=parseInt(r&&r.seat),sc=r&&r.score!=null&&r.score!==''?Number(r.score):null;
+        it.seat=seat>0?String(seat):'';it.name=r&&r.name?String(r.name).trim():'';
+        it.score=sc!=null&&!isNaN(sc)?String(sc):'';it.note=r&&r.note?String(r.note):'';
+        if(!it.seat&&it.name){const k=names.indexOf(it.name);if(k>=0){it.seat=String(k+1);r.sure=false;it.note='依姓名對到座號，請確認'}}
+        if(it.score==='')it.status='skip';else it.status=r&&r.sure===true?'ok':'flag';
+      }catch(e){
+        const c=e&&e.code;
+        if(c==='cancelled'){it.status='wait'}
+        else if(c==='rate_limited'){it.status='wait';halt=true;stopMsg='使用太頻繁，或已達您帳號目前的使用額度。請稍後再按「開始讀分」繼續。';ctl.abort()}
+        else if(['not_granted','sampling_disabled','not_declared','capability_disabled','capability_removed','images_unavailable'].includes(c)){
+          it.status='wait';halt=true;stopMsg='沒有取得使用 Claude 的許可，所以無法讀分。可以改用「① 輸入成績」手動輸入。';ctl.abort()}
+        else if(c==='session_expired'){it.status='wait';halt=true;stopMsg='登入已過期，請重新登入 Claude 後再試。';ctl.abort()}
+        else if(c==='image_rejected'){it.status='error';it.note='這張圖片無法讀取，請改用清楚的 JPG 或 PNG'}
+        else{it.status='error';it.note='讀取失敗，可再按一次「開始讀分」重試'}
+      }
+      done++;if(!halt)status();renderScanTable();
+    }
+  };
+  await Promise.all([worker(),worker()]);
+  running=false;$('scanStop').hidden=true;
+  checkItems();
+  const flagged=items.filter(i=>issue(i)||i.status==='error').length;
+  $('scanStatus').textContent=stopMsg||(halt?'已停止。按「開始讀分」可以繼續讀剩下的。':`讀取完成。`+(flagged?`有 ${flagged} 張需要您確認（黃色列）。`:'請核對後按「填入成績表」。'));
+  renderScanTable();
+}
+$('scanRun').addEventListener('click',runScan);
+$('scanStop').addEventListener('click',()=>{halt=true;ctl&&ctl.abort()});
+$('scanApply').addEventListener('click',()=>{
+  checkItems();
+  const ready=items.filter(i=>(i.status==='ok'||i.status==='flag')&&parseInt(i.seat)>0&&num(i.score)!=null);
+  const pending=items.filter(i=>issue(i)||i.status==='error'||i.status==='wait').length;
+  if(!ready.length){$('scanStatus').textContent='還沒有可以填入的分數。';return}
+  if(pending&&!applyArmed){applyArmed=true;$('scanApply').textContent=`還有 ${pending} 張沒確認，再按一次照目前內容填入`;return}
+  applyArmed=false;$('scanApply').textContent='填入成績表';
+  const j=+$('scanSubj').value;
+  if(S.example){S.students=[];S.example=false;S.count=Math.max(...ready.map(i=>parseInt(i.seat)),1)}
+  ready.forEach(it=>{const s=parseInt(it.seat);
+    if(s>S.count){S.count=s}fitCount();
+    const st=S.students[s-1];st.scores[j]=String(num(it.score));if(it.name&&!st.name.trim())st.name=it.name});
+  $('count').value=S.count;save();
+  $('scanStatus').textContent=`已把 ${ready.length} 位學生的${S.subjects[j].name}分數填進成績表，可以到「① 輸入成績」查看。換下一科前，請先按「清除這批檔案」。`;
+});
+$('scanClear').addEventListener('click',()=>{if(running)return;items.forEach(i=>URL.revokeObjectURL(i.url));items=[];applyArmed=false;
+  $('scanApply').textContent='填入成績表';$('scanStatus').textContent='';renderScanTable()});
+
+all();
+</script>
+</body>
+</html>
+
+<script data-goatcounter="https://teacher-liujikan.goatcounter.com/count" async src="//gc.zgo.at/count.js"></script>
+</body></html>
