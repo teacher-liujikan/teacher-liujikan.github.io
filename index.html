@@ -55,6 +55,8 @@ h2{font-size:22px;font-weight:700}
 .arrow{flex:none;color:var(--ink2);font-size:18px;transition:transform .15s,color .15s}
 .item:hover .arrow{color:var(--accent);transform:translateX(3px)}
 
+.visits{font-size:14px;color:var(--ink2);text-align:center}
+.visits b{color:var(--ink);font-variant-numeric:tabular-nums}
 footer{border-top:1px solid var(--line);padding-top:20px;font-size:13px;color:var(--ink2);line-height:1.6}
 @media (prefers-reduced-motion:reduce){*{transition:none!important}}
 
@@ -81,6 +83,7 @@ html{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset
 
   <div id="others" style="display:contents"></div>
 
+  <p class="visits" id="visits" hidden>累計瀏覽 <b id="visitN"></b> 次</p>
   <footer>老師媽咪自製的免費學習資源，提供老師與家長教學使用。國語課別範圍對應各版本課本，例句與練習題皆為原創，不是出版社官方產品。</footer>
 </div>
 
@@ -152,7 +155,11 @@ document.querySelector(".pickers").addEventListener("click",e=>{
 
 $("others").innerHTML=OTHERS.map(s=>`<section><h2>${s.n}</h2><div class="list">${s.items.map(item).join("")}</div></section>`).join("");
 renderZh();
+
+/* 累計瀏覽：GoatCounter 全站總數 */
+fetch("https://teacher-liujikan.goatcounter.com/counter/TOTAL.json").then(r=>r.ok?r.json():null).then(d=>{if(d&&d.count){$("visitN").textContent=d.count;$("visits").hidden=false}}).catch(()=>{});
 </script>
 
+<script data-goatcounter="https://teacher-liujikan.goatcounter.com/count" async src="//gc.zgo.at/count.js"></script>
 </body>
 </html>
