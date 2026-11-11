@@ -151,9 +151,9 @@ const OTHERS=[
  {n:"聖誕節相關課程",items:[
   {t:"一字千金 聖誕挑戰賽",tag:"新",u:G+"yizi-qianjin/",d:"國字小組競賽：選版本、年級和課次，四關隨機出題，電視上有計時和計分板，各組可以用平板掃 QR code 作答"}]},
  {n:"學力檢測",items:[
-  {t:"學力檢測 自己來訂正",tag:"新",u:G+"literacy-review/",d:"三～六年級數學 111～115 年：紙本檢討或平板線上測驗、一步一步看詳解、收集徽章；國語製作中"}]},
+  {t:"學力檢測 自己來訂正",tag:["新","可紙本可線上"],u:G+"literacy-review/",d:"三～六年級數學 111～115 年：紙本檢討或平板線上測驗、一步一步看詳解、收集徽章；國語製作中"}]},
  {n:"學習扶助",items:[
-  {t:"學扶考古題 自己來練習",tag:"新",u:G+"xuefu/",d:"一～六年級數學 111～115 年篩選測驗：平板線上作答自動批改、依南一／康軒／翰林單元或學扶細目挑題、錯題再做一次、匯出 Word／PDF；每年級一份模擬卷；國語、英語製作中"}]},
+  {t:"學扶考古題 自己來練習",tag:["新","可紙本可線上"],u:G+"xuefu/",d:"一～六年級數學 111～115 年篩選測驗：平板線上作答自動批改、依南一／康軒／翰林單元或學扶細目挑題、錯題再做一次、匯出 Word／PDF；每年級一份模擬卷；國語、英語製作中"}]},
  {n:"數學",items:[
   {t:"九九乘法大冒險",u:G+"9-9-Adventure/",d:"一關一關過，通關解鎖打怪和快答"},
   {t:"直式乘法小教室",tag:"三年級",u:G+"vertical-multiplication/",d:"看示範、自己算、錯題本、打怪挑戰"},
@@ -173,7 +173,7 @@ const OTHERS=[
 ];
 
 const $=id=>document.getElementById(id);
-const item=o=>`<a class="item" href="${link(o.u)}" target="_blank" rel="noopener"><span class="txt"><span class="t">${o.t}${o.tag?`<span class="tag">${o.tag}</span>`:""}</span><span class="d">${o.d}</span></span><span class="arrow" aria-hidden="true">→</span></a>`;
+const item=o=>`<a class="item" href="${link(o.u)}" target="_blank" rel="noopener"><span class="txt"><span class="t">${o.t}${[].concat(o.tag||[]).map(x=>`<span class="tag">${x}</span>`).join("")}</span><span class="d">${o.d}</span></span><span class="arrow" aria-hidden="true">→</span></a>`;
 
 let pick={v:"翰林",g:"三"};
 try{const s=JSON.parse(localStorage.getItem("tm-pick")||"{}");if(VERS.includes(s.v))pick.v=s.v;if(GRADES.includes(s.g))pick.g=s.g}catch(e){}
