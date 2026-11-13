@@ -261,6 +261,7 @@ img.potB,.pot-wrap.cooking img.potA{display:none}
 .card-head h2{background:var(--peach);border:3px solid var(--line);border-radius:999px;padding:1px 16px;box-shadow:0 3px 0 var(--line)}
 .card-head h2 small{color:var(--ink)}
 
+.strip.keep #btnRotate{display:none!important}
 .strip.solo .no,.strip.solo .turn,.strip.solo #btnRotate{display:none!important}
 .team .no{font-style:normal;font-family:var(--f-num);font-weight:800;background:var(--ink);color:#fff;border-radius:50%;width:1.35em;height:1.35em;display:grid;place-items:center;font-size:.68em;flex:none;line-height:1}
 .intro{position:fixed;inset:0;z-index:80;background:#120c08;color:#fff;display:grid;grid-template-rows:auto minmax(0,1fr) auto auto;justify-items:center;align-items:center;gap:1.5vh;padding:max(14px,env(safe-area-inset-top,0px)) max(16px,env(safe-area-inset-right,0px)) max(14px,env(safe-area-inset-bottom,0px)) max(16px,env(safe-area-inset-left,0px));overflow:hidden}
@@ -329,6 +330,12 @@ img.potB,.pot-wrap.cooking img.potA{display:none}
 .tut-tip small{display:block;font-size:.66em;color:var(--ink-soft)}
 .tut-tip .tut-go{pointer-events:auto;margin-top:8px;font-size:1em;padding:6px 36px}
 .tut-skip{position:fixed;right:max(16px,env(safe-area-inset-right,0px));bottom:max(14px,env(safe-area-inset-bottom,0px));z-index:1}
+#bigCount{position:fixed;left:50%;top:52%;transform:translate(-50%,-50%);z-index:40;pointer-events:none;display:grid;justify-items:center;gap:2px}
+#bigCount b{font-family:var(--f-num);font-weight:800;font-size:clamp(90px,26vh,260px);line-height:.95;color:#fff;-webkit-text-stroke:.09em var(--line);paint-order:stroke fill;text-shadow:0 .06em 0 var(--line)}
+#bigCount b.pop{animation:bigpop .5s cubic-bezier(.3,1.6,.5,1)}
+@keyframes bigpop{from{transform:scale(1.7);opacity:.3}}
+#bigCount.last b{color:var(--lemon)}
+#bigCount span{background:var(--red);color:#fff;border:4px solid var(--line);border-radius:999px;padding:1px 18px;font-weight:900;font-size:clamp(14px,2.8vh,28px);white-space:nowrap}
 #rotate{display:none;position:fixed;inset:0;z-index:100;background:var(--bg);place-items:center;text-align:center;padding:24px}
 #rotate div{display:grid;gap:14px;justify-items:center;font-weight:900;font-size:24px}
 #rotate svg{width:120px;height:auto;animation:turn 2.4s ease-in-out infinite}
@@ -482,6 +489,7 @@ img.potB,.pot-wrap.cooking img.potA{display:none}
       <div class="setg"><h3>一回合時間</h3><div class="seg" data-k="minutes"><button type="button" data-v="3">3 分</button><button type="button" data-v="5">5 分</button><button type="button" data-v="8">8 分</button><button type="button" data-v="0">不限時</button></div></div>
       <div class="setg"><h3>每道菜要買幾樣</h3><div class="seg" data-k="ings"><button type="button" data-v="1">1 樣</button><button type="button" data-v="2">2 樣</button><button type="button" data-v="3">2～3 樣</button></div></div>
       <div class="setg"><h3>一次來幾位客人</h3><div class="seg" data-k="guests"><button type="button" data-v="1">1 位</button><button type="button" data-v="2">2 位</button></div></div>
+      <div class="setg" id="swapG"><h3>換隊方式</h3><div class="seg" data-k="swap"><button type="button" data-v="one">答對一題就換隊</button><button type="button" data-v="time">時間內越多越好</button></div><p class="note" id="swapNote"></p></div>
       <div class="setg" id="turnG"><h3>每一隊作答時間</h3><div class="seg" data-k="turn"><button type="button" data-v="0">不限</button><button type="button" data-v="60">60 秒</button><button type="button" data-v="45">45 秒</button><button type="button" data-v="30">30 秒</button></div><p class="note">時間到就換下一隊試試看，不會扣分。</p></div>
       <div class="setg"><h3>開場教學</h3><div class="seg" data-k="tutor"><button type="button" data-v="1">要</button><button type="button" data-v="0">不要</button></div><p class="note">每次開場都會先帶著點一題。這一次不需要的話，改成「不要」。</p></div>
     </div>
@@ -525,6 +533,8 @@ img.potB,.pot-wrap.cooking img.potA{display:none}
     <div class="btn-row"><button class="big-btn" id="qrClose" type="button">關閉</button></div>
   </div>
 </div>
+
+<div id="bigCount" hidden aria-live="off"></div>
 
 <div id="rotate"><div><svg viewBox="0 0 80 120" aria-hidden="true"><rect x="8" y="6" width="64" height="108" rx="12" fill="#fffaf0" stroke="#4a2c1a" stroke-width="6"/><rect x="18" y="20" width="44" height="72" rx="4" fill="#7fd6c9" stroke="#4a2c1a" stroke-width="4"/><circle cx="40" cy="103" r="4" fill="#4a2c1a"/></svg>請把手機打橫再玩</div></div>
 
@@ -2929,7 +2939,7 @@ if(ICONS){
 $('#cast').innerHTML=GUESTS.map(t=>`<figure>${custSVG(t,'happy')}<figcaption>${t.name}</figcaption></figure>`).join('');
 
 /* ---------- settings ---------- */
-const DEF={mode:'team',teams:'3',grade:'g3',level:'mul2',speed:'slow',minutes:'5',sound:true,ings:'1',guests:'1',turn:'60',tutor:'1'};
+const DEF={mode:'team',teams:'3',grade:'g3',level:'mul2',speed:'slow',minutes:'5',sound:true,ings:'1',guests:'1',turn:'60',tutor:'1',swap:'one'};
 let set={...DEF};
 try{const s=JSON.parse(localStorage.getItem('msc-settings-v3')||'null');if(s)set={...DEF,...s}}catch(e){}
 set.tutor='1';
@@ -2957,6 +2967,8 @@ function renderSettings(){
   $('#teamsG').hidden=set.mode!=='team';
   $('#qrRow').hidden=set.mode!=='solo';
   $('#turnG').hidden=set.mode!=='team';
+  $('#swapG').hidden=set.mode!=='team';
+  $('#swapNote').textContent=set.swap==='time'?'同一隊在作答時間內可以一直算，時間到才換下一隊。作答時間選「不限」時會用 60 秒。':'每答對一題就輪到下一隊，算得快多 1 顆星。';
   $('#modeNote').textContent=NOTES.mode[set.mode];
   $('#levelNote').textContent=NOTES.level[set.level];
   $('#speedNote').textContent=NOTES.speed[set.speed];
@@ -3258,7 +3270,7 @@ function pay(){
   let team=null,note='';
   if(set.mode!=='coop'){
     team=G.active;
-    const quick=G.turnMax&&G.turnLeft>=G.turnMax*.5&&!G.hinted,gain=quick?2:1;
+    const quick=G.turnMax&&!G.keep&&G.turnLeft>=G.turnMax*.5&&!G.hinted,gain=quick?2:1;
     note=quick?'，又快又準，多 1 顆星！':G.hinted?'，看了提示再算出來也很棒！':'';
     G.teams[team].score+=gain;bumpTeam(team);
   }
@@ -3287,7 +3299,7 @@ function serve(c,team){
   if(set.mode==='coop'&&G.goal&&G.served===G.goal)setTimeout(()=>{SND.end();say('達成今天的目標了！繼續挑戰更多客人','good')},1300);
   setTimeout(()=>{if(G){G.busy=false;rotateTeam()}},1200);
 }
-function rotateTeam(){if(set.mode==='team'&&G.teams.length>1&&G.autoRotate){G.active=(G.active+1)%G.teams.length;renderStrip()}resetTurn()}
+function rotateTeam(){if(G.keep){G.hinted=false;return}if(set.mode==='team'&&G.teams.length>1&&G.autoRotate){G.active=(G.active+1)%G.teams.length;renderStrip()}resetTurn()}
 function resetTurn(){G.turnLeft=G.turnMax;G.hinted=false;paintTurn()}
 function paintTurn(){
   const bar=$('#turnBar');bar.hidden=!G.turnMax;if(!G.turnMax)return;
@@ -3340,7 +3352,7 @@ function reshuffle(){
 /* ---------- bottom strip ---------- */
 const STAR=ICONS?`<img src="${ICONS[0]}" alt="">`:'<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2.5l2.9 6 6.6.8-4.9 4.5 1.3 6.5L12 17l-5.9 3.3 1.3-6.5-4.9-4.5 6.6-.8z" fill="#FFD25A" stroke="#4a2c1a" stroke-width="2" stroke-linejoin="round"/></svg>';
 function renderStrip(){
-  const st=$('#strip');st.classList.toggle('solo',set.mode==='solo');
+  const st=$('#strip');st.classList.toggle('solo',set.mode==='solo');st.classList.toggle('keep',!!G.keep);
   if(set.mode!=='coop'){
     st.innerHTML=G.teams.map((t,i)=>`<button type="button" class="team${i===G.active?' on':''}" data-t="${i}" style="--c:${t.c}"><span class="dot cav${t.ci}"></span><i class="no">${i+1}</i>${t.name}<span class="sc">${STAR}${t.score}</span><span class="turn">輪到我們</span></button>`).join('')+`<span class="spacer"></span><button type="button" class="pill" id="btnRotate">答對自動換隊：${G.autoRotate?'開':'關'}</button>`+(set.mode==='solo'?`<span class="coop">已經讓 ${G.served} 位客人吃飽了</span>`:'');
   }else{
@@ -3359,7 +3371,20 @@ $('#strip').addEventListener('click',e=>{
 /* ---------- loop ---------- */
 function fmt(s){s=Math.max(0,Math.ceil(s));return String(Math.floor(s/60)).padStart(2,'0')+':'+String(s%60).padStart(2,'0')}
 let lastT=0,loopId=0;
-function tick(){
+function tick(){tick0();paintBig()}
+function paintBig(){
+  const el=$('#bigCount');let n=0,lab='';
+  if(!G||G.over||G.tut){el.hidden=true;el.dataset.n='';return}
+  if(G.timeLeft!=null&&G.timeLeft<=10){n=Math.ceil(G.timeLeft);lab='這一回合還有'}
+  else if(G.turnMax&&G.turnLeft<=10&&actives().length){n=Math.ceil(G.turnLeft);lab=G.teams.length>1?`${G.teams[G.active].name}還有`:'還有'}
+  if(n<=0){el.hidden=true;el.dataset.n='';return}
+  el.hidden=false;
+  if(el.dataset.n!==String(n)){
+    el.dataset.n=n;el.innerHTML=`<span>${lab}</span><b class="pop">${n}</b><span>秒</span>`;el.classList.toggle('last',n<=3);
+    if(!G.paused)tone([n<=3?990:740],'square',.09);
+  }
+}
+function tick0(){
   const now=performance.now();const dt=Math.min(.5,(now-lastT)/1000);lastT=now;
   if(!G||G.paused||G.over)return;
   if(G.tut){}
@@ -3383,7 +3408,7 @@ function startGame(){
   G={nums:[],reach:new Map(),queue:[],sel:{path:[],ops:[]},potItems:[],
      timeLeft:+set.minutes?+set.minutes*60:null,elapsed:0,served:0,missed:0,goal:set.mode==='coop'?GOALS[set.minutes]:0,
      teams:shuffle(TEAMS.map((t,ci)=>({...t,ci}))).slice(0,n).map(t=>({...t,score:0})),active:0,autoRotate:true,
-     turnMax:set.mode==='team'?+set.turn||0:0,turnLeft:0,hinted:false,paused:false,over:false,busy:false,spawnCd:0,hint:0,nextId:1,lastType:null};
+     keep:set.mode==='team'&&set.swap==='time',turnMax:set.mode==='team'?(+set.turn||(set.swap==='time'?60:0)):0,turnLeft:0,hinted:false,paused:false,over:false,busy:false,spawnCd:0,hint:0,nextId:1,lastType:null};
   randomBoard();
   $('#ops').innerHTML=LEVELS[set.level].ops.map(o=>`<button type="button" class="op" data-op="${o}" aria-label="${{'+':'加','−':'減','×':'乘','÷':'除'}[o]}">${o}</button>`).join('');
   $('#ops').style.gridTemplateColumns=`repeat(${LEVELS[set.level].ops.length},minmax(0,1fr))`;
