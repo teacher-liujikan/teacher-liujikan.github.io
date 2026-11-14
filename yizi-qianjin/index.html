@@ -414,7 +414,10 @@ function hostConnect(){
     if(hRetry>=3){roomErr=true;drawOvl()} if(hRetry<8) setTimeout(hostConnect,Math.min(8000,1200*hRetry))};
   me.onerror=()=>{};
 }
-function joinUrl(){return location.origin+location.pathname+'?room='+room.code+(QS.get('api')?'&api='+encodeURIComponent(QS.get('api')):'')}
+const PUBLIC='https://teacher-liujikan.github.io/yizi-qianjin/';
+const ONLINE_OK=/^https:\/\/teacher-liujikan\.github\.io$/.test(location.origin)||/^http:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/.test(location.origin);
+function joinUrl(){const base=/^http:\/\/(localhost|127\.0\.0\.1)/.test(location.origin)?location.origin+location.pathname:PUBLIC;
+  return base+'?room='+room.code+(QS.get('api')?'&api='+encodeURIComponent(QS.get('api')):'')}
 let qrFor='';
 function drawOvl(){
   $('roomBtn').textContent=room?`平板連線中・${online.length} 組`:'平板連線';
@@ -429,6 +432,10 @@ function drawOvl(){
   $('ovlTeams').innerHTML=Array.from({length:nTeams},(_,i)=>`<span class="${online.includes(i+1)?'in':''}">第 ${i+1} 組</span>`).join('');
 }
 $('roomBtn').onclick=()=>{
+  if(!ONLINE_OK){$('ovl').hidden=false;$('qr').innerHTML='';$('ovlCode').textContent='';
+    $('ovlStatus').className='ovl-status bad';$('ovlStatus').textContent='這個預覽頁沒辦法開平板連線。請用下面的網址打開遊戲，再按「平板連線」。';
+    $('ovlUrl').innerHTML=`<a href="${PUBLIC}" target="_blank" rel="noopener">${PUBLIC}</a>`;$('ovlTeams').innerHTML='';$('ovlEnd').hidden=true;return}
+  $('ovlEnd').hidden=false;
   if(!room){room={code:rnd(5,'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'),key:rnd(20,'abcdefghijklmnopqrstuvwxyz0123456789')};store.set('room',room);answers={};timerFor=-1}
   hRetry=0;roomErr=false;hostConnect();$('ovl').hidden=false;drawOvl();render(true)};
 $('ovlClose').onclick=()=>{$('ovl').hidden=true};
@@ -495,8 +502,10 @@ function studentApp(){
     if(!force&&ns===sig){return} sig=ns;
     let top='',main='';
     if(dead){root.innerHTML=`<div class="s-main"><div class="s-big">連不上房間</div><div class="s-msg">請再掃一次老師螢幕上的 QR code，或請老師重新開房間。</div></div>`;return}
-    if(!st){root.innerHTML=`<div class="s-main"><div class="s-big">一字千金</div><div class="s-msg">${ws&&opened?'等老師開始…':'連線中…'}</div></div>`;return}
-    if(!team){root.innerHTML=`<div class="s-main"><div class="s-big">你們是第幾組？</div><div class="s-teams">${Array.from({length:n},(_,i)=>`<button data-team="${i+1}">第 ${i+1} 組</button>`).join('')}</div><div class="s-msg">${escH(st.book||'')}</div></div>`;return}
+    if(!st&&!(ws&&opened)){root.innerHTML=`<div class="s-main"><div class="s-big">一字千金</div><div class="s-msg">連線中…</div></div>`;return}
+    const view=st||{n:6,scores:[],book:''};
+    if(!team){root.innerHTML=`<div class="s-main"><div class="s-big">你們是第幾組？</div><div class="s-teams">${Array.from({length:view.n||6},(_,i)=>`<button data-team="${i+1}">第 ${i+1} 組</button>`).join('')}</div><div class="s-msg">${escH(view.book||'')}</div></div>`;return}
+    if(!st){root.innerHTML=`<div class="s-main"><div class="s-big">第 ${team} 組</div><div class="s-msg">已加入，請看電視，等老師出題</div></div>`;return}
     top=`<div class="s-top"><button class="s-team" data-change="1">第 ${team} 組</button><span class="s-score">目前 ${st.scores[team-1]||0} 分</span>${q?`<span class="s-clock">${fmt(localLeft)}</span>`:''}</div>`;
     if(!q){main=`<div class="s-big">${st.round?escH(st.round):'一字千金'}</div><div class="s-msg">請看電視，等老師出題</div>`}
     else{
