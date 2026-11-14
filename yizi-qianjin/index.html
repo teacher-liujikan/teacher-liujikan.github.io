@@ -215,6 +215,10 @@ canvas.snow{position:absolute;inset:0;width:100%;height:100%;z-index:0;pointer-e
 .s-cross input{height:100%;font-size:min(14vw,70px);border-style:dashed;border-color:var(--ink);font-weight:900;padding:0}
 .s-cross .hintc{font-size:.8rem;color:var(--ink-soft);align-self:center;font-weight:700}
 input:disabled{opacity:.6}
+.credit{font-size:.8rem;color:var(--ink-soft);text-align:center;line-height:1.5}
+.credit b{color:var(--coral);font-weight:700}
+.credit a{color:inherit}
+.stu .credit{margin-top:auto;padding-top:12px}
 </style>
 </head>
 <body>
@@ -252,6 +256,7 @@ input:disabled{opacity:.6}
   <aside class="board">
     <h2>計分板 <button class="mini" id="fs">全螢幕</button></h2>
     <div class="teams" id="teams"></div>
+    <div class="credit">製作：<b>老師媽咪／范范老師</b></div>
     <div class="board-foot">
       組數
       <button id="tMinus">−</button><b id="tn">6</b><button id="tPlus">＋</button>
@@ -361,7 +366,9 @@ function renderSetup(){
    <div class="pick"><span class="lab">年級</span>${GRADES.map(([g,n])=>`<button class="opt ${pick.g===g?'on':''}" data-g="${g}">${n}</button>`).join('')}</div>
    ${scope}
    <button class="go" id="go" ${ok?'':'disabled'}>開始挑戰</button>
-   <div class="title-note">題目從選到的課裡隨機抽，每次都不一樣；選的課太少、題目不夠時，會從同一冊其他課補</div>`;
+   <div class="title-note">題目從選到的課裡隨機抽，每次都不一樣；選的課太少、題目不夠時，會從同一冊其他課補</div>
+   <div class="credit">© 老師媽咪／范范老師 製作・免費分享給老師和家長使用，題目依各版本課程整理，非出版社官方產品<br>
+   Threads：<a href="https://www.threads.net/@teacher_liujikan" target="_blank" rel="noopener">@teacher_liujikan</a></div>`;
 }
 $('setup').onclick=e=>{const b=e.target.closest('button');if(!b)return;
   if(b.dataset.v){pick.v=b.dataset.v;pick.ls=null}
@@ -524,7 +531,7 @@ function studentApp(){
       }
       if(note) main=`<div class="s-msg">${note}</div>`+main;
     }
-    root.innerHTML=top+`<div class="s-main">${main}</div>`;
+    root.innerHTML=top+`<div class="s-main">${main}</div><div class="credit">© 老師媽咪／范范老師 製作</div>`;
     if(q&&(q.t==='char'||q.t==='word')) drawList(q);
   }
   function drawList(q){const d=draft(q), l=$('sList'); if(!l)return; l.innerHTML=d.list.map((w,i)=>`<button data-del="${i}">${escH(w)}</button>`).join(''); $('sCount').textContent=d.list.length?`已經寫了 ${d.list.length} 個`:''}
