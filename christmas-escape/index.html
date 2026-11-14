@@ -1,0 +1,1233 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="description" content="聖誕雪屋大逃脫：國小中高年級的網頁密室逃脫遊戲，8 個房間、8 種國語數學解謎機關。">
+<style>:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}body{margin:0}img{max-width:100%}[hidden]{display:none!important}</style>
+<title>聖誕雪屋大逃脫</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Huninn&family=Noto+Sans+TC:wght@400;700;900&display=swap" rel="stylesheet">
+<style>
+/* Layout: phone-shaped game frame (title → level map → level → popups), full height on phones, centered on desktop. Cozy picture-book look: cream walls, light wood, macaron buttons, navy ink. */
+:root{
+  --cream:#FFF1DC; --apricot:#FADDB8; --dot:rgb(243,226,202); --paper:#fffaf0;
+  --ink:#2b3358; --ink2:#5c6184; --line:#8a5a3c; --wood:#d9a66e; --wood-d:#b98250;
+  --blue:#6db3ea; --blue-d:#4687c2;
+  --pink:#ffc2d9; --pink-d:#e88fb1;
+  --mint:#a8e0c4; --mint-d:#66b891;
+  --butter:#ffe08a; --butter-d:#dfae3c;
+  --red:#e8695f; --red-d:#c2483f;
+  /* legacy token names still referenced from scripts */
+  --deep:#f3e2ca; --sun:#f0b429; --bone:#fffaf0; --mist:#5c6184;
+  --pump:var(--pink); --lime:var(--mint); --grape:var(--blue);
+  --f-ui:Huninn,"Noto Sans TC","Noto Sans CJK TC","PingFang TC","Microsoft JhengHei",sans-serif;
+  --f-fun:Huninn,"Noto Sans TC","Noto Sans CJK TC",sans-serif;
+  --panel:radial-gradient(var(--dot) 1.6px,transparent 2px) 0 0/14px 14px,linear-gradient(var(--cream),var(--apricot));
+  --soft:0 10px 22px rgba(138,90,60,.22);
+  color-scheme:light;
+}
+html,body{height:100%}
+body{background:radial-gradient(#ead3b3 1.6px,transparent 2px) 0 0/16px 16px,#f3e2ca;color:var(--ink);font-family:var(--f-ui);margin:0;overflow:hidden;
+  -webkit-tap-highlight-color:transparent;user-select:none;-webkit-user-select:none}
+.app{height:100%;display:flex;justify-content:center;align-items:center}
+#game{position:relative;width:100%;max-width:440px;height:100%;max-height:900px;overflow:hidden;background:var(--cream);
+  padding-left:env(safe-area-inset-left,0px);padding-right:env(safe-area-inset-right,0px)}
+@media (min-width:500px) and (min-height:700px){#game{border-radius:28px;height:calc(100% - 32px);box-shadow:0 0 0 4px var(--ink),0 8px 0 4px var(--ink),0 30px 60px rgba(138,90,60,.35)}}
+#fx{position:absolute;inset:0;pointer-events:none;z-index:5}
+
+.screen{position:absolute;inset:0;z-index:2;display:flex;flex-direction:column}
+.screen[hidden]{display:none!important}
+
+/* sticker text: navy with a cream outline */
+.pop{paint-order:stroke fill;-webkit-text-stroke:5px var(--paper);color:var(--ink);letter-spacing:.03em}
+.fun{font-family:var(--f-fun);letter-spacing:.06em}
+
+/* candy buttons: pastel face, navy outline, thicker navy bottom edge */
+.btn{all:unset;box-sizing:border-box;cursor:pointer;position:relative;display:inline-flex;align-items:center;justify-content:center;gap:8px;
+  font-family:var(--f-ui);font-size:21px;color:var(--ink);padding:12px 24px;border-radius:18px;
+  background:var(--pink);border:2.5px solid var(--ink);
+  box-shadow:inset 0 -5px 0 rgba(43,51,88,.1),inset 0 3px 0 rgba(255,255,255,.45),0 5px 0 var(--ink),0 10px 14px rgba(138,90,60,.22);
+  transition:transform .08s, box-shadow .08s}
+.btn:active,.btn.pressed{transform:translateY(4px);box-shadow:inset 0 -2px 0 rgba(43,51,88,.1),0 1px 0 var(--ink),0 3px 6px rgba(138,90,60,.2)}
+.btn:focus-visible{outline:4px solid var(--blue);outline-offset:3px}
+.btn.green{background:var(--mint)}
+.btn.purple{background:var(--blue)}
+.btn.small{font-size:16px;padding:8px 14px;border-radius:14px;box-shadow:inset 0 -4px 0 rgba(43,51,88,.1),inset 0 2px 0 rgba(255,255,255,.45),0 4px 0 var(--ink),0 8px 10px rgba(138,90,60,.18)}
+.btn.small:active{box-shadow:0 1px 0 var(--ink)}
+.btn[hidden]{display:none}
+.btn[disabled]{filter:grayscale(.8) opacity(.6);pointer-events:none}
+
+.iconbtn{all:unset;box-sizing:border-box;cursor:pointer;width:44px;height:44px;border-radius:14px;background:var(--paper);display:grid;place-items:center;
+  border:2.5px solid var(--ink);box-shadow:0 3px 0 var(--ink);color:var(--ink);flex:none}
+.iconbtn:active{transform:translateY(2px);box-shadow:0 1px 0 var(--ink)}
+.iconbtn:focus-visible{outline:3px solid var(--blue);outline-offset:2px}
+.iconbtn svg{width:24px;height:24px}
+
+/* HUD */
+.hud{display:flex;align-items:center;gap:8px;padding:calc(10px + env(safe-area-inset-top,0px)) 12px 8px}
+.pill{display:flex;align-items:center;gap:5px;background:var(--panel);border:2.5px solid var(--ink);border-radius:30px;padding:3px 12px 3px 5px;font-size:18px;color:var(--ink);
+  box-shadow:0 3px 0 var(--ink);font-variant-numeric:tabular-nums}
+.pill svg{width:28px;height:28px}
+.hud .grow{flex:1}
+
+/* ---------- Title ---------- */
+#s-title{align-items:center;justify-content:flex-start;gap:12px;text-align:center;padding:calc(34px + env(safe-area-inset-top,0px)) 20px calc(26px + env(safe-area-inset-bottom,0px));background:var(--cream) center bottom/cover no-repeat}
+.logo{position:relative;display:flex;flex-direction:column;align-items:center;gap:2px;transform:rotate(-2deg);
+  background:var(--panel);border:3px solid var(--ink);border-radius:28px;padding:26px 26px 18px;box-shadow:0 6px 0 var(--ink),0 16px 24px rgba(138,90,60,.28)}
+.logo::before{content:"";position:absolute;left:18px;right:18px;top:-9px;height:18px;
+  background:radial-gradient(circle,var(--red) 5.5px,var(--ink) 6px 7.5px,transparent 8px) 0 0/72px 18px,
+    radial-gradient(circle,var(--butter) 5.5px,var(--ink) 6px 7.5px,transparent 8px) 24px 0/72px 18px,
+    radial-gradient(circle,var(--mint) 5.5px,var(--ink) 6px 7.5px,transparent 8px) 48px 0/72px 18px}
+.logo .en{font-size:17px;letter-spacing:.3em;color:var(--red-d);padding-left:.3em}
+.logo .zh{font-size:clamp(38px,11.5vw,50px);line-height:1.15;-webkit-text-stroke:0;color:var(--ink);letter-spacing:.04em}
+.logo .zh b{color:var(--red);font-weight:400}
+.tagline{color:var(--ink);font-size:15.5px;line-height:1.55;margin:4px 0 0;background:rgba(255,250,240,.92);border:2px solid var(--line);border-radius:16px;padding:6px 14px;text-wrap:balance}
+.mascot{width:150px;height:auto;margin-top:auto;animation:float 3s ease-in-out infinite;filter:drop-shadow(0 6px 6px rgba(138,90,60,.2))}
+@keyframes float{50%{transform:translateY(-10px)}}
+.bounce{animation:bounce 1.6s ease-in-out infinite}
+@keyframes bounce{0%,100%{transform:scale(1)}50%{transform:scale(1.05)}}
+
+/* ---------- Map ---------- */
+#s-map{background:linear-gradient(#cfe6f2 0,#e6f1f1 38%,#fdf9f1 64%)}
+#s-map .mapscroll{flex:1;overflow-y:auto;overflow-x:hidden;min-height:0;display:flex;flex-direction:column;padding-bottom:env(safe-area-inset-bottom,0px)}
+#board{margin-block:auto}
+#house{display:block;width:100%;height:auto;max-width:100%}
+#house text{font-family:var(--f-ui)}
+.room{cursor:pointer;outline:none}
+.room .rimg{transition:filter .2s}
+.room:hover .rimg{filter:brightness(1.08) saturate(1.1)}
+.room:focus-visible .frame,.doorbtn:focus-visible .frame{stroke:var(--blue);stroke-width:5}
+.room:active{transform:scale(.97);transform-box:fill-box;transform-origin:center}
+.doorbtn{cursor:pointer;outline:none}
+.doorbtn .dimg{transition:filter .2s}
+.doorbtn:hover .dimg{filter:brightness(1.05)}
+.doorbtn:active .dimg{transform:scale(.97);transform-box:fill-box;transform-origin:center bottom}
+.flick{animation:flick 1.3s ease-in-out infinite alternate}
+@keyframes flick{from{opacity:.6}to{opacity:1}}
+.mapghost{transform-box:fill-box;animation:float 3s ease-in-out infinite}
+.maptip{text-align:center;font-size:14px;line-height:1.5;color:var(--ink);margin:2px auto 8px;background:var(--panel);border:2.5px solid var(--ink);box-shadow:0 3px 0 var(--ink);border-radius:16px;padding:6px 14px;width:fit-content;max-width:calc(100% - 28px);box-sizing:border-box;text-wrap:balance}
+
+/* ---------- medals ---------- */
+.medals{gap:6px}
+.medal{display:flex;flex-direction:column;align-items:center;gap:2px;width:52px}
+.medal img{width:48px;height:48px;object-fit:contain}
+.medal b{font-size:14px;color:var(--ink);font-weight:400}
+.medal i{font-style:normal;font-family:var(--f-fun);font-size:20px;color:var(--red-d)}
+.medal.miss img{filter:grayscale(1) opacity(.35)}
+.reward img.medimg{width:64px;height:64px;object-fit:contain;flex:none}
+
+/* ---------- Level ---------- */
+#s-level{background:var(--room-bg,var(--cream))}
+.lvtitle{flex:0 1 auto;margin-inline:auto;text-align:center;font-size:19px;line-height:1.15;-webkit-text-stroke:0;
+  background:var(--panel);border:2.5px solid var(--ink);box-shadow:0 3px 0 var(--ink);border-radius:16px;padding:4px 16px 5px}
+.lvtitle small{display:block;font-size:11.5px;color:var(--ink2);letter-spacing:.14em}
+.stage{flex:1;display:flex;flex-direction:column;gap:10px;padding:6px 14px calc(14px + env(safe-area-inset-bottom,0px));overflow-y:auto;min-height:0}
+#play{display:flex;flex-direction:column;gap:10px}
+#play:empty{display:none}
+.talk{display:flex;align-items:flex-end;gap:10px}
+.talk .m{flex:none;width:84px;height:84px;object-fit:contain;animation:float 3s ease-in-out infinite;filter:drop-shadow(0 4px 4px rgba(138,90,60,.2))}
+.talk .m.pop-in{animation:avapop .35s cubic-bezier(.3,1.8,.5,1),float 3s ease-in-out .35s infinite}
+@keyframes avapop{from{transform:scale(.6)}}
+.panel .face{width:96px;height:96px;object-fit:contain;margin-top:-8px}
+.bubble{position:relative;flex:1;min-width:0;background:var(--paper);color:var(--ink);border:2.5px solid var(--ink);border-radius:18px;padding:9px 14px;font-size:16px;line-height:1.5;min-height:48px;box-sizing:border-box;
+  box-shadow:0 3px 0 var(--ink)}
+.bubble::before{content:"";position:absolute;left:-8.5px;bottom:16px;width:13px;height:13px;background:var(--paper);border-left:2.5px solid var(--ink);border-bottom:2.5px solid var(--ink);transform:rotate(45deg);border-bottom-left-radius:4px}
+.card{background:var(--panel);color:var(--ink);border-radius:22px;padding:14px 16px 16px;border:2.5px solid var(--ink);box-shadow:0 5px 0 var(--ink),var(--soft);display:flex;flex-direction:column;gap:8px}
+.card .subj{align-self:flex-start;font-size:12px;letter-spacing:.15em;color:var(--ink);padding:2px 10px 2px 12px;border-radius:20px;background:var(--blue);border:2px solid var(--ink)}
+.card .subj.chi{background:var(--pink)}
+.card h3{margin:0;font-size:22px;font-weight:400}
+.card .q{margin:0;font-size:17.5px;line-height:1.65;white-space:pre-line}
+.card .q em{font-style:normal;background:#ffe08a;border-radius:6px;padding:0 4px;color:#8a3a12}
+.choices{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:4px}
+.choice{font-size:30px;padding:12px 8px;border-radius:18px}
+.choice:nth-child(1){background:var(--pink)}
+.choice:nth-child(2){background:var(--blue)}
+.choice:nth-child(3){background:var(--butter)}
+.choice:nth-child(4){background:var(--mint)}
+.choice.wrong{filter:grayscale(1) opacity(.5);pointer-events:none}
+.ansbox{display:flex;justify-content:center;gap:8px;margin-top:2px}
+.ansbox span{width:52px;height:60px;border-radius:14px;background:var(--paper);border:2.5px solid var(--line);box-shadow:inset 0 3px 0 rgba(138,90,60,.12);display:grid;place-items:center;font-family:var(--f-fun);font-size:34px;color:var(--ink);font-variant-numeric:tabular-nums}
+.ansbox span.cur{border-color:var(--blue-d);box-shadow:0 0 0 4px rgba(109,179,234,.35)}
+.keypad{display:grid;grid-template-columns:repeat(3,1fr);gap:9px 10px;padding-bottom:5px}
+.keypad .btn{font-family:var(--f-fun);font-size:27px;padding:8px;border-radius:16px;background:var(--paper)}
+.keypad .btn.ok{background:var(--mint)}
+.keypad .btn.del{background:var(--pink)}
+.tools{display:flex;justify-content:center;gap:10px;flex-wrap:wrap;padding-bottom:5px}
+.choices.c3{grid-template-columns:repeat(3,1fr)}
+.choices.c3 .choice{font-size:20px;padding:12px 4px}
+/* symmetric chars */
+.symgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px 12px}
+.symc{all:unset;box-sizing:border-box;cursor:pointer;aspect-ratio:1;max-width:100%;display:grid;place-items:center;color:var(--ink);
+  background:transparent center/contain no-repeat;position:relative;transition:transform .1s}
+.symc:active{transform:scale(.94)}
+.symc:focus-visible{outline:4px solid var(--blue);border-radius:18px}
+.symc svg{margin-top:13%}
+.symc.on{filter:drop-shadow(0 0 10px rgba(240,180,41,.75))}
+.symc.on::after{content:"";position:absolute;top:22%;bottom:8%;left:50%;margin-left:-1.5px;border-left:3px dashed var(--red-d)}
+/* zhuyin table */
+.zy{display:grid;grid-template-columns:repeat(10,1fr);gap:4px;margin-top:4px}
+.zy span{all:unset;box-sizing:border-box;cursor:pointer;text-align:center;font-size:16px;padding:6px 0;border-radius:8px;color:var(--ink);background:transparent center/100% 100% no-repeat}
+.zy span:focus-visible{outline:3px solid var(--blue)}
+/* puzzle canvases */
+.board-svg{width:100%;height:auto;display:block;background:var(--panel);border-radius:18px;border:2.5px solid var(--ink);box-shadow:0 4px 0 var(--ink);box-sizing:border-box;touch-action:manipulation}
+#msvg{box-shadow:none}
+.status{display:flex;justify-content:space-between;align-items:center;gap:8px;font-size:16px;flex-wrap:wrap;color:var(--ink);padding-bottom:4px}
+.status b{color:var(--red-d);font-size:22px;font-weight:400}
+/* suspects */
+.suspects{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.sus{display:flex;flex-direction:column;align-items:center;gap:6px;text-align:center}
+.sus .face{width:58px;height:58px;border-radius:50%;display:grid;place-items:center;font-size:24px;color:#fff;border:2.5px solid var(--ink)}
+.sus .say{background:var(--paper);border:2px solid var(--line);border-radius:12px;padding:6px 6px;font-size:14px;line-height:1.4;color:var(--ink)}
+.sus b{font-size:14px;font-weight:400}
+/* maze */
+.maze{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;background:var(--panel);padding:10px;border-radius:18px;border:2.5px solid var(--ink);box-shadow:0 4px 0 var(--ink)}
+.mz{all:unset;box-sizing:border-box;cursor:pointer;aspect-ratio:1;display:flex;flex-direction:column;align-items:center;justify-content:center;border-radius:14px;
+  background:transparent center/100% 100% no-repeat;color:var(--ink);font-family:var(--f-fun);font-size:30px;line-height:1;padding-bottom:5%}
+.mz small{font-family:var(--f-ui);font-size:14px;color:var(--ink)}
+.mz:active{transform:scale(.94)}
+.mz:focus-visible{outline:4px solid var(--blue)}
+.lights{display:grid;gap:10px;background:var(--panel);padding:12px;border-radius:18px;border:2.5px solid var(--ink);box-shadow:0 4px 0 var(--ink)}
+.lamp{all:unset;box-sizing:border-box;cursor:pointer;aspect-ratio:1;border-radius:18px;display:grid;place-items:center;background:#efe0cb;border:2px solid #d9c2a3;box-shadow:inset 0 -5px 0 rgba(138,90,60,.12);transition:background .2s,box-shadow .2s}
+.lamp img{width:82%;height:82%;object-fit:contain;transition:transform .15s}
+.lamp.on{background:radial-gradient(circle,#fff6c9 0%,#ffe9a3 55%,#ffdf94 100%);border-color:var(--butter-d);box-shadow:0 0 16px rgba(240,180,41,.5),inset 0 -5px 0 rgba(223,174,60,.25)}
+.lamp:active img{transform:scale(.9)}
+.lamp:focus-visible{outline:4px solid var(--blue)}
+.ansbox.long span{width:34px;height:48px;font-size:26px;border-radius:10px}
+.shake{animation:shake .4s}
+@keyframes shake{20%,60%{transform:translateX(-10px)}40%,80%{transform:translateX(10px)}}
+
+/* seals for code */
+.seal{width:50px;height:50px;border-radius:50%;background:var(--red);color:#fffaf0;display:grid;place-items:center;font-size:24px;
+  border:2.5px solid var(--ink);box-shadow:inset 0 0 0 2.5px rgba(255,250,240,.55),0 3px 0 var(--ink);transform:rotate(-8deg);flex:none;box-sizing:border-box}
+.order{display:flex;flex-wrap:wrap;gap:6px 4px;justify-content:center;align-items:center}
+.order .seal{width:34px;height:34px;font-size:17px}
+.order i{font-style:normal;color:var(--line)}
+
+/* ---------- Popup ---------- */
+.veil{position:absolute;inset:0;z-index:10;background:rgba(92,62,44,.5);display:flex;align-items:center;justify-content:center;padding:20px}
+.veil[hidden]{display:none!important}
+.panel{width:100%;max-width:360px;box-sizing:border-box;background:var(--panel);border:3px solid var(--ink);border-radius:28px;padding:42px 18px 24px;
+  position:relative;text-align:center;display:flex;flex-direction:column;align-items:center;gap:12px;box-shadow:0 7px 0 var(--ink),0 22px 40px rgba(92,62,44,.35);animation:popin .4s cubic-bezier(.3,1.6,.5,1)}
+@keyframes popin{from{transform:scale(.5);opacity:0}}
+.ribbon{position:absolute;top:-26px;left:50%;transform:translateX(-50%);white-space:nowrap;background:var(--pink);border:3px solid var(--ink);box-shadow:0 4px 0 var(--ink);border-radius:18px;padding:5px 24px;font-size:25px;-webkit-text-stroke:0;color:var(--ink)}
+.bigstars{display:flex;gap:4px;align-items:flex-end}
+.bigstars svg{width:62px;height:62px;transform:scale(0);animation:starin .45s cubic-bezier(.3,1.8,.5,1) forwards}
+.bigstars svg:nth-child(2){width:80px;height:80px;animation-delay:.25s}
+.bigstars svg:nth-child(3){animation-delay:.5s}
+.bigstars svg:nth-child(1){animation-delay:0s}
+@keyframes starin{to{transform:scale(1)}}
+.panel p{margin:0;color:var(--ink);font-size:16px;line-height:1.6}
+.panel p b{color:var(--red-d);font-weight:400;font-size:1.15em}
+.reward{display:flex;align-items:center;gap:14px;background:var(--paper);border:2px solid var(--line);border-radius:18px;padding:10px 18px}
+.reward .digit{font-family:var(--f-fun);font-size:44px;color:var(--red);line-height:1}
+.panel .row{display:flex;gap:10px;flex-wrap:wrap;justify-content:center}
+.hintbox{background:var(--paper);color:var(--ink);border:2px solid var(--line);border-radius:16px;padding:12px 14px;text-align:left;line-height:1.6}
+
+@media (max-height:640px){.mascot{width:110px}.choice{font-size:24px;padding:8px}.keypad .btn{font-size:22px;padding:5px}.logo{padding:20px 22px 12px}}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}.bigstars svg{transform:none}}
+
+.maze{position:relative}
+.mz{position:relative;z-index:1}
+.mzroad{position:absolute;inset:0;width:100%;height:100%;z-index:0;pointer-events:none}
+.mz.next{animation:mznext 1.2s ease-in-out infinite;box-shadow:0 0 0 3px #ffd23f,0 0 14px rgba(255,210,63,.8)!important}
+@keyframes mznext{50%{box-shadow:0 0 0 5px #ffd23f,0 0 20px rgba(255,210,63,.95)}}
+.mz.far{filter:saturate(.7) brightness(.92)}
+.mztip{margin:2px 0 0;font-size:14px;line-height:1.5;color:var(--ink);background:rgba(255,255,255,.6);border:1.5px dashed rgba(0,0,0,.18);border-radius:12px;padding:6px 10px}
+.mztip b{color:#c0392b}
+.mztip.flash{animation:tipflash .6s}
+@keyframes tipflash{30%{background:#ffe3a3;transform:scale(1.03)}}
+.clockpick{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
+.ck{flex-direction:column;gap:0;font-size:26px;padding:10px 4px;line-height:1.1}
+.ck small{font-size:13px}
+.ck.wrong{filter:grayscale(1) opacity(.5);pointer-events:none}
+.ck.right{filter:brightness(1.1)}
+@media (prefers-reduced-motion:reduce){.mz.next{animation:none}}
+.cardtop{display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap}
+.diff{font-size:13px;color:#8a5a1a;background:#fff3d6;border:1.5px solid #e8c98a;border-radius:20px;padding:1px 10px}
+</style>
+</head>
+<body>
+<div class="app">
+<div id="game">
+  <canvas id="fx" aria-hidden="true"></canvas>
+
+  <!-- TITLE -->
+  <section class="screen" id="s-title">
+    <div class="logo">
+      <span class="en">CHRISTMAS ESCAPE</span>
+      <span class="zh pop">聖誕<b>雪屋</b><br>大逃脫</span>
+    </div>
+    <p class="tagline">聖誕夜被困在雪屋裡了！<br>8 個房間、8 種機關，想先闖哪一間都可以</p>
+    <img class="mascot" id="titleGhost" alt="雪球">
+    <button class="btn green bounce" id="startBtn" type="button" style="font-size:25px;padding:14px 44px">開始遊戲</button>
+    <button class="btn small purple" id="resetBtn" type="button" hidden>重新開始</button>
+  </section>
+
+  <!-- MAP -->
+  <section class="screen" id="s-map" hidden>
+    <div class="hud">
+      <button class="iconbtn" id="homeBtn" type="button" aria-label="回到標題"><svg viewBox="0 0 24 24"><path d="M3.5 11.5 12 4.5l8.5 7V20h-5.5v-5.5H9V20H3.5z" fill="#ffc2d9" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></svg></button>
+      <div class="grow"></div>
+      <div class="pill" title="星星"><svg viewBox="0 0 24 24"><use href="#star"/></svg><span id="starCount">0</span>/24</div>
+      <div class="pill" title="拐杖糖"><svg viewBox="0 0 32 32"><use href="#candy"/></svg><span class="candyCount">3</span></div>
+      <button class="iconbtn sndBtn" type="button" aria-label="音效開關"><svg viewBox="0 0 24 24"><use href="#snd-on"/></svg></button>
+    </div>
+    <div class="mapscroll" id="mapscroll"><p class="maptip">點任何一個房間開始解謎，找齊 8 枚徽章就能從大門逃出去，趕上聖誕老公公出發！</p><div id="board"></div></div>
+  </section>
+
+  <!-- LEVEL -->
+  <section class="screen" id="s-level" hidden>
+    <div class="hud">
+      <button class="iconbtn" id="backBtn" type="button" aria-label="回到地圖"><svg viewBox="0 0 24 24"><path d="M15 4.5 7.5 12l7.5 7.5" stroke="currentColor" stroke-width="3.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+      <div class="lvtitle pop" id="lvTitle"></div>
+      <div class="pill"><svg viewBox="0 0 32 32"><use href="#candy"/></svg><span class="candyCount">3</span></div>
+    </div>
+    <div class="stage" id="stage"></div>
+  </section>
+
+  <!-- POPUP -->
+  <div class="veil" id="veil" hidden><div class="panel" id="panel" role="dialog" aria-modal="true"></div></div>
+</div>
+</div>
+
+<!-- sprites -->
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs>
+    <symbol id="star" viewBox="0 0 24 24"><path d="M12 2.6l2.8 5.9 6.4.8-4.7 4.4 1.2 6.4L12 17l-5.7 3.1 1.2-6.4-4.7-4.4 6.4-.8z" fill="#ffd257" stroke="#2b3358" stroke-width="1.7" stroke-linejoin="round"/><path d="M9.2 9.6q1-2.2 2.2-3" stroke="#fff6c9" stroke-width="1.4" fill="none" stroke-linecap="round"/></symbol>
+    <symbol id="star-off" viewBox="0 0 24 24"><path d="M12 2.6l2.8 5.9 6.4.8-4.7 4.4 1.2 6.4L12 17l-5.7 3.1 1.2-6.4-4.7-4.4 6.4-.8z" fill="#efe0c8" stroke="#bfa888" stroke-width="1.7" stroke-linejoin="round"/></symbol>
+    <symbol id="candy" viewBox="0 0 32 32"><g transform="rotate(24 16 16)" fill="none" stroke-linecap="round"><path d="M13 27V11.5a5 5 0 0 1 10 0V13" stroke="#2b3358" stroke-width="8"/><path d="M13 27V11.5a5 5 0 0 1 10 0V13" stroke="#fffaf0" stroke-width="4.6"/><path d="M13 27V11.5a5 5 0 0 1 10 0V13" stroke="#e8695f" stroke-width="4.6" stroke-dasharray="3.4 3.6" stroke-linecap="butt"/></g></symbol>
+    <symbol id="snd-on" viewBox="0 0 24 24"><path d="M4 9.5h3.5l5-4v13l-5-4H4z" fill="#ffe08a" stroke="#2b3358" stroke-width="2" stroke-linejoin="round"/><path d="M16 8.5q2.6 3.5 0 7M18.6 6q4.6 6 0 12" stroke="#2b3358" stroke-width="2" fill="none" stroke-linecap="round"/></symbol>
+    <symbol id="snd-off" viewBox="0 0 24 24"><path d="M4 9.5h3.5l5-4v13l-5-4H4z" fill="#efe0c8" stroke="#2b3358" stroke-width="2" stroke-linejoin="round"/><path d="M16.5 9.5l4.5 5M21 9.5l-4.5 5" stroke="#2b3358" stroke-width="2.2" stroke-linecap="round"/></symbol>
+  </defs>
+</svg>
+
+<script>
+/* ================= CHRISTMAS ART (drawn in code, swap for illustrations later) ================= */
+/* Two layers of style: scenery uses thin warm-brown outlines (LN) and muted pastels; the mascot and UI objects use a thick navy outline (INK). */
+const svgURI = (w,h,body) => "data:image/svg+xml;charset=utf-8," + encodeURIComponent(`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${w} ${h}" width="${w}" height="${h}">${body}</svg>`);
+const INK="#2b3358", LN="#8a5a3c";
+const ol=(w=1.6,c=LN)=>`stroke="${c}" stroke-width="${w}" stroke-linejoin="round" stroke-linecap="round"`;
+
+/* ---------- mascot: 雪球 the snowman (character layer: thick navy outline, big head, blush) ---------- */
+function snowman(o={}){
+  const K=INK;
+  const eye=(x,kind)=> kind==="arc" ? `<path d="M${x-7} 83 q7 -9 14 0" stroke="${K}" stroke-width="5" fill="none" stroke-linecap="round"/>`
+    : kind==="wide" ? `<circle cx="${x}" cy="80" r="9" fill="#fff" stroke="${K}" stroke-width="4"/><circle cx="${x}" cy="81" r="3.8" fill="${K}"/>`
+    : `<ellipse cx="${x}" cy="${kind==="low"?82:80}" rx="5.5" ry="7" fill="${K}"/><circle cx="${x+2}" cy="${kind==="low"?79:77}" r="2.1" fill="#fff"/>`;
+  const eyes = o.eyes==="happy" ? eye(71,"arc")+eye(109,"arc")
+    : o.eyes==="wink" ? eye(71,"dot")+eye(109,"arc")
+    : o.eyes==="wide" ? eye(71,"wide")+eye(109,"wide")
+    : o.eyes==="think" ? eye(71,"low")+eye(109,"low")+`<path d="M101 68 l15 -5" stroke="${K}" stroke-width="4.5" stroke-linecap="round"/>`
+    : eye(71,"dot")+eye(109,"dot");
+  const mouth = o.mouth==="o" ? `<ellipse cx="90" cy="105" rx="5" ry="6.5" fill="#e8695f" stroke="${K}" stroke-width="3.5"/>`
+    : o.mouth==="big" ? `<path d="M78 99 q12 17 24 0 z" fill="#e8695f" stroke="${K}" stroke-width="4" stroke-linejoin="round"/>`
+    : o.mouth==="hmm" ? `<path d="M81 105 q5 -4 9 0 q4 3 9 -1" stroke="${K}" stroke-width="4" fill="none" stroke-linecap="round"/>`
+    : `<path d="M80 100 q10 9 20 0" stroke="${K}" stroke-width="4" fill="none" stroke-linecap="round"/>`;
+  const arm=(sx,up)=>{ const x0=90+sx*30, y0=up?136:142, x1=90+sx*(up?58:60), y1=up?106:152;
+    return `<path d="M${x0} ${y0} L${x1} ${y1}" stroke="${K}" stroke-width="8" stroke-linecap="round"/><circle cx="${x1+sx*3}" cy="${y1+(up?-3:1)}" r="9.5" fill="#e8695f" stroke="${K}" stroke-width="5"/>`; };
+  const cane = o.hand ? `<g fill="none" stroke-linecap="round"><path d="M150 124 V76 q0 -12 10 -12 q10 0 10 12 v4" stroke="${K}" stroke-width="14"/><path d="M150 124 V76 q0 -12 10 -12 q10 0 10 12 v4" stroke="#fffaf0" stroke-width="7"/><path d="M150 124 V76 q0 -12 10 -12 q10 0 10 12 v4" stroke="#e8695f" stroke-width="7" stroke-dasharray="6 7" stroke-linecap="butt"/></g>` : "";
+  const armL = arm(-1, o.arms==="up");
+  const armR = cane + arm(1, o.arms==="up"||o.arms==="wave"||o.hand);
+  const extra = (o.sweat?`<path d="M148 44 q8 12 0 18 q-8 -6 0 -18z" fill="#a9d6f5" stroke="${K}" stroke-width="3.5" stroke-linejoin="round"/>`:"")
+    + (o.q?`<text x="143" y="52" font-size="40" font-weight="900" fill="#6db3ea" stroke="${K}" stroke-width="3" paint-order="stroke" font-family="Arial Black,Arial,sans-serif">?</text>`:"")
+    + (o.stars?[[22,46],[160,40],[166,128],[14,126]].map(([x,y],k)=>`<path d="${starPath(x,y,k%2?9:11)}" fill="#ffd257" stroke="${K}" stroke-width="3" stroke-linejoin="round"/>`).join(""):"");
+  return svgURI(180,180,`
+    <ellipse cx="90" cy="172" rx="44" ry="5" fill="rgba(138,90,60,.22)"/>
+    ${armL}${armR}
+    <ellipse cx="90" cy="144" rx="36" ry="27" fill="#fffdf8" stroke="${K}" stroke-width="6"/>
+    <path d="M62 154 q10 12 28 13" stroke="#e7edf5" stroke-width="6" fill="none" stroke-linecap="round"/>
+    <circle cx="90" cy="140" r="4" fill="${K}"/><circle cx="90" cy="155" r="4" fill="${K}"/>
+    <ellipse cx="90" cy="80" rx="46" ry="40" fill="#fffdf8" stroke="${K}" stroke-width="6"/>
+    <path d="M52 106 q38 20 76 0 q7 7 2 15 q-40 19 -80 0 q-5 -8 2 -15z" fill="#8fd4b2" stroke="${K}" stroke-width="5" stroke-linejoin="round"/>
+    <path d="M110 122 l5 25 q9 3 15 -4 l-7 -25z" fill="#8fd4b2" stroke="${K}" stroke-width="5" stroke-linejoin="round"/>
+    <path d="M68 115 l-2 12 M82 119 l-1 12 M98 119 l1 12" stroke="#fffaf0" stroke-width="3.5" stroke-linecap="round" opacity=".85"/>
+    <ellipse cx="60" cy="94" rx="9" ry="5.5" fill="#ffb3c6"/><ellipse cx="120" cy="94" rx="9" ry="5.5" fill="#ffb3c6"/>
+    ${eyes}
+    <path d="M86 86 q15 0 21 6.5 q-11 5 -21 1.5 q-3 -4 0 -8z" fill="#ffab5e" stroke="${K}" stroke-width="3.5" stroke-linejoin="round"/>
+    ${mouth}
+    <path d="M48 60 q-2 -46 42 -46 q44 0 42 46z" fill="#e8695f" stroke="${K}" stroke-width="6" stroke-linejoin="round"/>
+    <path d="M66 30 q10 -9 24 -9" stroke="#f6968c" stroke-width="5" fill="none" stroke-linecap="round"/>
+    <rect x="40" y="50" width="100" height="19" rx="9.5" fill="#fffaf0" stroke="${K}" stroke-width="6"/>
+    <path d="M58 55 v9 M74 55 v9 M90 55 v9 M106 55 v9 M122 55 v9" stroke="#ead9c2" stroke-width="3" stroke-linecap="round"/>
+    <circle cx="90" cy="13" r="9.5" fill="#fffaf0" stroke="${K}" stroke-width="5"/>
+    ${extra}`);
+}
+
+/* ---------- small helpers ---------- */
+const starPath=(x,y,r)=>{ let d=""; for(let k=0;k<10;k++){ const a=-Math.PI/2+k*Math.PI/5, rr=k%2?r*.5:r; d+=(k?"L":"M")+(x+rr*Math.cos(a)).toFixed(1)+" "+(y+rr*Math.sin(a)).toFixed(1); } return d+"Z"; };
+const flake=(x,y,r,c="#fff",w=2)=>[0,1,2].map(k=>{ const a=k*Math.PI/3; return `<path d="M${(x-r*Math.cos(a)).toFixed(1)} ${(y-r*Math.sin(a)).toFixed(1)}L${(x+r*Math.cos(a)).toFixed(1)} ${(y+r*Math.sin(a)).toFixed(1)}" stroke="${c}" stroke-width="${w}" stroke-linecap="round"/>`; }).join("");
+const BULB=["#f4a6a0","#ffd98a","#a8e0c4","#a9d0ee"];
+const bulbs=(pts,r=3.2,glow=false)=>pts.map(([x,y],k)=>`${glow?`<circle cx="${x}" cy="${y}" r="${r*2.4}" fill="#ffe9a3" opacity=".45"/>`:""}<circle cx="${x}" cy="${y}" r="${r}" fill="${BULB[k%4]}" ${ol(1)}/>`).join("");
+const gift=(x,y,w,h,c,r)=>`<rect x="${x}" y="${y}" width="${w}" height="${h}" rx="3" fill="${c}" ${ol()}/><rect x="${x+w/2-3}" y="${y}" width="6" height="${h}" fill="${r}"/><rect x="${x}" y="${y+h*.42}" width="${w}" height="5" fill="${r}"/><rect x="${x}" y="${y}" width="${w}" height="${h}" rx="3" fill="none" ${ol()}/><path d="M${x+w/2} ${y} q-9 -11 -12 -2 q2 5 12 2 q9 -11 12 -2 q-2 5 -12 2" fill="${r}" ${ol(1.3)}/>`;
+const wreath=(x,y,r)=>`<circle cx="${x}" cy="${y}" r="${r}" fill="none" stroke="${LN}" stroke-width="${r*.62+2.4}"/><circle cx="${x}" cy="${y}" r="${r}" fill="none" stroke="#7fb58a" stroke-width="${r*.62}"/><circle cx="${x}" cy="${y}" r="${r}" fill="none" stroke="#5f9c6f" stroke-width="${r*.22}" stroke-dasharray="${r*.3} ${r*.42}" stroke-linecap="round"/>${[[-.7,-.7],[.75,-.6],[-.95,.25],[.9,.4]].map(([a,b])=>`<circle cx="${x+a*r}" cy="${y+b*r}" r="${r*.16}" fill="#e8695f"/>`).join("")}<path d="M${x} ${y+r*.8} l${-r*.5} ${-r*.3} v${r*.7}z M${x} ${y+r*.8} l${r*.5} ${-r*.3} v${r*.7}z" fill="#e8695f" ${ol(1.2)}/><circle cx="${x}" cy="${y+r*.82}" r="${r*.16}" fill="#f6968c" ${ol(1)}/>`;
+const pine=(x,y,s=1,lit=false)=>{ const t=(yy,hw,h,c)=>`<path d="M${x} ${y+yy*s} L${x+hw*s} ${y+(yy+h)*s} Q${x} ${y+(yy+h+6)*s} ${x-hw*s} ${y+(yy+h)*s}Z" fill="${c}" ${ol(1.8)}/>`;
+  return `<rect x="${x-6*s}" y="${y+84*s}" width="${12*s}" height="${14*s}" fill="#b98250" ${ol()}/>${t(42,46,46,"#6aa377")}${t(20,36,40,"#78b085")}${t(0,26,34,"#88bd93")}`; };
+
+/* ---------- room scenes 180 x 150 ---------- */
+function room(key, lit){
+  const wall = {tree:"#FBE6CB",deer:"#F3DDBC",book:"#EDE1EC",ice:"#DCECF3",kitchen:"#FCE5D4",gift:"#F1E6D3",star:"#DEE5F2",living:"#F9DFCD"}[key];
+  const floor = key==="ice" ? "#C9E0EC" : "#E6BF93";
+  const fl = key==="ice" ? "#a9c9da" : "#cf9f6e";
+  let s="";
+  switch(key){
+    case "tree": s=`<ellipse cx="90" cy="131" rx="56" ry="8" fill="#f6c9bd" ${ol(1.3)}/>
+      ${pine(90,26,1,lit)}
+      <path d="${starPath(90,24,10)}" fill="#ffd257" ${ol()}/>
+      <path d="M70 66 q20 10 40 0 M58 96 q32 14 64 0" stroke="#ffe9a3" stroke-width="1.6" fill="none"/>
+      ${bulbs([[76,70],[104,69],[90,58],[64,98],[84,104],[106,103],[118,97],[72,122],[98,126],[116,121]],3,lit)}
+      ${gift(22,104,24,22,"#f4a6a0","#fffaf0")}${gift(136,110,26,16,"#a9d0ee","#ffd257")}${gift(40,114,16,12,"#ffe08a","#e8695f")}`; break;
+    case "deer": s=`${[30,60,90,120,150].map(x=>`<path d="M${x} 10 V120" stroke="#e3c79e" stroke-width="1.5"/>`).join("")}
+      <rect x="8" y="12" width="164" height="7" rx="2" fill="#d9a66e" ${ol()}/>
+      <path d="M90 19 v8" ${ol()}/><rect x="83" y="27" width="14" height="16" rx="3" fill="${lit?"#ffe08a":"#e9d9bf"}" ${ol()}/>${lit?`<circle cx="90" cy="35" r="20" fill="#ffe9a3" opacity=".4"/>`:""}
+      ${[[54,74],[126,78]].map(([x,y],k)=>`<path d="M${x-9} ${y-20} l-7 -13 m3.5 6.5 l-8 -1 M${x+9} ${y-20} l7 -13 m-3.5 6.5 l8 -1" stroke="#a8744a" stroke-width="3.4" stroke-linecap="round" fill="none"/>
+        <ellipse cx="${x-17}" cy="${y-10}" rx="7" ry="4.5" fill="#cf9f72" ${ol()} transform="rotate(-25 ${x-17} ${y-10})"/><ellipse cx="${x+17}" cy="${y-10}" rx="7" ry="4.5" fill="#cf9f72" ${ol()} transform="rotate(25 ${x+17} ${y-10})"/>
+        <ellipse cx="${x}" cy="${y}" rx="16" ry="19" fill="#d8aa7c" ${ol(1.8)}/><ellipse cx="${x}" cy="${y+10}" rx="10" ry="7.5" fill="#f3dcc0"/>
+        <circle cx="${x}" cy="${y+7}" r="4.8" fill="${k?"#8a5a3c":"#e8695f"}"/><circle cx="${x-6.5}" cy="${y-4}" r="2.3" fill="${INK}"/><circle cx="${x+6.5}" cy="${y-4}" r="2.3" fill="${INK}"/>
+        <ellipse cx="${x-11}" cy="${y+3}" rx="3.4" ry="2.2" fill="#f6a9a0"/><ellipse cx="${x+11}" cy="${y+3}" rx="3.4" ry="2.2" fill="#f6a9a0"/>`).join("")}
+      ${[[20,90],[94,94]].map(([x,y])=>`<rect x="${x}" y="${y}" width="66" height="${124-y}" rx="3" fill="#dfb180" ${ol(1.8)}/><path d="M${x+4} ${y+5} L${x+62} ${119} M${x+62} ${y+5} L${x+4} ${119}" stroke="#c8935f" stroke-width="3"/><rect x="${x}" y="${y}" width="66" height="6" rx="2" fill="#cf9b68" ${ol()}/>`).join("")}
+      <path d="M8 138 q8 -12 16 -2 q8 -12 16 0 M138 140 q8 -12 16 -2 q8 -10 16 0" stroke="#f0cf73" stroke-width="5" fill="none" stroke-linecap="round"/>`; break;
+    case "book": s=`<rect x="16" y="20" width="62" height="102" rx="4" fill="#e2b98a" ${ol(1.8)}/><rect x="21" y="25" width="52" height="92" fill="#f6e3c6"/>
+      ${[0,1,2].map(r=>[0,1,2,3,4].map(c=>{ const h=20+((c*5+r*3)%7); return `<rect x="${23+c*9.8}" y="${25+r*31+(27-h)}" width="8" height="${h}" rx="1.5" fill="${["#f4a6a0","#a8e0c4","#ffe08a","#a9d0ee","#d7bfe8","#f6c39a"][(c+r*2)%6]}" ${ol(1)}/>`; }).join("")).join("")}
+      ${[0,1,2].map(r=>`<rect x="19" y="${52+r*31}" width="56" height="4" fill="#d9a66e" ${ol(1)}/>`).join("")}
+      <rect x="104" y="22" width="52" height="44" rx="5" fill="#fffaf0" ${ol(1.8)}/><rect x="109" y="27" width="42" height="34" rx="2" fill="#cfe6f2"/><path d="M109 54 q12 -8 22 -2 q10 -6 20 0 v9 h-42z" fill="#fff"/><path d="M130 27 v34 M109 44 h42" stroke="#fffaf0" stroke-width="3"/>${[[116,34],[140,32],[122,48],[144,46]].map(([x,y])=>`<circle cx="${x}" cy="${y}" r="1.4" fill="#fff"/>`).join("")}
+      <rect x="92" y="94" width="76" height="7" rx="2" fill="#d9a66e" ${ol()}/><path d="M100 101 v22 M160 101 v22" stroke="#c8935f" stroke-width="5" stroke-linecap="round"/>
+      <path d="M100 93 q12 -6 22 0 q10 -6 22 0 v-10 q-12 -6 -22 0 q-10 -6 -22 0z" fill="#fffaf0" ${ol(1.4)}/><path d="M122 83 v10" ${ol(1.2)}/>
+      <path d="M150 93 q0 -20 9 -22 q7 8 8 22z" fill="#8fd4b2" ${ol(1.4)}/><rect x="147" y="89" width="23" height="5" rx="2.5" fill="#e8695f" ${ol(1)}/><circle cx="159" cy="70" r="3.2" fill="#ffd257" ${ol(1)}/>`; break;
+    case "ice": s=`${Array.from({length:9},(_,k)=>`<path d="M${14+k*19} 8 l4 ${9+(k*5)%8} l4 -${9+(k*5)%8}z" fill="#f4fbff" ${ol(1,"#9fc3d6")}/>`).join("")}
+      ${[50,130].map(x=>`<ellipse cx="${x}" cy="72" rx="27" ry="40" fill="#f1d7a3" ${ol(1.8)}/><ellipse cx="${x}" cy="72" rx="20" ry="33" fill="#c4e2f1" ${ol(1.2,"#8fb6c9")}/><ellipse cx="${x}" cy="72" rx="20" ry="33" fill="url(#mg)"/><path d="M${x-9} 56 l10 -8 M${x-8} 68 l15 -12" stroke="#fff" stroke-width="3" stroke-linecap="round" opacity=".85"/><path d="${starPath(x,30,6)}" fill="#fffaf0" ${ol(1.2)}/>`).join("")}
+      ${flake(90,44,8,"#fff",2.4)}${flake(90,92,5.5,"#fff",2)}${flake(18,100,4.5,"#fff",1.8)}${flake(162,100,4.5,"#fff",1.8)}
+      <path d="M30 132 h40 M96 140 h52 M110 130 h30" stroke="#eaf6fb" stroke-width="2.5" stroke-linecap="round"/>`; break;
+    case "kitchen": s=`<rect x="96" y="20" width="72" height="5" rx="2" fill="#d9a66e" ${ol(1.2)}/>${[106,122,138,154].map((x,k)=>`<path d="M${x} 25 v6" ${ol(1.2)}/><rect x="${x-4.5}" y="31" width="9" height="13" rx="3.5" fill="${BULB[k]}" ${ol(1.2)}/>`).join("")}
+      <rect x="20" y="52" width="62" height="71" rx="7" fill="#bfe3d2" ${ol(1.8)}/><rect x="20" y="52" width="62" height="16" rx="7" fill="#d5eee1" ${ol(1.4)}/>${[32,44,56,70].map(x=>`<circle cx="${x}" cy="60" r="3" fill="#fffaf0" ${ol(1)}/>`).join("")}
+      <rect x="28" y="76" width="46" height="34" rx="5" fill="${lit?"#ffd98a":"#9a8f8c"}" ${ol(1.6)}/>${lit?`<path d="M36 108 q6 -18 15 -22 q9 6 14 22z" fill="#f6968c"/><path d="M43 108 q3 -10 8 -12 q5 4 7 12z" fill="#ffe9a3"/>`:`<path d="M34 104 h34" stroke="#7d726f" stroke-width="2"/>`}<path d="M34 114 h34" ${ol(2)}/>
+      <path d="M36 52 v-8 h30 v8" fill="#f4a6a0" ${ol(1.4)}/><path d="M32 44 h38" ${ol(2.4)}/>
+      <rect x="92" y="92" width="78" height="7" rx="2" fill="#d9a66e" ${ol()}/><path d="M100 99 v24 M162 99 v24" stroke="#c8935f" stroke-width="5" stroke-linecap="round"/>
+      ${[[108,72],[131,72],[154,72]].map(([x,y])=>`<path d="M${x-9} ${y+2} h18 M${x-5} ${y+18} l5 -14 l5 14" stroke="${LN}" stroke-width="9" stroke-linecap="round" stroke-linejoin="round" fill="none"/><circle cx="${x}" cy="${y-8}" r="8.2" fill="${LN}"/>
+        <path d="M${x-9} ${y+2} h18 M${x-5} ${y+18} l5 -14 l5 14" stroke="#d39a66" stroke-width="6.4" stroke-linecap="round" stroke-linejoin="round" fill="none"/><circle cx="${x}" cy="${y-8}" r="6.8" fill="#d39a66"/>
+        <circle cx="${x-2.4}" cy="${y-9}" r="1.1" fill="${INK}"/><circle cx="${x+2.4}" cy="${y-9}" r="1.1" fill="${INK}"/><path d="M${x-2.5} ${y-6} q2.5 2.4 5 0" stroke="#fffaf0" stroke-width="1.2" fill="none"/><circle cx="${x}" cy="${y+3}" r="1.3" fill="#fffaf0"/><circle cx="${x}" cy="${y+8}" r="1.3" fill="#e8695f"/>`).join("")}`; break;
+    case "gift": s=`<rect x="10" y="26" width="160" height="5" rx="2" fill="#d9a66e" ${ol(1.2)}/>
+      ${gift(112,62,50,60,"#a9d0ee","#ffd257")}${gift(22,72,46,50,"#f4a6a0","#fffaf0")}${gift(68,90,40,32,"#a8e0c4","#e8695f")}${gift(34,46,32,26,"#ffe08a","#e8695f")}${gift(120,36,30,26,"#d7bfe8","#fffaf0")}${gift(76,68,24,22,"#f6c39a","#8fd4b2")}`; break;
+    case "star": s=`<path d="M0 0 H58 L0 62Z M180 0 H122 L180 62Z" fill="#e2b98a" ${ol(1.6)}/>
+      <circle cx="90" cy="60" r="34" fill="#e2b98a" ${ol(1.8)}/><circle cx="90" cy="60" r="27" fill="${lit?"#8fb2dd":"#a9bcd8"}" ${ol(1.2)}/>
+      ${[[74,48],[104,44],[108,70],[76,74],[92,80]].map(([x,y])=>`<circle cx="${x}" cy="${y}" r="1.5" fill="#fff"/>`).join("")}
+      ${lit?`<circle cx="90" cy="58" r="17" fill="#ffe9a3" opacity=".5"/>`:""}<path d="${starPath(90,58,12)}" fill="#ffd257" ${ol(1.4)}/>
+      <path d="M90 33 v54 M63 60 h54" stroke="#e2b98a" stroke-width="3"/>
+      <path d="M28 124 l12 -22 l12 22 M40 102 v-6" stroke="${LN}" stroke-width="2.6" fill="none" stroke-linecap="round"/><path d="M22 92 l34 -18 l6 11 l-34 18z" fill="#f4a6a0" ${ol(1.6)}/><path d="M56 74 l8 -4 l6 11 l-8 4z" fill="#ffe08a" ${ol(1.4)}/>
+      <rect x="124" y="100" width="40" height="23" rx="3" fill="#dfb180" ${ol(1.6)}/><path d="M124 100 q20 -16 40 0z" fill="#e9c193" ${ol(1.6)}/><rect x="140" y="98" width="8" height="9" rx="2" fill="#ffd257" ${ol(1.2)}/>`; break;
+    case "living": s=`<path d="M10 16 q40 18 80 0 q40 18 80 0" stroke="#7fb58a" stroke-width="3.4" fill="none" stroke-linecap="round"/>${bulbs([[24,22],[42,27],[60,26],[76,21],[104,21],[120,26],[138,27],[156,22]],3,lit)}
+      ${wreath(90,40,11)}
+      <rect x="48" y="58" width="84" height="9" rx="3" fill="#d9a66e" ${ol(1.6)}/><rect x="54" y="67" width="72" height="56" fill="#eeb09c" ${ol(1.8)}/>
+      <path d="M54 81 h14 M112 81 h14 M54 95 h10 M116 95 h10 M54 109 h8 M118 109 h8 M62 67 v14 M118 67 v14" stroke="#d98f7a" stroke-width="1.4"/>
+      <path d="M68 123 v-24 a22 22 0 0 1 44 0 v24z" fill="${lit?"#7a5348":"#8d7570"}" ${ol(1.6)}/>
+      ${lit?`<circle cx="90" cy="108" r="26" fill="#ffe9a3" opacity=".45"/><path d="M76 123 q3 -22 13 -30 q10 12 15 30z" fill="#f6968c"/><path d="M83 123 q2 -13 7 -17 q6 7 7 17z" fill="#ffe08a"/>`:`<path d="M76 121 h28 M80 117 h20" stroke="#6f5a55" stroke-width="3" stroke-linecap="round"/>`}
+      ${[62,86,108].map((x,k)=>`<path d="M${x} 66 v14 q0 7 7 7 h5 q3 0 3 -3.5 q0 -3.500 -3 -3.500 h-2 v-14z" fill="${["#f4a6a0","#a8e0c4","#a9d0ee"][k]}" ${ol(1.3)}/><rect x="${x-1.5}" y="64" width="13" height="5.5" rx="2" fill="#fffaf0" ${ol(1)}/>`).join("")}
+      <path d="M4 124 v-30 q0 -12 12 -12 h10 q12 0 12 12 v30z" fill="#a8d8bf" ${ol(1.6)}/><path d="M4 106 h34" ${ol(1.3)}/>
+      <path d="M150 124 v-36" ${ol(2.4)}/><path d="M138 88 l6 -22 h14 l6 22z" fill="${lit?"#ffe08a":"#eadbc0"}" ${ol(1.5)}/>${lit?`<circle cx="151" cy="84" r="22" fill="#ffe9a3" opacity=".4"/>`:""}`; break;
+  }
+  const planks = [132,141].map((y,k)=>`<path d="M0 ${y} H180" stroke="${fl}" stroke-width="1.2"/>`).join("")+[[30,123,132],[100,123,132],[150,123,132],[60,132,141],[124,132,141],[20,141,150],[90,141,150],[160,141,150]].map(([x,a,b])=>`<path d="M${x} ${a} V${b}" stroke="${fl}" stroke-width="1.2"/>`).join("");
+  const glow = lit ? `<rect width="180" height="150" fill="url(#g)"/>` : "";
+  const dim = lit ? "" : `<rect width="180" height="150" fill="#4a5578" opacity=".4"/><rect width="180" height="150" fill="#dfe6f2" opacity=".18"/>`;
+  return svgURI(180,150,`<defs><radialGradient id="g" cx="50%" cy="40%" r="75%"><stop offset="0" stop-color="#fff3c4" stop-opacity=".55"/><stop offset="1" stop-color="#ffe9a3" stop-opacity="0"/></radialGradient>
+    <linearGradient id="mg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#fff" stop-opacity=".5"/><stop offset=".6" stop-color="#fff" stop-opacity="0"/></linearGradient></defs>
+    <rect width="180" height="150" fill="${wall}"/><rect width="180" height="9" fill="${LN}" opacity=".1"/>
+    <rect y="123" width="180" height="27" fill="${floor}"/>${planks}<rect x="-2" y="118" width="184" height="6" fill="#fffaf0" ${ol(1.2)}/>
+    ${glow}${s}${dim}`);
+}
+
+/* ---------- cottage exterior 400 x 582 (rooms are drawn on top by houseSVG) ---------- */
+const HOUSE_W=400, HOUSE_H=582;
+function shell(){
+  const EAVE=188, PEAK=22, slope=(x)=>EAVE-(EAVE-PEAK)*(1-Math.abs(x-200)/198);   // y of the roof edge at x
+  let shingles="";
+  for(let y=58;y<EAVE-2;y+=18){ const hw=(y-PEAK)/(EAVE-PEAK)*198-10; let d=`M${(200-hw).toFixed(1)} ${y}`; const n=Math.max(1,Math.round(hw*2/16)); const st=hw*2/n; for(let k=0;k<n;k++) d+=` q${(st/2).toFixed(1)} 7 ${st.toFixed(1)} 0`; shingles+=`<path d="${d}" fill="none" stroke="#c57a5c" stroke-width="1.5" stroke-linecap="round"/>`; }
+  let stones=""; for(let r=0;r<7;r++){ const y=420+r*17; for(let x=22+(r%2)*18;x<378;x+=36){ const w=Math.min(32,378-x); if(w>10) stones+=`<rect x="${x}" y="${y}" width="${w}" height="13" rx="5" fill="#efe3d2" stroke="#d3bfa6" stroke-width="1.2"/>`; } }
+  const roofBulbs=[.1,.2,.3,.4].flatMap(t=>{ const x=2+198*t; return [[x+10,slope(x)+15],[400-x-10,slope(x)+15]]; });
+  return svgURI(HOUSE_W,HOUSE_H,`
+    <g fill="#fff" opacity=".9"><path d="M22 70 q2 -14 16 -12 q6 -12 20 -6 q12 -4 14 10 q10 2 8 12 h-56 q-8 -2 -2 -4z"/><path d="M330 100 q4 -12 16 -8 q8 -10 20 -2 q12 0 10 12 q8 4 2 10 h-50 q-6 -6 2 -12z"/></g>
+    <rect x="284" y="56" width="32" height="84" fill="#eeb09c" ${ol(2)}/><path d="M284 76 h32 M284 94 h32 M300 56 v20 M292 76 v18 M306 76 v18" stroke="#d98f7a" stroke-width="1.3"/>
+    <path d="M278 60 q0 -12 12 -12 h20 q12 0 12 12z" fill="#fff" ${ol(2)}/>
+    <g fill="#fff" opacity=".85"><circle cx="304" cy="34" r="7"/><circle cx="314" cy="22" r="5"/><circle cx="310" cy="10" r="3.4"/></g>
+    <path d="M200 ${PEAK} L398 ${EAVE} H2Z" fill="#dd9272" ${ol(2.4)}/>${shingles}
+    <g transform="translate(0,22)">
+    <path d="M-4 420 V402 q30 -16 60 -4 h288 q30 -12 60 4 V420z" fill="#fff" ${ol(2)}/>
+    <rect x="4" y="408" width="392" height="148" rx="20" fill="#d9b791" ${ol(2.2)}/>
+    ${[[9,440],[12,500],[388,470],[391,530],[60,551],[200,552],[330,551]].map(([x,y])=>`<ellipse cx="${x}" cy="${y}" rx="3.4" ry="2.4" fill="#c49f78"/>`).join("")}
+    <path d="M-4 414 V402 q30 -16 60 -4 h288 q30 -12 60 4 V414z" fill="#fff"/>
+    <rect x="18" y="162" width="364" height="254" fill="#F7E3C6" ${ol(2.4)}/>
+    <rect x="18" y="414" width="364" height="134" fill="#e6d6c1" ${ol(2.4)}/>${stones}
+    ${[[18,162,364,9],[18,284,364,10],[18,408,364,9]].map(([x,y,w,h])=>`<rect x="${x}" y="${y}" width="${w}" height="${h}" fill="#cf9b68" ${ol(1.6)}/>`).join("")}
+    ${[18,138,256,374].map(x=>`<rect x="${x}" y="171" width="${x===18||x===374?8:6}" height="113" fill="#cf9b68" ${ol(1.4)}/><rect x="${x}" y="294" width="${x===18||x===374?8:6}" height="114" fill="#cf9b68" ${ol(1.4)}/>`).join("")}
+    </g>
+    <path d="M0 ${EAVE+2} L200 14 L400 ${EAVE+2}" fill="none" stroke="${LN}" stroke-width="19" stroke-linejoin="round" stroke-linecap="round"/>
+    <path d="M0 ${EAVE+2} L200 14 L400 ${EAVE+2}" fill="none" stroke="#fff" stroke-width="15" stroke-linejoin="round" stroke-linecap="round"/>
+    ${[[14,EAVE+6,4],[30,EAVE-6,3],[386,EAVE+6,4],[370,EAVE-6,3]].map(([x,y,r])=>`<circle cx="${x}" cy="${y}" r="${r+1.6}" fill="#fff" ${ol(1.4)}/>`).join("")}
+    ${bulbs(roofBulbs,3.6,true)}
+    <path d="${starPath(200,15,12.5)}" fill="#ffd257" stroke="${LN}" stroke-width="2" stroke-linejoin="round"/>`);
+}
+
+/* ---------- doors 180 x 254 ---------- */
+function door(open){
+  return svgURI(180,254,`
+    <defs><radialGradient id="lg" cx="50%" cy="55%" r="65%"><stop offset="0" stop-color="#fffbe6"/><stop offset="1" stop-color="#ffe08a"/></radialGradient></defs>
+    <rect x="12" y="40" width="156" height="214" rx="8" fill="#fffaf0" ${ol(3)}/>
+    ${open?`<rect x="26" y="54" width="128" height="200" rx="4" fill="url(#lg)" ${ol(2.6)}/><path d="M26 226 q30 -18 62 -6 q30 -12 66 2 v32 h-128z" fill="#fff"/>${flake(60,96,7,"#fff",2.6)}${flake(118,120,6,"#fff",2.4)}${flake(92,160,5,"#fff",2.2)}${flake(128,72,4.500,"#fff",2)}
+      <path d="M26 54 l34 14 v186 h-34z" fill="#f4dcbd" ${ol(2.6)}/><circle cx="52" cy="164" r="4.5" fill="#ffd257" ${ol(1.6)}/>`
+     :`<rect x="26" y="54" width="128" height="200" rx="4" fill="#fbe9d0" ${ol(2.6)}/>
+      <rect x="40" y="68" width="100" height="92" rx="6" fill="none" stroke="#e3c8a3" stroke-width="2.6"/><rect x="40" y="172" width="100" height="70" rx="6" fill="none" stroke="#e3c8a3" stroke-width="2.6"/>
+      ${wreath(90,112,26)}
+      <rect x="56" y="184" width="68" height="22" rx="5" fill="#d9a66e" ${ol(2)}/><path d="M64 195 h52" stroke="#c8935f" stroke-width="2" stroke-linecap="round"/>
+      <circle cx="140" cy="166" r="6" fill="#ffd257" ${ol(2)}/>`}
+    <rect x="42" y="4" width="96" height="30" rx="10" fill="${open?"#a8e0c4":"#ffc2d9"}" stroke="${INK}" stroke-width="3.5"/>
+    <text x="90" y="27" text-anchor="middle" font-size="21" font-weight="900" letter-spacing="2" fill="${INK}" font-family="Arial Black,Arial,sans-serif">EXIT</text>`);
+}
+
+/* ---------- medallions 110 x 110 (UI layer: navy rim) ---------- */
+function medal(icon){
+  const I = {
+    tree:`<rect x="51" y="74" width="8" height="9" fill="#b98250" ${ol()}/><path d="M55 28 L76 75 Q55 81 34 75Z" fill="#7fb58a" ${ol(2)}/><path d="M55 28 L68 56 Q55 60 42 56Z" fill="#92c49d"/><path d="${starPath(55,28,8)}" fill="#ffd257" ${ol(1.5)}/><circle cx="49" cy="58" r="3" fill="#f4a6a0" ${ol(1)}/><circle cx="62" cy="66" r="3" fill="#ffe08a" ${ol(1)}/><circle cx="46" cy="70" r="2.6" fill="#a9d0ee" ${ol(1)}/>`,
+    deer:`<path d="M45 40 l-8 -14 m4 7 l-9 -2 M65 40 l8 -14 m-4 7 l9 -2" stroke="#a8744a" stroke-width="4" stroke-linecap="round" fill="none"/><ellipse cx="55" cy="58" rx="17" ry="20" fill="#d8aa7c" ${ol(2)}/><ellipse cx="55" cy="68" rx="10" ry="8" fill="#f3dcc0"/><circle cx="55" cy="66" r="5.5" fill="#e8695f"/><circle cx="48" cy="53" r="2.6" fill="${INK}"/><circle cx="62" cy="53" r="2.6" fill="${INK}"/><ellipse cx="43" cy="61" rx="3.6" ry="2.4" fill="#f6a9a0"/><ellipse cx="67" cy="61" rx="3.6" ry="2.4" fill="#f6a9a0"/>`,
+    book:`<path d="M29 40 q13 -7 26 2 q13 -9 26 -2 v35 q-13 -7 -26 2 q-13 -9 -26 -2z" fill="#fffaf0" ${ol(2)}/><path d="M55 42 v35" ${ol(2)}/><path d="M35 50 h13 M35 58 h13 M35 66 h9 M62 50 h13 M62 58 h13 M62 66 h9" stroke="#d9b791" stroke-width="2.2" stroke-linecap="round"/><path d="M70 36 v16 l4 -3 l4 3 v-18z" fill="#e8695f" ${ol(1.2)}/>`,
+    mirror:`<ellipse cx="55" cy="55" rx="19" ry="26" fill="#f1d7a3" ${ol(2)}/><ellipse cx="55" cy="55" rx="13.500" ry="20" fill="#c4e2f1" ${ol(1.2,"#8fb6c9")}/><path d="M48 46 l8 -6 M48 56 l12 -9" stroke="#fff" stroke-width="2.6" stroke-linecap="round"/>`,
+    cookie:`<path d="M39 56 h32 M46 82 l9 -24 l9 24" stroke="${LN}" stroke-width="15" stroke-linecap="round" stroke-linejoin="round" fill="none"/><circle cx="55" cy="38" r="12.500" fill="${LN}"/><path d="M39 56 h32 M46 82 l9 -24 l9 24" stroke="#d39a66" stroke-width="11.500" stroke-linecap="round" stroke-linejoin="round" fill="none"/><circle cx="55" cy="38" r="10.800" fill="#d39a66"/><circle cx="51" cy="36" r="1.7" fill="${INK}"/><circle cx="59" cy="36" r="1.7" fill="${INK}"/><path d="M51 41 q4 3.500 8 0" stroke="#fffaf0" stroke-width="1.8" fill="none" stroke-linecap="round"/><circle cx="55" cy="57" r="2.2" fill="#fffaf0"/><circle cx="55" cy="65" r="2.2" fill="#e8695f"/>`,
+    gift:`<rect x="34" y="46" width="42" height="34" rx="3" fill="#f4a6a0" ${ol(2)}/><rect x="51" y="46" width="8" height="34" fill="#fffaf0"/><rect x="31" y="39" width="48" height="11" rx="3" fill="#f6b8b2" ${ol(2)}/><rect x="51" y="39" width="8" height="11" fill="#fffaf0"/><path d="M55 39 q-14 -15 -17 -3 q4 5 17 3 q14 -15 17 -3 q-4 5 -17 3" fill="#ffe08a" ${ol(1.6)}/>`,
+    star:`<path d="${starPath(55,57,25)}" fill="#ffd257" ${ol(2.2)}/><path d="M46 52 q3 -7 8 -10" stroke="#fff6c9" stroke-width="3" fill="none" stroke-linecap="round"/>`,
+    bulb:`<rect x="47" y="27" width="16" height="13" rx="3" fill="#cfc7c2" ${ol(1.8)}/><path d="M55 40 c-17 8 -17 31 0 43 c17 -12 17 -35 0 -43z" fill="#ffd98a" ${ol(2.2)}/><path d="M49 53 q-3 8 0 16" stroke="#fff6c9" stroke-width="3.4" stroke-linecap="round" fill="none"/>`
+  }[icon];
+  return svgURI(110,110,`<circle cx="55" cy="55" r="50" fill="#f6c667" stroke="${INK}" stroke-width="5"/><circle cx="55" cy="55" r="40" fill="#fff6e6" stroke="#dfa53a" stroke-width="2.6"/><path d="M22 34 a40 40 0 0 1 20 -18" stroke="#fde7a8" stroke-width="4" fill="none" stroke-linecap="round"/>${I}`);
+}
+
+/* ---------- puzzle pieces ---------- */
+const bauble=(lit)=>svgURI(140,140,`${lit?`<circle cx="70" cy="80" r="60" fill="#ffe08a" opacity=".5"/>`:""}<path d="M63 12 q7 -11 14 0" stroke="${INK}" stroke-width="4" fill="none" stroke-linecap="round"/><rect x="57" y="12" width="26" height="17" rx="5" fill="#f6c667" stroke="${INK}" stroke-width="4.500"/>
+  <circle cx="70" cy="82" r="53" fill="${lit?"#ffe08a":"#fffaf0"}" stroke="${INK}" stroke-width="5"/><path d="M22 66 q48 -15 96 0" stroke="${lit?"#f6c667":"#f6d5c0"}" stroke-width="5" fill="none" stroke-linecap="round"/><path d="M22 100 q48 15 96 0" stroke="${lit?"#f6c667":"#cfe4f1"}" stroke-width="5" fill="none" stroke-linecap="round"/><path d="M36 54 q8 -11 19 -14" stroke="#fff" stroke-width="6" stroke-linecap="round" fill="none" opacity=".9"/>`);
+const ztile=(on)=>svgURI(80,80,`<rect x="4" y="7" width="72" height="70" rx="15" fill="${on?"#dfae3c":"#d9b791"}"/><rect x="4" y="3" width="72" height="68" rx="15" fill="${on?"#ffe08a":"#fffaf0"}" stroke="${on?"#b98a1f":"#b98250"}" stroke-width="4"/>`);
+const tile=(kind)=>{ const c={def:["#dceef7","#b4d4e6"],lit:["#ffe08a","#f0c452"],in:["#a8e0c4","#7cc7a3"],out:["#ffc2d9","#f29bbb"]}[kind];
+  return svgURI(100,100,`<rect x="4" y="10" width="92" height="87" rx="16" fill="${INK}"/><rect x="4" y="4" width="92" height="86" rx="16" fill="${c[0]}" stroke="${INK}" stroke-width="4.500"/><path d="M14 80 q36 6 72 0" stroke="${c[1]}" stroke-width="5" fill="none" stroke-linecap="round"/>${kind==="def"?flake(78,24,7,"#fff",2.6):""}${kind==="lit"?`<path d="${starPath(78,24,9)}" fill="#fffaf0"/>`:""}`); };
+const bulb=(on)=>svgURI(120,120,`${on?`<circle cx="60" cy="70" r="50" fill="#fff6c9" opacity=".7"/>`:""}<rect x="47" y="8" width="26" height="23" rx="5" fill="#cfc7c2" stroke="${INK}" stroke-width="4.500"/><path d="M49 17 h22 M49 24 h22" stroke="${INK}" stroke-width="2.2"/>
+  <path d="M60 31 c-31 14 -35 55 0 80 c35 -25 31 -66 0 -80z" fill="${on?"#ffd257":"#d9d2cf"}" stroke="${INK}" stroke-width="5" stroke-linejoin="round"/><path d="M47 55 q-6 14 0 28" stroke="${on?"#fffbe6":"#efeae7"}" stroke-width="6" stroke-linecap="round" fill="none"/>
+  ${on?`<circle cx="52" cy="72" r="3" fill="${INK}"/><circle cx="68" cy="72" r="3" fill="${INK}"/><path d="M54 82 q6 6 12 0" stroke="${INK}" stroke-width="3" fill="none" stroke-linecap="round"/><ellipse cx="45" cy="80" rx="4.500" ry="3" fill="#f6a9a0"/><ellipse cx="75" cy="80" rx="4.500" ry="3" fill="#f6a9a0"/>`
+      :`<path d="M48 73 q4 3 8 0 M64 73 q4 3 8 0" stroke="#8d8683" stroke-width="3" fill="none" stroke-linecap="round"/>`}`);
+
+/* ---------- backdrops ---------- */
+function sceneArt(){   // wide cozy room "stage" for the title screen, 440 x 900
+  let planks=""; for(let y=690;y<900;y+=42){ planks+=`<path d="M0 ${y} H440" stroke="#cf9f6e" stroke-width="1.6"/>`; for(let x=((y/42)%2)*90+40;x<440;x+=180) planks+=`<path d="M${x} ${y} v42" stroke="#cf9f6e" stroke-width="1.6"/>`; }
+  const g=[[14,34],[52,47],[92,56],[134,60],[176,58],[220,52],[264,58],[306,60],[348,56],[388,47],[426,34]];
+  return svgURI(440,900,`<defs><pattern id="d" width="22" height="22" patternUnits="userSpaceOnUse"><circle cx="11" cy="11" r="1.8" fill="rgb(243,226,202)"/></pattern>
+      <radialGradient id="lamp" cx="50%" cy="50%" r="50%"><stop offset="0" stop-color="#fff3c4" stop-opacity=".9"/><stop offset="1" stop-color="#fff3c4" stop-opacity="0"/></radialGradient></defs>
+    <rect width="440" height="900" fill="#FFF1DC"/><rect width="440" height="560" fill="url(#d)"/>
+    <rect y="0" width="440" height="22" fill="#F1D4AC" ${ol(1.6)}/>
+    <rect y="540" width="440" height="112" fill="#FBE3C4"/><rect x="-4" y="532" width="448" height="10" fill="#fffaf0" ${ol(1.6)}/>
+    ${[40,150,260,370].map(x=>`<rect x="${x-34}" y="556" width="68" height="72" rx="5" fill="none" stroke="#efcfa8" stroke-width="2.2"/>`).join("")}
+    <rect y="652" width="440" height="248" fill="#E6BF93"/>${planks}
+    <rect x="-4" y="640" width="448" height="14" fill="#fffaf0" ${ol(1.8)}/>
+    <path d="M-6 26 Q110 74 220 50 Q330 74 446 26" stroke="#7fb58a" stroke-width="4" fill="none" stroke-linecap="round"/>${bulbs(g,6,true)}
+    <!-- window -->
+    <rect x="292" y="316" width="130" height="176" rx="10" fill="#fffaf0" ${ol(2.2)}/><rect x="302" y="326" width="110" height="150" rx="4" fill="#cfe6f2" ${ol(1.4)}/>
+    <path d="M302 446 q28 -22 56 -6 q28 -16 54 0 v36 h-110z" fill="#fff"/>${pine(330,398,.5)}${pine(388,410,.4)}
+    ${[[316,344],[346,362],[372,340],[398,372],[324,392],[362,402],[396,330],[340,430]].map(([x,y])=>`<circle cx="${x}" cy="${y}" r="2.4" fill="#fff"/>`).join("")}
+    <path d="M357 326 v150 M302 400 h110" stroke="#fffaf0" stroke-width="6"/><path d="M357 326 v150 M302 400 h110" stroke="${LN}" stroke-width="1" opacity=".35"/>
+    <rect x="284" y="488" width="146" height="12" rx="4" fill="#fffaf0" ${ol(2)}/>
+    <path d="M286 312 h142" ${ol(3)}/><path d="M292 314 q-4 70 14 110 q10 -60 26 -110z M422 314 q4 70 -14 110 q-10 -60 -26 -110z" fill="#ffc2d9" ${ol(1.8)}/>
+    <!-- tree -->
+    <ellipse cx="100" cy="664" rx="104" ry="13" fill="#f6c9bd" ${ol(1.6)}/>
+    ${pine(96,424,2.4)}
+    <path d="M52 498 q44 18 88 0 M22 560 q74 24 148 0 M0 624 q96 26 192 0" stroke="#ffe9a3" stroke-width="2.4" fill="none" stroke-linecap="round"/>
+    ${bulbs([[62,502],[96,508],[130,502],[36,565],[72,574],[120,574],[156,565],[14,629],[56,638],[96,641],[138,638],[178,629],[96,470],[78,536],[118,540],[60,602],[134,604]],5.5,true)}
+    <path d="${starPath(96,420,22)}" fill="#ffd257" ${ol(2.2)}/>
+    <g transform="translate(168,622) scale(1.7)">${gift(0,0,26,24,"#a9d0ee","#ffd257")}</g><g transform="translate(-6,640) scale(1.6)">${gift(0,0,28,20,"#f4a6a0","#fffaf0")}</g><g transform="translate(218,650) scale(1.4)">${gift(0,0,20,16,"#ffe08a","#e8695f")}</g>
+    <!-- lamp + side table -->
+    <circle cx="380" cy="566" r="74" fill="url(#lamp)"/>
+    <rect x="344" y="622" width="72" height="9" rx="3" fill="#d9a66e" ${ol(1.8)}/><path d="M354 631 v38 M406 631 v38" stroke="${LN}" stroke-width="8" stroke-linecap="round"/><path d="M354 631 v38 M406 631 v38" stroke="#d9a66e" stroke-width="5" stroke-linecap="round"/>
+    <path d="M380 622 v-34" ${ol(3)}/><ellipse cx="380" cy="621" rx="12" ry="3.500" fill="#cf9b68" ${ol(1.5)}/><path d="M358 592 l8 -40 h28 l8 40z" fill="#ffe08a" ${ol(2)}/>
+    <!-- rug -->
+    <ellipse cx="226" cy="770" rx="168" ry="44" fill="#f6c9bd" ${ol(2)}/><ellipse cx="226" cy="770" rx="146" ry="34" fill="none" stroke="#fffaf0" stroke-width="4" stroke-dasharray="2 10" stroke-linecap="round"/>`);
+}
+function skyArt(){     // snowy daytime outdoors, 326 x 972 (door level backdrop)
+  return svgURI(326,972,`<defs><linearGradient id="s" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#cfe6f2"/><stop offset=".7" stop-color="#eef4f0"/><stop offset="1" stop-color="#fdf9f1"/></linearGradient></defs><rect width="326" height="972" fill="url(#s)"/>
+    ${Array.from({length:46},(_,k)=>`<circle cx="${(k*97)%326}" cy="${(k*173)%700}" r="${1.6+(k%3)*.7}" fill="#fff" opacity="${.7+(k%3)*.1}"/>`).join("")}
+    <g fill="#fff" opacity=".9"><path d="M30 120 q4 -18 22 -14 q10 -16 28 -6 q16 -2 16 14 q12 6 2 16 h-70 q-10 -4 2 -10z"/><path d="M212 60 q6 -14 20 -10 q12 -12 26 0 q14 2 12 14 q8 6 0 12 h-58 q-8 -8 0 -16z"/></g>
+    <path d="M0 250 q80 -44 170 -14 q90 -36 156 -6 V972 H0z" fill="#f4f8f6" ${ol(1.6,"#c9dbe0")}/>
+    ${pine(40,170,.8)}${pine(84,186,.6)}${pine(250,168,.8)}${pine(296,186,.6)}
+    <path d="M0 300 q100 -40 200 -8 q70 -24 126 -4 V972 H0z" fill="#fdf9f1"/>`);
+}
+
+const GH = {
+  c01: snowman(), c02: snowman({eyes:"happy",mouth:"big",arms:"up"}), c03: snowman({eyes:"wide",mouth:"o",sweat:1}),
+  c04: snowman({eyes:"think",mouth:"hmm",q:1}), c05: snowman({eyes:"happy",hand:1}), c06: snowman({eyes:"happy",mouth:"big",arms:"up",stars:1}),
+  c07: snowman({eyes:"wink",mouth:"big",arms:"wave"})
+};
+function ava(k){ const a=document.getElementById("ava"); if(!a) return; a.src=GH[k]; a.classList.remove("pop-in"); void a.offsetWidth; a.classList.add("pop-in"); clearTimeout(ava._t); if(k==="c03") ava._t=setTimeout(()=>{ const b=document.getElementById("ava"); if(b && b.src===GH.c03) b.src=GH.c01; },2500); }
+
+const ART = {
+  shell: shell(), door_c: door(false), door_o: door(true), scene: sceneArt(), sky: skyArt(),
+  pk_def: bauble(false), pk_lit: bauble(true), zy_def: ztile(false), zy_on: ztile(true),
+  t_def: tile("def"), t_lit: tile("lit"), t_in: tile("in"), t_out: tile("out"), jl_on: bulb(true), jl_off: bulb(false),
+  dot_def: svgURI(80,80,`<circle cx="40" cy="40" r="29" fill="#fffaf0" stroke="${INK}" stroke-width="6"/><circle cx="32" cy="32" r="7" fill="#f6d5c0"/>`),
+  dot_on: svgURI(80,80,`<circle cx="40" cy="40" r="38" fill="#ffe08a" opacity=".6"/><circle cx="40" cy="40" r="28" fill="#ffd257" stroke="${INK}" stroke-width="5"/><path d="${starPath(40,40,14)}" fill="#fffaf0"/>`),
+  mirror: svgURI(135,158,`<defs><linearGradient id="mg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#fff" stop-opacity=".65"/><stop offset=".55" stop-color="#fff" stop-opacity="0"/></linearGradient></defs>
+    <ellipse cx="67.5" cy="84" rx="59" ry="71" fill="#f1d7a3" ${ol(2.6)}/><ellipse cx="67.5" cy="84" rx="53" ry="65" fill="none" stroke="#fbe9c4" stroke-width="2.4"/>
+    <ellipse cx="67.5" cy="84" rx="46" ry="58" fill="#c4e2f1" ${ol(2,"#8fb6c9")}/><ellipse cx="67.5" cy="84" rx="46" ry="58" fill="url(#mg)"/>
+    <path d="${starPath(67.5,13,9)}" fill="#fffaf0" ${ol(1.6)}/>${flake(13,84,5,"#fffaf0",2.4)}${flake(122,84,5,"#fffaf0",2.4)}${flake(67.5,150,5,"#fffaf0",2.4)}`),
+  wood: svgURI(384,143,`<rect x="3" y="3" width="378" height="137" rx="18" fill="#c99363" stroke="${INK}" stroke-width="4"/>${[38,74,108].map(y=>`<path d="M10 ${y} H374" stroke="#b98250" stroke-width="2"/>`).join("")}<path d="M24 20 q60 -6 120 2 M220 92 q60 8 140 -4 M60 58 q40 5 90 0" stroke="#d9a877" stroke-width="2.6" fill="none" stroke-linecap="round"/>`),
+  star: svgURI(70,66,`<path d="${starPath(35,35,29)}" fill="#ffd257" stroke="${INK}" stroke-width="4.500" stroke-linejoin="round"/>`),
+  candy: svgURI(112,64,`<g transform="rotate(30 56 32)" fill="none" stroke-linecap="round"><path d="M48 58 V22 q0 -14 14 -14 q14 0 14 14" stroke="${INK}" stroke-width="16"/><path d="M48 58 V22 q0 -14 14 -14 q14 0 14 14" stroke="#fffaf0" stroke-width="9.500"/><path d="M48 58 V22 q0 -14 14 -14 q14 0 14 14" stroke="#e8695f" stroke-width="9.500" stroke-dasharray="6 7" stroke-linecap="butt"/></g>`)
+};
+for(const k of ["tree","deer","book","mirror","cookie","gift","star","bulb"]) ART["med_"+k]=medal(k);
+for(const [k,s] of [["green","tree"],["attic","deer"],["library","book"],["mirrorh","ice"],["kitchen","kitchen"],["cellar","gift"],["clock","star"],["living","living"]]){ ART["r_"+k+"_d"]=room(s,false); ART["r_"+k+"_l"]=room(s,true); }
+/* ================= DATA ================= */
+const LEVELS = [
+  { key:"sym", room:"聖誕樹大廳", seal:"樹", digit:6, subj:"圖形", bg:"",
+    intro:"聖誕樹上掛著寫了字的彩球，只有「左右對稱」的字會發光！",
+    title:"照鏡子的字",
+    q:"想像在字的正中間畫一條直線，\n左右兩邊一模一樣，就是<em>左右對稱</em>。\n把所有左右對稱的字都點亮！",
+    type:"sym", chars:["山","上","中","月","田","七","木","九","日"], answer:["山","中","田","木","日"],
+    hint:"用手指在字中間擋住一半，看看左右是不是一樣。答案一共有 5 個字。" },
+  { key:"seq", room:"麋鹿馬廄", seal:"鹿", digit:1, subj:"數學", bg:"",
+    intro:"聖誕節快到了，每天來馬廄報到的麋鹿越來越多……好像有規律喔！",
+    title:"越來越多的麋鹿",
+    q:"每天來報到的麋鹿數量：\n1、1、2、3、5、8、？\n第 7 天會來幾隻？",
+    type:"num", len:2, answer:"13",
+    hint:"每個數字都等於「前面兩個數字」加起來，例如 2 = 1 + 1、3 = 1 + 2、5 = 2 + 3……" },
+  { key:"zy", room:"精靈書房", seal:"書", digit:9, subj:"國語", bg:"",
+    intro:"精靈把禮物清單鎖起來了，鎖上刻了三個字，可是要輸入的是數字……",
+    title:"注音密碼鎖",
+    q:"鎖上刻著：<em>雪　人　帽</em>\n\n帽下藏著小玄機，\n字字頭符莫忘記，\nㄅㄆㄇㄈ排隊點，\n只留個位不留十。",
+    type:"num", len:3, answer:"483", extra:"zy",
+    hint:"三個字的注音是：雪 ㄒㄩㄝˇ、人 ㄖㄣˊ、帽 ㄇㄠˋ。只看第一個符號就好。個位數的意思是：排第 12 個就輸入 2。" },
+  { key:"mirror", room:"冰晶鏡廊", seal:"鏡", digit:5, subj:"圖形", bg:"",
+    intro:"鏡廊的時鐘掛在背後，我只能從冰鏡裡看到它……",
+    title:"冰鏡裡的時鐘",
+    q:"冰鏡裡的時鐘看起來是 <em>2 點</em>。\n真正的時鐘是<em>幾點</em>？從下面選一個吧！",
+    type:"pick12", answer:10, extra:"mirror",
+    hint:"鏡子會把左右顛倒。時針在鏡子裡指向右邊的 2，真正的時針就指向左邊對稱的位置。12 點和 6 點的連線就是鏡子的對稱線。" },
+  { key:"match", room:"薑餅廚房", seal:"餅", digit:4, subj:"數學", bg:"",
+    intro:"烤箱旁邊用火柴排了一道算式，可是它是錯的！",
+    title:"點蠟燭的火柴",
+    q:"只能移動<em>一根</em>火柴，讓算式成立。\n先點一根亮著的火柴拿起來，再點一個空位放下去。",
+    type:"match",
+    hint:"「＋」號也是兩根火柴做的。如果拿走一根，它會變成什麼符號？拿走的那根可以讓 5 變成哪個數字？" },
+  { key:"draw", room:"禮物倉庫", seal:"禮", digit:3, subj:"圖形", bg:"",
+    intro:"倉庫的門上畫著一間薑餅屋，要一筆畫完才會打開！",
+    title:"一筆畫薑餅屋",
+    q:"每條線都要畫到，<em>不能重複</em>、<em>不能提筆</em>。\n依序點圓點來畫線。",
+    type:"draw",
+    hint:"先數數看每個圓點連著幾條線。連著「單數條線」的點只有兩個，一筆畫一定要從其中一個開始，在另一個結束。" },
+  { key:"maze", room:"星光閣樓", seal:"星", digit:8, subj:"數學", bg:"",
+    intro:"閣樓的地板是冰磚，踩的數字加起來要剛好，屋頂的星星才會亮！",
+    title:"冰磚迷宮",
+    q:"從<em>入口</em>開始，一格一格點亮冰磚，鋪出一條路走到<em>出口</em>。\n路上踩到的數字加起來要剛好等於 <em>36</em>。",
+    type:"maze", grid:[[0,3,7,1],[2,9,2,6],[1,9,4,1],[2,7,7,0]], target:36,
+    hint:"36 很大，所以不能走捷徑，要繞遠路。試試看先往右走一格，再往下踩 9，然後往左回到最左邊那一排。" },
+  { key:"lights", room:"壁爐客廳", seal:"燈", digit:7, subj:"邏輯", bg:"",
+    intro:"客廳的聖誕燈全都暗著，聖誕老公公會找不到路！快把它們全部點亮！",
+    title:"點亮聖誕燈",
+    q:"點一顆燈泡，<em>它自己和上下左右的燈泡</em>都會變成相反：\n暗的會亮起來，亮的會暗掉。\n讓 9 顆燈泡<em>全部點亮</em>！",
+    type:"lights", size:3, best:5,
+    hint:"最少只要點 5 下。先點正中間那一顆看看會變怎樣，再想想四個角落要怎麼處理。每一顆燈泡最多點一次就夠了。" }
+];
+const ORDER_SEALS = ["星","鹿","鏡","燈","書","禮","餅","樹"];
+const ORDER = ORDER_SEALS.map(s=>LEVELS.findIndex(l=>l.seal===s));
+const CODE = ORDER.map(i=>LEVELS[i].digit).join("");
+const N = LEVELS.length;
+const ZHUYIN = "ㄅㄆㄇㄈㄉㄊㄋㄌㄍㄎㄏㄐㄑㄒㄓㄔㄕㄖㄗㄘㄙㄧㄨㄩㄚㄛㄜㄝㄞㄟㄠㄡㄢㄣㄤㄥㄦ".split("");
+
+const WRONG = ["呵呵～不對喔，再想想！","差一點點！","嗚嗚，門還是打不開……","卡住的話，可以用拐杖糖換提示喔！"];
+const RIGHT = ["太厲害了！","答對啦！","你是解謎天才！"];
+
+/* ================= STATE ================= */
+const fresh = () => ({ stars:{}, candy:3, start:null, end:null, sound:true });
+const HINT_COST = 3;
+const DIFF = { sym:1, seq:1, mirror:1, match:2, draw:2, zy:3, maze:3, lights:3 };   // 難度＝過關基本獎勵
+const rewardOf = (lv, stars) => DIFF[lv.key] + (stars===3 ? 1 : 0);
+let S = fresh();
+try{ const v = JSON.parse(localStorage.getItem("christmas-escape-v1")||"null"); if(v && v.stars) S = Object.assign(fresh(), v); }catch(e){}
+const save = () => { try{ localStorage.setItem("christmas-escape-v1", JSON.stringify(S)); }catch(e){} };
+const done = i => S.stars[i] != null;
+const unlocked = () => { let n=0; while(n<N && done(n)) n++; return n; };
+const totalStars = () => Object.values(S.stars).reduce((a,b)=>a+b,0);
+
+/* ================= SOUND ================= */
+let AC=null;
+function tone(f, d=.12, type="square", vol=.08, when=0){
+  if(!S.sound) return;
+  try{
+    AC = AC || new (window.AudioContext||window.webkitAudioContext)();
+    const t = AC.currentTime + when, o = AC.createOscillator(), g = AC.createGain();
+    o.type=type; o.frequency.setValueAtTime(f,t);
+    g.gain.setValueAtTime(vol,t); g.gain.exponentialRampToValueAtTime(.001,t+d);
+    o.connect(g).connect(AC.destination); o.start(t); o.stop(t+d+.02);
+  }catch(e){}
+}
+const sfx = {
+  tap:()=>tone(660,.06,"triangle",.1),
+  pick:()=>tone(880,.08,"triangle",.1),
+  right:()=>[523,659,784,1047].forEach((f,i)=>tone(f,.16,"square",.06,i*.09)),
+  wrong:()=>{tone(180,.25,"sawtooth",.07);tone(140,.3,"sawtooth",.06,.12)},
+  star:i=>tone(880+i*220,.18,"triangle",.1),
+  win:()=>[392,523,659,784,659,784,1047].forEach((f,i)=>tone(f,.2,"square",.06,i*.12))
+};
+
+/* ================= HELPERS ================= */
+const $ = s => document.querySelector(s);
+function show(id){ document.querySelectorAll(".screen").forEach(s=>s.hidden = s.id!==id); }
+function updHud(){
+  document.querySelectorAll(".candyCount").forEach(e=>e.textContent=S.candy);
+  $("#starCount").textContent = totalStars();
+  document.querySelectorAll(".sndBtn use").forEach(u=>u.setAttribute("href", S.sound?"#snd-on":"#snd-off"));
+}
+function starsSvg(n){ return [0,1,2].map(i=>`<svg viewBox="0 0 24 24"><use href="${i<n?"#star":"#star-off"}"/></svg>`).join(""); }
+function say(text){
+  const el=$("#bubble"); if(!el) return;
+  clearInterval(el._t); el.textContent=""; let i=0;
+  if(matchMedia("(prefers-reduced-motion: reduce)").matches){ el.textContent=text; return; }
+  el._t = setInterval(()=>{ el.textContent = text.slice(0,++i); if(i>=text.length) clearInterval(el._t); }, 35);
+}
+function popup(html){ $("#panel").innerHTML = html; $("#veil").hidden=false; const b=$("#panel").querySelector(".btn"); if(b) b.focus(); }
+function closePopup(){ $("#veil").hidden=true; }
+function shake(el){ el = el || $("#card"); if(!el) return; el.classList.remove("shake"); void el.offsetWidth; el.classList.add("shake"); }
+document.addEventListener("click", e=>{ if(e.target.closest(".btn,.iconbtn,.room,.doorbtn,.symc,.mz,.zy span")) sfx.tap(); }, true);
+document.querySelectorAll(".sndBtn").forEach(b=>b.onclick=()=>{ S.sound=!S.sound; save(); updHud(); });
+const keypadHTML = `<div class="keypad">${[1,2,3,4,5,6,7,8,9].map(n=>`<button class="btn" type="button" data-k="${n}">${n}</button>`).join("")}
+  <button class="btn del" type="button" data-k="del" aria-label="刪除">⌫</button><button class="btn" type="button" data-k="0">0</button><button class="btn ok" type="button" data-k="ok" aria-label="確定">OK</button></div>`;
+
+/* ================= TITLE ================= */
+function goTitle(){
+  show("s-title");
+  const started = Object.keys(S.stars).length>0;
+  $("#startBtn").textContent = started ? "繼續冒險" : "開始遊戲";
+  $("#resetBtn").hidden = !started;
+}
+$("#startBtn").onclick = ()=>{ if(!S.start){ S.start=Date.now(); save(); } goMap(); };
+$("#resetBtn").onclick = ()=>{ const snd=S.sound; S=fresh(); S.sound=snd; save(); goTitle(); };
+$("#homeBtn").onclick = goTitle;
+
+/* ================= MAP: cross-section of the snow cottage ================= */
+// room cells in the 400 x 582 cottage, keyed by LEVELS index: [x0,y0,x1,y1]
+const RG = {
+  6:[116,78,284,180],
+  2:[26,193,138,306],  3:[144,193,256,306], 1:[262,193,374,306],
+  0:[26,316,138,430],                       7:[262,316,374,430],
+  4:[26,446,138,562],                       5:[262,446,374,562]
+};
+const DOOR_H=[144,316,256,430], DECO_H=[144,446,256,562];
+const ROOMART = {0:"green",1:"attic",2:"library",3:"mirrorh",4:"kitchen",5:"cellar",6:"clock",7:"living"};
+const MEDAL   = {0:"tree",1:"deer",2:"book",3:"mirror",4:"cookie",5:"gift",6:"star",7:"bulb"};
+const SUBJ_C  = {"數學":"#a9d0ee","國語":"#ffc2d9","圖形":"#a8e0c4","邏輯":"#ffe08a"};
+// attic room follows the roof slope; the others are rounded rectangles
+const cellPath = i => { const [x0,y0,x1,y1]=RG[i], r=8;
+  return i===6 ? `M${x0+44} ${y0} H${x1-44} L${x1} ${y0+36} V${y1-r} Q${x1} ${y1} ${x1-r} ${y1} H${x0+r} Q${x0} ${y1} ${x0} ${y1-r} V${y0+36}Z`
+    : `M${x0+r} ${y0} H${x1-r} Q${x1} ${y0} ${x1} ${y0+r} V${y1-r} Q${x1} ${y1} ${x1-r} ${y1} H${x0+r} Q${x0} ${y1} ${x0} ${y1-r} V${y0+r} Q${x0} ${y0} ${x0+r} ${y0}Z`; };
+
+function roomSVG(i){
+  const [x0,y0,x1,y1]=RG[i], w=x1-x0, h=y1-y0, lv=LEVELS[i], d=done(i);
+  return `<g class="room ${d?"done":""}" data-i="${i}" tabindex="0" role="button" aria-label="${lv.room}，${lv.subj}題${d?"，已破解，"+S.stars[i]+" 顆星":""}">
+    <clipPath id="rc${i}"><path d="${cellPath(i)}"/></clipPath>
+    <image class="rimg" clip-path="url(#rc${i})" href="${ART["r_"+ROOMART[i]+(d?"_l":"_d")]}" x="${x0}" y="${y0}" width="${w}" height="${h}" preserveAspectRatio="xMidYMid slice"/>
+    <path class="frame" d="${cellPath(i)}" fill="transparent" stroke="${LN}" stroke-width="2.6" stroke-linejoin="round"/>
+  </g>`;
+}
+function roomBadges(i){
+  const [x0,y0,x1,y1]=RG[i], w=x1-x0, lv=LEVELS[i], d=done(i), attic=i===6;
+  const cx=x0+w/2, plateW=lv.room.length*14+18, py=y1-27, bx=x0+(attic?40:5), by=y0+(attic?7:5);
+  return `<g pointer-events="none">
+    ${d ? `<image href="${ART["med_"+MEDAL[i]]}" x="${bx-2}" y="${by-2}" width="32" height="32"/>`
+        : `<rect x="${bx}" y="${by}" width="40" height="20" rx="10" fill="${SUBJ_C[lv.subj]||"#fffaf0"}" stroke="${INK}" stroke-width="1.8"/><text x="${bx+20}" y="${by+14.5}" text-anchor="middle" font-size="12" fill="${INK}">${lv.subj}</text>`}
+    ${d ? `<g transform="translate(${x1-(attic?98:63)},${by})"><rect x="0" y="0" width="58" height="21" rx="10.500" fill="#fffaf0" stroke="${INK}" stroke-width="1.8"/>${[0,1,2].map(k=>`<use href="${k<S.stars[i]?"#star":"#star-off"}" x="${4+k*17}" y="2.500" width="16" height="16"/>`).join("")}</g>` : ""}
+    <rect x="${cx-plateW/2}" y="${py+2.500}" width="${plateW}" height="23" rx="11.500" fill="${INK}"/>
+    <rect x="${cx-plateW/2}" y="${py}" width="${plateW}" height="23" rx="11.500" fill="${d?"#fff6c9":"#fffaf0"}" stroke="${INK}" stroke-width="1.8"/>
+    <text x="${cx}" y="${py+16.500}" text-anchor="middle" font-size="14" fill="${INK}">${lv.room}</text>
+  </g>`;
+}
+
+function houseSVG(){
+  const n = Object.keys(S.stars).length, ready = n===N;
+  const [dx0,dy0,dx1,dy1]=DOOR_H, [gx0,gy0,gx1,gy1]=DECO_H;
+  const dh=dy1-dy0-8, dw=dh*180/254, dcx=(dx0+dx1)/2, gcx=(gx0+gx1)/2;
+  const nook=(x0,y0,x1,y1,wall,id)=>`<clipPath id="${id}"><rect x="${x0}" y="${y0}" width="${x1-x0}" height="${y1-y0}" rx="8"/></clipPath>
+    <g clip-path="url(#${id})"><rect x="${x0}" y="${y0}" width="${x1-x0}" height="${y1-y0}" fill="${wall}"/><rect x="${x0}" y="${y1-22}" width="${x1-x0}" height="22" fill="#E6BF93"/><rect x="${x0-2}" y="${y1-26}" width="${x1-x0+4}" height="5" fill="#fffaf0" stroke="${LN}" stroke-width="1.2"/>`;
+  return `<svg id="house" viewBox="0 0 ${HOUSE_W} ${HOUSE_H}" role="group" aria-label="雪屋地圖">
+    <image href="${ART.shell}" x="0" y="0" width="${HOUSE_W}" height="${HOUSE_H}" pointer-events="none"/>
+    ${nook(gx0,gy0,gx1,gy1,"#F6E6CF","rcg")}
+      <ellipse cx="${gcx}" cy="${gy1-12}" rx="40" ry="7" fill="#f6c9bd" stroke="${LN}" stroke-width="1.2"/>
+      <path d="M${gx0+10} ${gy0+16} q${(gx1-gx0)/2-10} 16 ${gx1-gx0-20} 0" stroke="#7fb58a" stroke-width="2.6" fill="none" stroke-linecap="round"/>
+      ${[.12,.3,.5,.7,.88].map((t,k)=>`<circle class="flick" style="animation-delay:${k*.25}s" cx="${gx0+10+t*(gx1-gx0-20)}" cy="${gy0+16+8*4*t*(1-t)+3}" r="3.4" fill="${BULB[k%4]}" stroke="${LN}" stroke-width="1"/>`).join("")}
+    </g>
+    <rect x="${gx0}" y="${gy0}" width="${gx1-gx0}" height="${gy1-gy0}" rx="8" fill="none" stroke="${LN}" stroke-width="2.6"/>
+    <image class="mapghost" href="${GH.c01}" x="${gcx-41}" y="${gy1-92}" width="82" height="82" pointer-events="none"/>
+    ${Object.keys(RG).map(k=>roomSVG(+k)).join("")}
+    <g class="doorbtn" id="doorBtn" tabindex="0" role="button" aria-label="雪屋大門，已收集 ${n} / ${N} 枚徽章">
+      ${nook(dx0,dy0,dx1,dy1,ready?"#FFF3C9":"#F6E6CF","rcd")}
+        ${ready?`<circle cx="${dcx}" cy="${dy1-50}" r="62" fill="#ffe9a3" opacity=".6"/>`:""}
+      </g>
+      <rect class="frame" x="${dx0}" y="${dy0}" width="${dx1-dx0}" height="${dy1-dy0}" rx="8" fill="transparent" stroke="${LN}" stroke-width="2.6"/>
+      <image class="dimg ${ready?"bounce":""}" href="${ready?ART.door_o:ART.door_c}" x="${dcx-dw/2}" y="${dy1-dh-1}" width="${dw}" height="${dh}" style="transform-box:fill-box;transform-origin:center bottom"/>
+      <g pointer-events="none"><rect x="${dx1-45}" y="${dy1-25.500}" width="40" height="22" rx="11" fill="${INK}"/>
+      <rect x="${dx1-45}" y="${dy1-28}" width="40" height="22" rx="11" fill="${ready?"#a8e0c4":"#fffaf0"}" stroke="${INK}" stroke-width="1.8"/>
+      <text x="${dx1-25}" y="${dy1-12}" text-anchor="middle" font-size="14" fill="${INK}">${n}/${N}</text></g>
+    </g>
+    ${Object.keys(RG).map(k=>roomBadges(+k)).join("")}
+  </svg>`;
+}
+
+function goMap(){
+  L = null;
+  show("s-map"); updHud();
+  $("#board").innerHTML = houseSVG();
+  document.querySelectorAll("#house .room").forEach(g=>{
+    const go=()=>openLevel(+g.dataset.i);
+    g.addEventListener("click", go);
+    g.addEventListener("keydown", e=>{ if(e.key==="Enter"||e.key===" "){ e.preventDefault(); go(); } });
+  });
+  const d=$("#doorBtn");
+  d.addEventListener("click", tryDoor);
+  d.addEventListener("keydown", e=>{ if(e.key==="Enter"||e.key===" "){ e.preventDefault(); tryDoor(); } });
+}
+
+function medalRow(){
+  return `<div class="row medals">${LEVELS.map((l,k)=>`<div class="medal ${done(k)?"":"miss"}"><img src="${ART["med_"+MEDAL[k]]}" alt="${l.seal}"><b>${done(k)?l.seal:"?"}</b></div>`).join("")}</div>`;
+}
+function tryDoor(){
+  const n = Object.keys(S.stars).length;
+  if(n===N || S.end){ openDoor(); return; }
+  sfx.wrong();
+  popup(`<div class="ribbon pop">雪屋大門</div>
+    <img src="${ART.door_c}" alt="" style="height:110px">
+    <p>大門上有 ${N} 個徽章凹槽，<br>目前找到 <b>${n}</b> 枚，還差 <b>${N-n}</b> 枚！</p>
+    ${medalRow()}
+    <div class="row"><button class="btn green" type="button" id="ok">繼續探險</button></div>`);
+  $("#ok").onclick=closePopup;
+}
+
+/* ================= LEVEL SHELL ================= */
+let L = null;
+$("#backBtn").onclick = goMap;
+
+function levelShell(title, sub, bg){
+  show("s-level"); updHud();
+  $("#lvTitle").innerHTML = `${title}<small>${sub}</small>`;
+  $("#s-level").style.setProperty("--room-bg", bg);
+  $("#stage").scrollTop = 0;
+}
+
+function openLevel(i){
+  const lv = LEVELS[i];
+  L = { i, wrong:0, hintUsed:false, input:"", len:lv.len||3 };
+  levelShell(lv.room, `${lv.subj}題`, `radial-gradient(rgb(243,226,202) 1.6px,transparent 2px) 0 0/16px 16px,linear-gradient(180deg,rgba(255,241,220,0) 0,rgba(255,241,220,.35) 110px,#FFF1DC 270px),url("${ART["r_"+ROOMART[i]+"_l"]}") center top/100% auto no-repeat,#FFF1DC`);
+  $("#stage").innerHTML = `
+    <div class="talk"><img class="m" id="ava" src="${GH.c01}" alt="雪球"><div class="bubble" id="bubble" aria-live="polite"></div></div>
+    <div class="card" id="card">
+      <div class="cardtop"><span class="subj ${lv.subj==="國語"?"chi":""}">${lv.subj}</span><span class="diff">難度 ${"★".repeat(DIFF[lv.key])}${"☆".repeat(3-DIFF[lv.key])}・過關送 ${DIFF[lv.key]} 根拐杖糖</span></div>
+      <h3>${lv.title}</h3>
+      <p class="q">${lv.q}</p>
+      ${extraHTML(lv)}
+    </div>
+    <div id="play"></div>
+    <div class="tools" id="tools"><button class="btn small purple" type="button" id="hintBtn"><svg viewBox="0 0 32 32" width="22" height="22"><use href="#candy"/></svg>用 ${HINT_COST} 根拐杖糖換提示</button></div>`;
+  say(lv.intro);
+  $("#hintBtn").onclick = useHint;
+  setupExtra(lv);
+  ({ num:setupNum, choice:setupChoice, sym:setupSym, match:setupMatch, draw:setupDraw, maze:setupMaze, lights:setupLights, pick12:setupPick12 })[lv.type](lv);
+}
+
+function fail(msg){
+  ava("c03");
+  L.wrong++; sfx.wrong(); shake();
+  say(msg || (L.wrong>=3 && S.candy<HINT_COST && !L.hintUsed ? "拐杖糖不夠也沒關係，點下面的提示按鈕，這次我免費告訴你！" : WRONG[Math.min(L.wrong-1,WRONG.length-1)]));
+}
+
+function useHint(){
+  const lv = LEVELS[L.i];
+  if(!L.hintUsed){
+    if(S.candy<HINT_COST){ if(L.wrong<3){ say(`提示要 ${HINT_COST} 根拐杖糖，你現在只有 ${S.candy} 根。先自己想想看，答錯三次我就偷偷告訴你～`); return; } }
+    else { S.candy-=HINT_COST; save(); updHud(); }
+    L.hintUsed=true;
+  }
+  ava("c04"); popup(`<div class="ribbon pop">提示</div><img class="face" src="${GH.c05}" alt=""><div class="hintbox">${lv.hint}</div><div class="row"><button class="btn green" type="button" id="ok">我知道了</button></div>`);
+  $("#ok").onclick=()=>{ closePopup(); ava("c01"); };
+}
+
+function win(){
+  ava("c02");
+  const i=L.i, lv=LEVELS[i];
+  const stars = (L.wrong===0 && !L.hintUsed) ? 3 : (L.wrong<=1 ? 2 : 1);
+  const first = !done(i);
+  S.stars[i] = Math.max(S.stars[i]||0, stars);
+  const gain = first ? rewardOf(lv, stars) : 0;
+  S.candy += gain; save(); updHud();
+  sfx.right(); [0,1,2].slice(0,stars).forEach(k=>setTimeout(()=>sfx.star(k), 450+k*250));
+  burst(); if(lv.type!=="lights") say(RIGHT[Math.floor(Math.random()*RIGHT.length)]);
+  const last = Object.keys(S.stars).length===N;
+  setTimeout(()=>{
+    popup(`<div class="ribbon pop">過關！</div>
+      <div class="bigstars">${starsSvg(stars)}</div>
+      <p>${stars===3?"完美！一次就答對！":stars===2?"很棒！差一點就三顆星！":"成功過關！再挑戰可以拿更多星星喔"}</p>
+      <div class="reward"><img class="medimg" src="${ART["med_"+MEDAL[i]]}" alt=""><div style="text-align:left"><p>得到徽章「${lv.seal}」</p><span class="digit">${lv.digit}</span></div></div>
+      ${gain?`<p>獲得 <b>${gain}</b> 根拐杖糖！${stars===3?"（完美過關多送 1 根）":""}</p>`:""}
+      <div class="row"><button class="btn green" type="button" id="next">${last?"前往大門":"回到雪屋"}</button></div>`);
+    $("#next").onclick=()=>{ closePopup(); last ? openDoor() : goMap(); };
+  }, 500);
+}
+
+/* ================= EXTRA CARD CONTENT ================= */
+function extraHTML(lv){
+  if(lv.extra==="zy") return `<div class="zy" id="zy">${ZHUYIN.map(z=>`<span role="button" tabindex="0">${z}</span>`).join("")}</div>`;
+  if(lv.extra==="mirror") return mirrorClock();
+  if(lv.extra==="liar") return `<div class="suspects">
+      <div class="sus"><div class="face" style="background:#f07a1a">南</div><b>南瓜頭</b><div class="say">「是吸血鬼偷的！」</div></div>
+      <div class="sus"><div class="face" style="background:#8e1f3f">吸</div><b>吸血鬼</b><div class="say">「不是我偷的。」</div></div>
+      <div class="sus"><div class="face" style="background:#8a8070">木</div><b>木乃伊</b><div class="say">「不是我偷的。」</div></div>
+    </div>`;
+  return "";
+}
+function setupExtra(lv){
+  if(lv.extra==="zy") document.querySelectorAll("#zy span").forEach(s=>{
+    const p=()=>{ s.style.backgroundImage=`url("${s.classList.contains("on")?ART.zy_on:ART.zy_def}")`; }; p();
+    const t=()=>{ s.classList.toggle("on"); p(); };
+    s.onclick=t; s.onkeydown=e=>{ if(e.key==="Enter"||e.key===" "){ e.preventDefault(); t(); } };
+  });
+}
+function mirrorClock(){
+  // real time 10:00, drawn mirrored so it reads as 2:00, set inside the gold mirror frame
+  const nums = Array.from({length:12},(_,k)=>{ const a=k*Math.PI/6, s=Math.sin(a), c=Math.cos(a); return `<line x1="${100+76*s}" y1="${100-76*c}" x2="${100+64*s}" y2="${100-64*c}" stroke="#2b3358" stroke-width="5" stroke-linecap="round"/>`; }).join("");
+  const ha = 10*Math.PI/6;
+  return `<svg viewBox="0 0 135 158" role="img" aria-label="鏡子裡沒有數字的時鐘，看起來是 2 點" style="display:block;width:190px;max-width:100%;margin:4px auto 0">
+    <image href="${ART.mirror}" x="0" y="0" width="135" height="158"/>
+    <g transform="translate(67.5,84) scale(-0.3,0.3) translate(-100,-100)">
+      <circle cx="100" cy="100" r="92" fill="#fff8ec" stroke="#2b3358" stroke-width="5"/>
+      ${nums}
+      <line x1="100" y1="100" x2="${100+42*Math.sin(ha)}" y2="${100-42*Math.cos(ha)}" stroke="#2b3358" stroke-width="9" stroke-linecap="round"/>
+      <line x1="100" y1="100" x2="100" y2="34" stroke="#c4560a" stroke-width="6" stroke-linecap="round"/>
+      <circle cx="100" cy="100" r="8" fill="#2b3358"/>
+    </g>
+    <path d="M44 52 l14 -10 M46 62 l20 -14" stroke="#fff" stroke-width="3" stroke-linecap="round" opacity=".55"/>
+  </svg>`;
+}
+
+/* ================= TYPE: NUMBER KEYPAD ================= */
+function setupNum(lv){
+  $("#play").innerHTML = `<div class="ansbox ${L.len>4?"long":""}" id="ansbox"></div>${keypadHTML}`;
+  L.press = k => {
+    if(k==="del") L.input=L.input.slice(0,-1);
+    else if(k==="ok"){
+      if(!L.input) return;
+      if(L.input===lv.answer){ drawAns(); win(); return; }
+      L.input=""; fail();
+    } else if(L.input.length<L.len) L.input+=k;
+    drawAns();
+  };
+  bindKeypad(); drawAns();
+}
+function drawAns(){
+  const box=$("#ansbox"); if(!box) return;
+  box.innerHTML = Array.from({length:L.len},(_,k)=>`<span class="${k===L.input.length?"cur":""}">${L.input[k]||""}</span>`).join("");
+}
+function bindKeypad(){ document.querySelectorAll(".keypad .btn").forEach(b=>b.onclick=()=>L.press(b.dataset.k)); }
+document.addEventListener("keydown", e=>{
+  if(!L || !L.press || $("#s-level").hidden || !$("#veil").hidden) return;
+  if(/^\d$/.test(e.key)) L.press(e.key); else if(e.key==="Backspace") L.press("del"); else if(e.key==="Enter") L.press("ok");
+});
+
+/* ================= TYPE: CHOICE ================= */
+function setupChoice(lv){
+  $("#play").innerHTML = `<div class="choices ${lv.c3?"c3":""}">${lv.options.map(o=>`<button class="btn choice" type="button" data-v="${o}">${o}</button>`).join("")}</div>`;
+  document.querySelectorAll(".choice").forEach(b=>b.onclick=()=>{
+    if(b.dataset.v===lv.answer) win(); else { b.classList.add("wrong"); fail(); }
+  });
+}
+
+/* ================= TYPE: SYMMETRIC CHARS ================= */
+// hand-drawn strokes (100 x 100) so the symmetric ones mirror exactly around x = 50
+const GLYPH = {
+  "山":"M50 16V82 M20 40V82H80V40",
+  "中":"M24 34H76V64H24Z M50 12V90",
+  "田":"M22 22H78V80H22Z M50 22V80 M22 51H78",
+  "木":"M14 38H86 M50 12V90 M50 40L18 78 M50 40L82 78",
+  "日":"M28 16H72V84H28Z M28 50H72",
+  "上":"M46 14V82 M46 46H76 M14 82H86",
+  "月":"M32 16V60Q32 80 16 88 M32 16H72V82Q72 90 62 86 M32 38H72 M32 60H72",
+  "七":"M14 48L86 36 M42 14V72Q42 84 56 84H86V70",
+  "九":"M14 36H60V76Q60 84 70 84H88V70 M40 14Q40 62 12 86"
+};
+function setupSym(lv){
+  const glyph=c=>`<svg viewBox="0 0 100 100" width="62%" height="62%" aria-hidden="true"><path d="${GLYPH[c]}" fill="none" stroke="currentColor" stroke-width="10" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
+  $("#play").innerHTML = `<div class="symgrid">${lv.chars.map(c=>`<button class="symc" type="button" data-c="${c}" aria-label="${c}" aria-pressed="false">${glyph(c)}</button>`).join("")}</div>
+    <div class="tools"><button class="btn green" type="button" id="symOk">就是這些！</button></div>`;
+  const paint=b=>{ b.style.backgroundImage=`url("${b.classList.contains("on")?ART.pk_lit:ART.pk_def}")`; };
+  document.querySelectorAll(".symc").forEach(b=>{ paint(b); b.onclick=()=>{ const on=b.classList.toggle("on"); b.setAttribute("aria-pressed",on); paint(b); }; });
+  $("#symOk").onclick=()=>{
+    const picked=[...document.querySelectorAll(".symc.on")].map(b=>b.dataset.c);
+    const wrongPick = picked.filter(c=>!lv.answer.includes(c));
+    const missing = lv.answer.filter(c=>!picked.includes(c));
+    if(!wrongPick.length && !missing.length){ win(); return; }
+    if(wrongPick.length) fail(`「${wrongPick[0]}」左右不一樣喔！再看清楚一點～`);
+    else fail(`還有 ${missing.length} 個對稱的字沒找到！`);
+  };
+}
+
+/* ================= TYPE: MATCHSTICK ================= */
+const SEG = {"0":"abcdef","1":"bc","2":"abdeg","3":"abcdg","4":"bcfg","5":"acdfg","6":"acdefg","7":"abc","8":"abcdefg","9":"abcdfg"};
+function setupMatch(){
+  const M = { d:[new Set(SEG["5"]), new Set(SEG["7"]), new Set(SEG["2"])], op:new Set(["h","v"]), held:null };
+  const DX=[14,124,238], OPX=96, oy=14;
+  const segXY=(ox,s)=>({a:[ox+5,oy,ox+35,oy],b:[ox+40,oy+5,ox+40,oy+33],c:[ox+40,oy+43,ox+40,oy+71],d:[ox+5,oy+76,ox+35,oy+76],
+    e:[ox,oy+43,ox,oy+71],f:[ox,oy+5,ox,oy+33],g:[ox+5,oy+38,ox+35,oy+38]})[s];
+  const slots=[];
+  M.d.forEach((_,di)=>"abcdefg".split("").forEach(s=>slots.push({id:`d${di}${s}`, xy:segXY(DX[di],s), has:()=>M.d[di].has(s), set:v=>v?M.d[di].add(s):M.d[di].delete(s)})));
+  slots.push({id:"oh",xy:[OPX-16,oy+38,OPX+16,oy+38],has:()=>M.op.has("h"),set:v=>v?M.op.add("h"):M.op.delete("h")});
+  slots.push({id:"ov",xy:[OPX,oy+22,OPX,oy+54],has:()=>M.op.has("v"),set:v=>v?M.op.add("v"):M.op.delete("v")});
+  $("#play").innerHTML = `<svg class="board-svg" id="msvg" viewBox="0 0 300 108" role="img" aria-label="火柴棒算式" style="background:url(&quot;${ART.wood}&quot;) center/100% 100% no-repeat;border:none"></svg>
+    <div class="status"><span id="mstat">點一根亮著的火柴拿起來</span><button class="btn small purple" type="button" id="mreset">復原</button></div>`;
+  const svg=$("#msvg");
+  const snapshot=()=>({d:M.d.map(x=>new Set(x)), op:new Set(M.op)});
+  let base=snapshot();
+  const draw=()=>{
+    const stick=(sl)=>{
+      const [x1,y1,x2,y2]=sl.xy, lit=sl.has(), held=M.held===sl.id;
+      const col = held ? "#ffe08a" : "#fff6e0";
+      return `<g data-id="${sl.id}" style="cursor:pointer">
+        <line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke="transparent" stroke-width="20"/>
+        ${lit||held ? `${held?"":`<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke="#2b3358" stroke-width="10" stroke-linecap="round"/>`}<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke="${col}" stroke-width="${held?6:6.5}" stroke-linecap="round" ${held?'stroke-dasharray="3 7" opacity=".95"':""}/>
+          ${held?"":`<circle cx="${x2}" cy="${y2}" r="5" fill="#e8695f" stroke="#2b3358" stroke-width="1.8"/>`}`
+        : `<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke="rgba(92,52,24,.22)" stroke-width="6" stroke-linecap="round"/>`}
+      </g>`;
+    };
+    svg.innerHTML = slots.map(stick).join("") +
+      [44,62].map(y=>`<line x1="194" y1="${y}" x2="222" y2="${y}" stroke="#2b3358" stroke-width="10" stroke-linecap="round"/><line x1="194" y1="${y}" x2="222" y2="${y}" stroke="#fff6e0" stroke-width="6.5" stroke-linecap="round"/>`).join("");
+    svg.querySelectorAll("g[data-id]").forEach(g=>g.onclick=()=>tapSlot(slots.find(s=>s.id===g.dataset.id)));
+  };
+  const parse=()=>{
+    const digs=M.d.map(set=>Object.keys(SEG).find(k=>SEG[k].length===set.size && [...SEG[k]].every(c=>set.has(c))));
+    const op = M.op.has("h")&&M.op.has("v") ? "+" : (M.op.has("h")&&!M.op.has("v") ? "-" : null);
+    if(digs.some(x=>x==null) || !op) return null;
+    return {digs,op};
+  };
+  const tapSlot=sl=>{
+    if(M.held==null){
+      if(!sl.has()) { $("#mstat").textContent="要先拿起一根亮著的火柴喔"; return; }
+      sl.set(false); M.held=sl.id; sfx.pick(); $("#mstat").textContent="手上有 1 根火柴，點一個空位放下"; draw(); return;
+    }
+    if(sl.id===M.held){ sl.set(true); M.held=null; $("#mstat").textContent="放回去了，再選一根"; draw(); return; }
+    if(sl.has()){ $("#mstat").textContent="那裡已經有火柴了，選一個暗暗的空位"; return; }
+    sl.set(true); M.held=null; sfx.pick(); draw();
+    const p=parse();
+    const ok = p && ((p.op==="+" ? +p.digs[0] + +p.digs[1] : +p.digs[0] - +p.digs[1]) === +p.digs[2]);
+    if(ok){ $("#mstat").textContent=`${p.digs[0]} ${p.op==="+"?"＋":"－"} ${p.digs[1]} ＝ ${p.digs[2]}，成立了！`; win(); return; }
+    fail(p ? `變成 ${p.digs[0]} ${p.op==="+"?"＋":"－"} ${p.digs[1]} ＝ ${p.digs[2]}，算式不成立喔！` : "這樣排出來不是數字耶！");
+    $("#mstat").textContent="火柴自動回到原位了，再試一次";
+    setTimeout(()=>{ M.d=base.d.map(x=>new Set(x)); M.op=new Set(base.op); draw(); }, 700);
+  };
+  $("#mreset").onclick=()=>{ M.d=base.d.map(x=>new Set(x)); M.op=new Set(base.op); M.held=null; $("#mstat").textContent="點一根亮著的火柴拿起來"; draw(); };
+  draw();
+}
+
+/* ================= TYPE: ONE-STROKE DRAW ================= */
+function setupDraw(){
+  const P={A:[50,200],B:[210,200],C:[210,100],D:[50,100],E:[130,26]};
+  const EDGES=["AB","BC","CD","DA","AC","BD","DE","EC"];
+  const G={cur:null, used:new Set(), trail:[]};
+  $("#play").innerHTML = `<svg class="board-svg" id="dsvg" viewBox="0 0 260 230" role="img" aria-label="一筆畫小屋"></svg>
+    <div class="status"><span>已畫 <b id="dcount">0</b> / ${EDGES.length} 條線</span><button class="btn small purple" type="button" id="dreset">重畫</button></div>`;
+  const svg=$("#dsvg");
+  const ek=(a,b)=>EDGES.find(e=>e===a+b||e===b+a);
+  const draw=()=>{
+    let h="";
+    EDGES.forEach(e=>{ const [a,b]=e.split(""); const u=G.used.has(e);
+      h+=`<line x1="${P[a][0]}" y1="${P[a][1]}" x2="${P[b][0]}" y2="${P[b][1]}" stroke="${u?"#e8695f":"rgba(138,90,60,.45)"}" stroke-width="${u?9:5}" stroke-linecap="round" ${u?"":'stroke-dasharray="2 10"'}/>`; });
+    Object.entries(P).forEach(([k,[x,y]])=>{ const c=G.cur===k;
+      h+=`<g data-n="${k}" style="cursor:pointer"><circle cx="${x}" cy="${y}" r="22" fill="transparent"/>
+        <image href="${c?ART.dot_on:ART.dot_def}" x="${x-(c?20:16)}" y="${y-(c?20:16)}" width="${c?40:32}" height="${c?40:32}"/></g>`; });
+    svg.innerHTML=h; $("#dcount").textContent=G.used.size;
+    svg.querySelectorAll("g[data-n]").forEach(g=>g.onclick=()=>tap(g.dataset.n));
+  };
+  const reset=()=>{ G.cur=null; G.used.clear(); draw(); };
+  const tap=n=>{
+    if(G.cur==null){ G.cur=n; sfx.pick(); draw(); return; }
+    if(n===G.cur) return;
+    const e=ek(G.cur,n);
+    if(!e){ say("這兩個點之間沒有線，不能跳過去喔！"); sfx.wrong(); return; }
+    if(G.used.has(e)){ say("這條線已經畫過了，不能重複！"); sfx.wrong(); return; }
+    G.used.add(e); G.cur=n; sfx.pick(); draw();
+    if(G.used.size===EDGES.length){ win(); return; }
+    const left=EDGES.some(x=>!G.used.has(x) && x.includes(n));
+    if(!left){ fail("卡住了！還有線沒畫到，但已經走不下去了。重新來過吧！"); setTimeout(reset, 900); }
+  };
+  $("#dreset").onclick=reset; draw();
+}
+
+/* ================= TYPE: NUMBER MAZE ================= */
+function setupMaze(lv){
+  const g=lv.grid, n=g.length, key=(r,c)=>r*n+c, EXIT=key(n-1,n-1);
+  let path=[0];   // tile keys from 入口 in walking order
+  $("#play").innerHTML = `<div class="status"><span>目前加總 <b id="msum">0</b></span><span>目標 <b>${lv.target}</b></span><button class="btn small purple" type="button" id="zreset">全部重來</button></div>
+    <div class="maze" id="mz"></div>
+    <p class="mztip" id="mztip">小提示：新的冰磚要接在<b>最後一塊亮磚的上下左右</b>；點已經亮的磚可以退回去。</p>`;
+  const rc=k=>[Math.floor(k/n),k%n];
+  const sum=()=>path.reduce((a,k)=>{ const [r,c]=rc(k); return a+g[r][c]; },0);
+  const nextOK=k=>{ const [r,c]=rc(k), [hr,hc]=rc(path.at(-1)); return Math.abs(r-hr)+Math.abs(c-hc)===1 && !path.includes(k); };
+  const draw=()=>{
+    const box=$("#mz");
+    box.innerHTML = `<svg class="mzroad" id="mzroad" aria-hidden="true"></svg>` + g.map((row,r)=>row.map((v,c)=>{
+      const k=key(r,c), st=k===0, en=k===EXIT, on=path.includes(k), nx=!on && nextOK(k);
+      const bgi = st?ART.t_in : en?ART.t_out : on?ART.t_lit : ART.t_def;
+      return `<button style="background-image:url(&quot;${bgi}&quot;)" class="mz ${on?"on":""} ${en?"end":""} ${nx?"next":""} ${!on&&!nx&&!st?"far":""}" type="button" data-k="${k}" aria-pressed="${on}" aria-label="${st?"入口":en?"出口":"數字 "+v}${nx?"，可以接上":""}">${st?"<small>入口</small>":en?"<small>出口</small>":v}</button>`;
+    }).join("")).join("");
+    $("#msum").textContent=sum();
+    box.querySelectorAll(".mz").forEach(b=>b.onclick=()=>tap(+b.dataset.k, b));
+    // road: bars between consecutive tiles, drawn under the tiles so they show in the gaps
+    requestAnimationFrame(()=>{
+      const svg=$("#mzroad"); if(!svg) return; const R0=box.getBoundingClientRect();
+      const ctr=k=>{ const r=box.querySelector(`.mz[data-k="${k}"]`).getBoundingClientRect(); return [r.left-R0.left+r.width/2, r.top-R0.top+r.height/2]; };
+      svg.setAttribute("viewBox",`0 0 ${R0.width} ${R0.height}`);
+      const pts=path.map(ctr);
+      svg.innerHTML = pts.length>1 ? `<polyline points="${pts.map(p=>p.join(",")).join(" ")}" fill="none" stroke="#c98a1a" stroke-width="26" stroke-linecap="round" stroke-linejoin="round"/><polyline points="${pts.map(p=>p.join(",")).join(" ")}" fill="none" stroke="#ffd23f" stroke-width="16" stroke-linecap="round" stroke-linejoin="round"/><polyline points="${pts.map(p=>p.join(",")).join(" ")}" fill="none" stroke="#fff6c8" stroke-width="4" stroke-dasharray="2 12" stroke-linecap="round" stroke-linejoin="round"/>` : "";
+    });
+  };
+  const tip=(msg,b)=>{ const t=$("#mztip"); t.innerHTML=msg; t.classList.remove("flash"); void t.offsetWidth; t.classList.add("flash"); if(b){ b.classList.remove("shake"); void b.offsetWidth; b.classList.add("shake"); } };
+  const tap=(k,b)=>{
+    if(k===0) return;
+    const at=path.indexOf(k);
+    if(at>0){ path=path.slice(0,at); sfx.pick(); draw(); return; }          // tap a lit tile: back up to before it
+    if(!nextOK(k)){ sfx.wrong(); tip("要接在<b>最後一塊亮磚的上下左右</b>才可以喔！斜的、跳過去的都不行。", b); return; }
+    path.push(k); sfx.pick(); draw();
+    if(k===EXIT){
+      const s=sum();
+      if(s===lv.target) win();
+      else { fail(`走到出口了，可是加起來是 ${s}，不是 ${lv.target}！點亮著的磚可以退回去換條路。`); setTimeout(()=>{ path.pop(); draw(); }, 700); }
+    }
+  };
+  $("#zreset").onclick=()=>{ path=[0]; draw(); };
+  addEventListener("resize", ()=>{ if($("#mzroad")) draw(); });
+  draw();
+}
+
+/* ================= TYPE: PICK 1-12 (mirror clock) ================= */
+function setupPick12(lv){
+  $("#play").innerHTML = `<div class="clockpick">${Array.from({length:12},(_,k)=>`<button class="btn ck" type="button" data-h="${k+1}">${k+1}<small>點</small></button>`).join("")}</div>`;
+  document.querySelectorAll(".ck").forEach(b=>b.onclick=()=>{
+    if(+b.dataset.h===lv.answer){ b.classList.add("right"); win(); }
+    else { b.classList.add("wrong"); b.disabled=true; fail(); }
+  });
+}
+
+/* ================= TYPE: LIGHTS OUT ================= */
+function setupLights(lv){
+  const n=lv.size; let on=Array(n*n).fill(false), moves=0;
+  $("#play").innerHTML = `<div class="status"><span>還暗著 <b id="lcount">${n*n}</b> 顆</span><span>已點 <b id="lmoves">0</b> 下</span><button class="btn small purple" type="button" id="lreset">全部重來</button></div>
+    <div class="lights" id="lgrid" style="grid-template-columns:repeat(${n},1fr)"></div>`;
+  const draw=()=>{
+    $("#lgrid").innerHTML = on.map((v,k)=>`<button class="lamp ${v?"on":""}" type="button" data-k="${k}" aria-label="第 ${Math.floor(k/n)+1} 排第 ${k%n+1} 顆，${v?"亮著":"暗著"}"><img src="${v?ART.jl_on:ART.jl_off}" alt=""></button>`).join("");
+    $("#lcount").textContent = on.filter(v=>!v).length;
+    $("#lmoves").textContent = moves;
+    document.querySelectorAll(".lamp").forEach(b=>b.onclick=()=>press(+b.dataset.k));
+  };
+  const press=k=>{
+    const r=Math.floor(k/n), c=k%n;
+    [[0,0],[1,0],[-1,0],[0,1],[0,-1]].forEach(([dr,dc])=>{ const R=r+dr, C=c+dc; if(R>=0&&R<n&&C>=0&&C<n) on[R*n+C]=!on[R*n+C]; });
+    moves++; sfx.pick(); draw();
+    if(on.every(Boolean)){
+      L.wrong = moves<=lv.best ? 0 : (moves<=lv.best+4 ? 1 : 2);
+      say(moves<=lv.best ? `只用 ${moves} 下就全部點亮，太神了！` : `全部點亮了！用了 ${moves} 下，最少只要 ${lv.best} 下喔。`);
+      win();
+    } else if(moves===lv.best*3){ say("好像越點越亂了……試試看按「全部重來」，換個方法！"); }
+  };
+  $("#lreset").onclick=()=>{ on=Array(n*n).fill(false); moves=0; draw(); };
+  draw();
+}
+
+/* ================= DOOR ================= */
+function openDoor(){
+  if(S.end){ showEnd(); return; }
+  L = { i:N, wrong:0, input:"", len:CODE.length };
+  levelShell("雪屋大門", "最後一關・密碼鎖", `radial-gradient(rgb(243,226,202) 1.6px,transparent 2px) 0 0/16px 16px,linear-gradient(180deg,rgba(255,241,220,0) 0,rgba(255,241,220,.4) 110px,#FFF1DC 280px),url("${ART.sky}") center top/100% auto no-repeat,#FFF1DC`);
+  $("#stage").innerHTML = `
+    <div class="talk"><img class="m" id="ava" src="${GH.c01}" alt="雪球"><div class="bubble" id="bubble" aria-live="polite"></div></div>
+    <div class="card" id="card">
+      <span class="subj">密碼鎖</span>
+      <p class="q">星光照麋鹿，鏡前點彩燈，
+翻書拆禮物，薑餅掛樹梢。</p>
+      <div class="order">${ORDER_SEALS.map((s,k)=>`<span class="seal">${s}</span>${k<ORDER_SEALS.length-1?"<i>›</i>":""}`).join("")}</div>
+    </div>
+    <div class="ansbox long" id="ansbox"></div>
+    ${keypadHTML}
+    <div class="tools"><button class="btn small purple" type="button" id="sealsBtn">看我的徽章</button></div>`;
+  say("照著詩裡出現的順序，把封印上的數字輸入進去！");
+  L.press = k=>{
+    if(k==="del") L.input=L.input.slice(0,-1);
+    else if(k==="ok"){
+      if(L.input.length<L.len){ say(`密碼有 ${L.len} 位數，還沒填完喔！`); return; }
+      if(L.input===CODE){ S.end=Date.now(); save(); sfx.win(); burst(); burst(); showEnd(); return; }
+      sfx.wrong(); L.input=""; shake(); say("門把轉不動……再對照一次詩裡的順序！");
+    } else if(L.input.length<L.len) L.input+=k;
+    drawAns();
+  };
+  bindKeypad(); drawAns();
+  $("#sealsBtn").onclick=()=>{
+    popup(`<div class="ribbon pop">我的徽章</div>
+      <div class="row medals">${LEVELS.map((l,k)=>`<div class="medal"><img src="${ART["med_"+MEDAL[k]]}" alt=""><b>${l.seal}</b><i>${l.digit}</i></div>`).join("")}</div>
+      <div class="row"><button class="btn green" type="button" id="ok">關閉</button></div>`);
+    $("#ok").onclick=closePopup;
+  };
+}
+
+function fmt(ms){ const s=Math.max(0,Math.floor(ms/1000)); return Math.floor(s/60)+" 分 "+String(s%60).padStart(2,"0")+" 秒"; }
+function showEnd(){
+  const ts=totalStars(), max=N*3;
+  popup(`<div class="ribbon pop fun" style="font-family:var(--f-fun)">ESCAPED!</div>
+    <img src="${GH.c06}" alt="" width="130" style="animation:float 2s ease-in-out infinite">
+    <p style="font-size:21px">恭喜逃出雪屋！</p>
+    <div class="row">
+      <div class="pill"><svg viewBox="0 0 24 24"><use href="#star"/></svg>${ts} / ${max}</div>
+      <div class="pill"><svg viewBox="0 0 24 24"><use href="#candy"/></svg>${S.candy}</div>
+    </div>
+    <p>花費時間 <b>${fmt(S.end-(S.start||S.end))}</b><br>${ts===max?"全部三顆星！你是雪屋解謎大師！":"回到地圖重玩關卡，挑戰全部三顆星吧！"}</p>
+    <div class="row"><button class="btn purple" type="button" id="toMap">回地圖</button><button class="btn green" type="button" id="again">再玩一次</button></div>`);
+  $("#toMap").onclick=()=>{ closePopup(); goMap(); };
+  $("#again").onclick=()=>{ const snd=S.sound; S=fresh(); S.sound=snd; save(); closePopup(); goTitle(); };
+}
+
+/* ================= FX ================= */
+/* soft snow / warm sparkles drift over the title and map; confetti bursts on wins. Drawn above the screens, never catches taps. */
+const fx=$("#fx"), cx=fx.getContext("2d");
+const still = matchMedia("(prefers-reduced-motion: reduce)").matches;
+let W,H,snow=[],parts=[];
+function size(){ const r=$("#game").getBoundingClientRect(), dpr=Math.min(2,window.devicePixelRatio||1); W=r.width; H=r.height; fx.width=W*dpr; fx.height=H*dpr; fx.style.width=W+"px"; fx.style.height=H+"px"; cx.setTransform(dpr,0,0,dpr,0,0);
+  snow=Array.from({length:34},(_,k)=>({x:Math.random()*W,y:Math.random()*H,r:1.6+Math.random()*2.6,s:.25+Math.random()*.55,p:Math.random()*6,gold:k%4===0}));
+}
+function burst(){
+  if(still) return;
+  const cols=["#ffd257","#e8695f","#a8e0c4","#ffc2d9","#6db3ea","#ffab5e"];
+  for(let i=0;i<70;i++) parts.push({x:W/2,y:H*.4,vx:(Math.random()-.5)*12,vy:-Math.random()*12-3,c:cols[i%6],r:Math.random()*6+4,a:Math.random()*6,life:90+Math.random()*40});
+}
+function frame(t){
+  cx.clearRect(0,0,W,H);
+  const ambient = !$("#s-title").hidden || !$("#s-map").hidden;
+  if(ambient){
+    for(const f of snow){
+      if(!still){ f.y+=f.s; f.x+=Math.sin(t*.001+f.p)*.3; if(f.y>H+6){ f.y=-6; f.x=Math.random()*W; } }
+      const tw=.55+.35*Math.sin(t*.002+f.p);
+      if(f.gold){ // warm four-point sparkle
+        cx.globalAlpha=still?.7:tw; cx.fillStyle="#ffd98a"; const r=f.r*2.1; cx.beginPath();
+        cx.moveTo(f.x,f.y-r); cx.quadraticCurveTo(f.x,f.y,f.x+r,f.y); cx.quadraticCurveTo(f.x,f.y,f.x,f.y+r); cx.quadraticCurveTo(f.x,f.y,f.x-r,f.y); cx.quadraticCurveTo(f.x,f.y,f.x,f.y-r); cx.fill();
+      } else {     // soft snowflake with a faint warm rim so it reads on cream too
+        cx.globalAlpha=.9; cx.fillStyle="#fff"; cx.strokeStyle="rgba(196,150,110,.35)"; cx.lineWidth=1; cx.beginPath(); cx.arc(f.x,f.y,f.r,0,7); cx.fill(); cx.stroke();
+      }
+    }
+    cx.globalAlpha=1;
+  }
+  parts=parts.filter(p=>p.life-->0);
+  for(const p of parts){ p.x+=p.vx; p.y+=p.vy; p.vy+=.35; p.vx*=.99; p.a+=.2;
+    cx.save(); cx.translate(p.x,p.y); cx.rotate(p.a); cx.globalAlpha=Math.min(1,p.life/25); cx.fillStyle=p.c; cx.beginPath(); cx.roundRect ? cx.roundRect(-p.r/2,-p.r/4,p.r,p.r/2,2) : cx.rect(-p.r/2,-p.r/4,p.r,p.r/2); cx.fill(); cx.restore(); }
+  cx.globalAlpha=1;
+  requestAnimationFrame(frame);
+}
+addEventListener("resize",size); size(); requestAnimationFrame(frame);
+
+/* ================= BOOT ================= */
+document.getElementById("titleGhost").src=GH.c07;
+document.getElementById("s-title").style.backgroundImage=`url("${ART.scene}")`;
+updHud(); goTitle();
+</script>
+</body>
+</html>
