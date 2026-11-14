@@ -7,6 +7,7 @@
 <style>:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}body{margin:0}img{max-width:100%}[hidden]{display:none!important}</style>
 <title>聖誕雪屋大逃脫</title>
 <meta name="claude:viewport-fit-sides" content="cover">
+<meta name="copyright" content="© 2026 老師媽咪／范范老師">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Huninn&family=Noto+Sans+TC:wght@400;700;900&display=swap" rel="stylesheet">
@@ -74,7 +75,7 @@ body{background:radial-gradient(#ead3b3 1.6px,transparent 2px) 0 0/16px 16px,#f3
 .hud .grow{flex:1}
 
 /* ---------- Title ---------- */
-#s-title{align-items:center;justify-content:flex-start;gap:12px;text-align:center;padding:calc(34px + env(safe-area-inset-top,0px)) 20px calc(26px + env(safe-area-inset-bottom,0px));background:var(--cream) center bottom/cover no-repeat}
+#s-title{align-items:center;justify-content:flex-start;gap:12px;text-align:center;padding:calc(34px + env(safe-area-inset-top,0px)) 20px calc(44px + env(safe-area-inset-bottom,0px));background:var(--cream) center bottom/cover no-repeat}
 .logo{position:relative;display:flex;flex-direction:column;align-items:center;gap:2px;transform:rotate(-2deg);
   background:var(--panel);border:3px solid var(--ink);border-radius:28px;padding:26px 26px 18px;box-shadow:0 6px 0 var(--ink),0 16px 24px rgba(138,90,60,.28)}
 .logo::before{content:"";position:absolute;left:18px;right:18px;top:-9px;height:18px;
@@ -247,6 +248,8 @@ body{background:radial-gradient(#ead3b3 1.6px,transparent 2px) 0 0/16px 16px,#f3
 @media (prefers-reduced-motion:reduce){.mz.next{animation:none}}
 .cardtop{display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap}
 .diff{font-size:13px;color:#8a5a1a;background:#fff3d6;border:1.5px solid #e8c98a;border-radius:20px;padding:1px 10px}
+.credit{margin:6px 0 10px;text-align:center;font-size:12px;letter-spacing:.04em;color:rgba(44,52,96,.6)}
+.credit-title{position:absolute;left:50%;transform:translateX(-50%);white-space:nowrap;bottom:calc(8px + env(safe-area-inset-bottom,0px));margin:0;background:rgba(255,248,236,.85);border-radius:12px;padding:2px 10px;color:rgba(44,52,96,.75)}
 </style>
 </head>
 <body>
@@ -264,6 +267,7 @@ body{background:radial-gradient(#ead3b3 1.6px,transparent 2px) 0 0/16px 16px,#f3
     <img class="mascot" id="titleGhost" alt="雪球">
     <button class="btn green bounce" id="startBtn" type="button" style="font-size:25px;padding:14px 44px">開始遊戲</button>
     <button class="btn small purple" id="resetBtn" type="button" hidden>重新開始</button>
+    <p class="credit credit-title">© 2026 老師媽咪／范范老師　聖誕雪屋大逃脫</p>
   </section>
 
   <!-- MAP -->
@@ -275,7 +279,7 @@ body{background:radial-gradient(#ead3b3 1.6px,transparent 2px) 0 0/16px 16px,#f3
       <div class="pill" title="拐杖糖"><svg viewBox="0 0 32 32"><use href="#candy"/></svg><span class="candyCount">3</span></div>
       <button class="iconbtn sndBtn" type="button" aria-label="音效開關"><svg viewBox="0 0 24 24"><use href="#snd-on"/></svg></button>
     </div>
-    <div class="mapscroll" id="mapscroll"><p class="maptip">點任何一個房間開始解謎，找齊 8 枚徽章就能從大門逃出去，趕上聖誕老公公出發！</p><div id="board"></div></div>
+    <div class="mapscroll" id="mapscroll"><p class="maptip">點任何一個房間開始解謎，找齊 8 枚徽章就能從大門逃出去，趕上聖誕老公公出發！</p><div id="board"></div><p class="credit">© 2026 老師媽咪／范范老師</p></div>
   </section>
 
   <!-- LEVEL -->
