@@ -269,7 +269,7 @@ body{background:radial-gradient(#ead3b3 1.6px,transparent 2px) 0 0/16px 16px,#f3
   <!-- TITLE -->
   <section class="screen" id="s-title">
     <div class="logoboard" id="logoBoard"><span class="en">CHRISTMAS ESCAPE</span><span class="zh">聖誕雪屋大逃脫</span></div>
-    <p class="tagline">聖誕夜被困在雪屋裡了！<br>8 個房間、8 種機關，想先闖哪一間都可以</p>
+    <p class="tagline">糟糕！雪球和你被困在雪屋裡了！<br>解開 8 個房間的機關，才逃得出去</p>
     <img class="mascot" id="titleGhost" alt="雪球">
     <button class="btn green bounce" id="startBtn" type="button" style="font-size:25px;padding:14px 44px">開始遊戲</button>
     <button class="btn small purple" id="resetBtn" type="button" hidden>重新開始</button>
@@ -724,7 +724,7 @@ const RG = {
   4:[235,828,565,1006],
   5:[206,1099,566,1258]
 };
-const DOOR_H=[620,828,949,1006], DECO_H=[620,1100,979,1259];
+const DOOR_H=[620,1100,979,1259], DECO_H=[620,828,949,1006];
 const ROOMART = {0:"green",1:"attic",2:"library",3:"mirrorh",4:"kitchen",5:"cellar",6:"clock",7:"living"};
 const MEDAL   = {0:"tree",1:"deer",2:"book",3:"mirror",4:"cookie",5:"gift",6:"star",7:"bulb"};
 const SUBJ_C  = {"數學":"#cfe4f6","國語":"#ffd9e6","圖形":"#d3efe0","邏輯":"#fff0bf"};
@@ -757,11 +757,11 @@ function houseSVG(){
   return `<svg id="house" viewBox="40 0 1110 1322" role="group" aria-label="雪屋地圖">
     <defs><clipPath id="cdoor"><rect x="${dx0-pad}" y="${dy0-pad}" width="${dx1-dx0+2*pad}" height="${dy1-dy0+2*pad}"/></clipPath>
       <clipPath id="cnook"><rect x="${gx0-pad}" y="${gy0-pad}" width="${gx1-gx0+2*pad}" height="${gy1-gy0+2*pad}"/></clipPath></defs>
-    <g clip-path="url(#cnook)"><image href="${ART.titlebg}" x="${gx0-pad-40}" y="${gy0-pad-385}" width="${(gx1-gx0)+2*pad+80}" height="${((gx1-gx0)+2*pad+80)*1672/941}" preserveAspectRatio="none"/></g>
-    <image class="mapghost" href="${GH.c07}" x="${(gx0+gx1)/2-80}" y="${gy1-168}" width="160" height="160" pointer-events="none"/>
+    <g clip-path="url(#cnook)"><image href="${ART.titlebg}" x="${gx0-pad-40}" y="${gy0-pad-328}" width="${(gx1-gx0)+2*pad+80}" height="${((gx1-gx0)+2*pad+80)*1672/941}" preserveAspectRatio="none"/></g>
+    <image class="mapghost" href="${GH.c04}" x="${(gx0+gx1)/2-80}" y="${gy1-168}" width="160" height="160" pointer-events="none"/>
     ${Object.keys(RG).map(k=>roomSVG(+k)).join("")}
     <g class="doorbtn" id="doorBtn" tabindex="0" role="button" aria-label="雪屋大門，已收集 ${n} / ${N} 枚徽章">
-      <g clip-path="url(#cdoor)"><image href="${ART.titlebg}" x="${dx0-pad-30}" y="${dy0-pad-305}" width="${(dx1-dx0)+2*pad+60}" height="${((dx1-dx0)+2*pad+60)*1672/941}" preserveAspectRatio="none" style="${ready?"":"filter:brightness(.85)"}"/>
+      <g clip-path="url(#cdoor)"><image href="${ART.titlebg}" x="${dx0-pad-30}" y="${dy0-pad-360}" width="${(dx1-dx0)+2*pad+60}" height="${((dx1-dx0)+2*pad+60)*1672/941}" preserveAspectRatio="none" style="${ready?"":"filter:brightness(.85)"}"/>
         ${ready?`<rect x="${dx0}" y="${dy0}" width="${dx1-dx0}" height="${dy1-dy0}" fill="#ffe9a3" opacity=".35"/>`:""}</g>
       <rect class="frame" x="${dx0}" y="${dy0}" width="${dx1-dx0}" height="${dy1-dy0}" rx="22" fill="transparent" stroke="none"/>
       <image class="dimg ${ready?"bounce":""}" href="${ready?ART.door_o:ART.door_c}" x="${(dx0+dx1)/2-dw/2}" y="${dy1-dh-2}" width="${dw}" height="${dh}" style="transform-box:fill-box;transform-origin:center bottom"/>
@@ -1227,7 +1227,7 @@ function frame(t){
 addEventListener("resize",size); size(); requestAnimationFrame(frame);
 
 /* ================= BOOT ================= */
-document.getElementById("titleGhost").src=GH.c07;
+document.getElementById("titleGhost").src=GH.c03;
 document.getElementById("s-title").style.backgroundImage=`url("${ART.titlebg}")`;
 document.getElementById("logoBoard").style.backgroundImage=`url("${ART.logo}")`;
 updHud(); goTitle();
