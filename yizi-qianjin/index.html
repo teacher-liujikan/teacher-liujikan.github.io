@@ -232,6 +232,24 @@ input:disabled{opacity:.6}
 .g-act label{font-size:.95rem;color:var(--ink-soft);display:flex;gap:6px;align-items:center}
 .g-skip{position:absolute;top:12px;right:14px;border:2px solid var(--line);background:var(--paper);border-radius:999px;padding:4px 14px;font-weight:700;color:var(--ink-soft)}
 .linkbtn{border:none;background:none;color:var(--pine);text-decoration:underline;font-weight:700;font-size:.9rem;padding:2px 4px}
+.modes{display:flex;gap:8px;align-items:center;flex-wrap:wrap;font-weight:700}
+.modes button{border:2px solid var(--line);background:var(--paper);border-radius:999px;padding:4px 14px;font-weight:700;color:var(--ink)}
+.modes button.on{background:var(--coral);border-color:var(--coral);color:#fff}
+.wb-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;width:100%;max-width:1100px;min-height:0;overflow:auto}
+.wb-card{background:var(--paper-2);border-radius:14px;padding:8px;display:flex;flex-direction:column;gap:6px;min-width:0}
+.wb-card .hd{display:flex;align-items:center;gap:6px;font-weight:900}
+.wb-card .hd span{margin-left:auto;font-weight:700;color:var(--ink-soft);font-size:.85rem}
+.wb-card canvas{width:100%;aspect-ratio:1000/560;background:#fff;border-radius:8px;border:2px solid var(--line);display:block}
+.wb-card .bt{display:flex;gap:6px}
+.wb-card .bt button{flex:1;border:none;border-radius:8px;padding:6px 0;font-weight:900;background:var(--pine);color:#fff;font-size:1rem}
+.wb-card .bt button.p2{background:var(--gold);color:var(--ink)}
+.wb-card .bt button.m{background:var(--paper);color:var(--ink-soft);border:1.5px solid var(--line)}
+.wb-card .added{font-size:.85rem;color:var(--pine);font-weight:900;text-align:center;min-height:1.2em}
+.s-pad{width:100%;max-width:980px;aspect-ratio:1000/560;background:#fff;border:4px dashed #c9c1a8;border-radius:16px;touch-action:none;display:block}
+.s-pad.lock{opacity:.6}
+.s-tools{display:flex;gap:10px;justify-content:center}
+.s-tools button{border:2px solid var(--ink);background:var(--paper);border-radius:12px;padding:6px 18px;font-size:1.1rem;font-weight:900;color:var(--ink)}
+.s-mini{display:flex;gap:6px;justify-content:center;font-weight:900;font-size:1.8rem;letter-spacing:.1em}
 </style>
 </head>
 <body>
@@ -286,6 +304,7 @@ input:disabled{opacity:.6}
   <div class="ovl-info"><h3>平板掃這裡加入</h3><div class="code" id="ovlCode"></div><div class="url" id="ovlUrl"></div>
     <div class="ovl-status" id="ovlStatus"></div><div class="on-teams" id="ovlTeams"></div>
     <div class="title-note" style="text-align:left">一組一臺平板，掃 QR code 後選自己的組別。連線時每一題的時間會拉長（3 分鐘／1 分鐘／3 分鐘／2 分鐘）。</div>
+    <div class="modes" id="ovlModes">作答方式：<button data-mode="type">打字</button><button data-mode="wb">手寫白板</button></div>
     <div class="ovl-btns"><button class="tool hot" id="ovlClose">開始比賽</button><button class="tool" id="ovlEnd">結束連線</button></div></div>
 </div></div>
 <div class="stu" id="stu" hidden></div>
@@ -410,7 +429,7 @@ let inv=store.get('inv',{}), applied=store.get('applied',{});
 const tSec=s=>room?LONG[s.t]:s.time;
 const rnd=(n,abc)=>Array.from({length:n},()=>abc[Math.random()*abc.length|0]).join('');
 function pubState(){
-  const base={n:nTeams,scores:scores.slice(0,nTeams),book:pick.v&&pick.g?bookName():'',q:null,round:null};
+  const base={n:nTeams,scores:scores.slice(0,nTeams),book:pick.v&&pick.g?bookName():'',q:null,round:null,mode:room&&room.mode==='wb'?'wb':'type'};
   if(mode!=='game'||!S) return base;
   const s=S[idx]; if(s.r!=null) base.round=ROUNDS[s.r].plain;
   if(s.time){ base.q={id:s.id,t:s.t,g:s.g||null,shown:s.t==='fix'?s.q:null,phase:tick?'open':(doneFlag?'closed':(left<total?'pause':'wait')),left,total};
@@ -419,7 +438,7 @@ function pubState(){
 }
 function pushState(force){
   if(!hws||hws.readyState!==1) return;
-  const st=pubState(), sig=JSON.stringify([st.q&&[st.q.id,st.q.phase,!!st.q.fix],st.n,st.scores,st.round]);
+  const st=pubState(), sig=JSON.stringify([st.q&&[st.q.id,st.q.phase,!!st.q.fix],st.n,st.scores,st.round,st.mode]);
   const save=!!force||sig!==lastSig; lastSig=sig;
   try{hws.send(JSON.stringify({t:'state',state:st,save}))}catch(e){}
 }
@@ -452,6 +471,7 @@ function drawOvl(){
   const ok=hws&&hws.readyState===1;
   $('ovlStatus').className='ovl-status'+(ok?'':' bad');
   $('ovlStatus').textContent=ok?`已連線，${online.length} 組加入`:(roomErr?'連不上連線伺服器。這個功能要把網頁放在 GitHub Pages 上才能用，也請確認網路。':'連線中…');
+  for(const b of $('ovlModes').querySelectorAll('button')) b.classList.toggle('on',(room.mode||'type')===b.dataset.mode);
   $('ovlTeams').innerHTML=Array.from({length:nTeams},(_,i)=>`<span class="${online.includes(i+1)?'in':''}">第 ${i+1} 組</span>`).join('');
 }
 $('roomBtn').onclick=()=>{
@@ -462,10 +482,12 @@ $('roomBtn').onclick=()=>{
   if(!room){room={code:rnd(5,'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'),key:rnd(20,'abcdefghijklmnopqrstuvwxyz0123456789')};store.set('room',room);answers={};timerFor=-1}
   hRetry=0;roomErr=false;hostConnect();$('ovl').hidden=false;drawOvl();render(true)};
 $('ovlClose').onclick=()=>{$('ovl').hidden=true};
+$('ovlModes').onclick=e=>{const b=e.target.closest('button[data-mode]');if(!b||!room)return;room.mode=b.dataset.mode;store.set('room',room);pushState(true);drawOvl();render(true)};
 $('ovlEnd').onclick=()=>{room=null;store.set('room',null);answers={};online=[];wall=false;if(hws){try{hws.close()}catch(e){}}hws=null;$('ovl').hidden=true;timerFor=-1;drawOvl();render(true)};
 function clean(d,s){
   const str=x=>typeof x==='string'?x.slice(0,8):'';
   if(!d||typeof d!=='object') return null;
+  if(Array.isArray(d.s)) return {wb:d.s.slice(0,200).filter(a=>Array.isArray(a)).map(a=>a.slice(0,4000).map(v=>Math.max(0,Math.min(1000,v|0))))};
   if(s.t==='char') return {list:(Array.isArray(d.list)?d.list:[]).slice(0,120).map(str).filter(c=>[...c].length===1&&HAN.test(c))};
   if(s.t==='word') return {list:(Array.isArray(d.list)?d.list:[]).slice(0,80).map(str).filter(w=>[...w].length>=2)};
   if(s.t==='cross') return {c:[0,1,2,3].map(i=>str((d.c||[])[i]).slice(0,2))};
@@ -475,6 +497,7 @@ function clean(d,s){
 function judge(s,team){
   const d=clean((answers[s.id]||{})[team],s), bad=((inv[s.id]||{})[team])||{}; const items=[]; let pts=0;
   if(!d) return {items,pts:0,none:true};
+  if(d.wb) return {items,pts:0,wb:d.wb};
   if(s.t==='char'){[...new Set(d.list)].forEach(c=>{const v=!bad[c];items.push({k:c,txt:c,v});if(v)pts++})}
   else if(s.t==='word'){[...new Set(d.list)].forEach(w=>{const p=[...w].length>=4?2:1, v=w.includes(s.g)&&!bad[w];items.push({k:w,txt:w,v,p});if(v)pts+=p})}
   else if(s.t==='cross'){const c=d.c, ws=[c[0]&&c[0]+s.g,c[1]&&c[1]+s.g,c[2]&&s.g+c[2],c[3]&&s.g+c[3]], seen=new Set();
@@ -483,7 +506,21 @@ function judge(s,team){
     items.push({k:'_',txt:[...s.q].map((c,i)=>p[i]!==undefined?(p[i]||'？'):c).join(''),v:ok}); pts=ok?1:0}
   return {items,pts};
 }
+const isWb=()=>room&&room.mode==='wb';
+let wbAdded=store.get('wbAdded',{});
+function wbWall(s){
+  const cards=Array.from({length:nTeams},(_,i)=>{const t=i+1,j=judge(s,t),ad=(wbAdded[s.id]||{})[t];
+    return `<div class="wb-card"><div class="hd">第 ${t} 組<span>${j.wb?'':(j.none?'還沒作答':'')}</span></div><canvas width="500" height="280" data-wbteam="${t}"></canvas>
+     <div class="bt"><button data-wbadd="${t}" data-v="1">+1</button><button class="p2" data-wbadd="${t}" data-v="2">+2</button><button class="m" data-wbadd="${t}" data-v="-1">−1</button></div><div class="added">${ad?(ad>0?'+':'')+ad+' 分':''}</div></div>`}).join('');
+  return `<div class="w-head"><span>${s.t==='fix'?escH(s.q):'「'+s.g+'」'}・各組手寫答案</span><span class="hint">看完各組寫的，直接按 +1／+2 加分</span></div><div class="wb-grid">${cards}</div>`;
+}
+function paintWb(){
+  const s=S[idx]; for(const c of document.querySelectorAll('canvas[data-wbteam]')){const j=judge(s,+c.dataset.wbteam);const x=c.getContext('2d');x.clearRect(0,0,500,280);
+    x.lineCap='round';x.lineJoin='round';x.strokeStyle='#262340';x.lineWidth=5;
+    for(const st of (j.wb||[])){if(st.length<2)continue;x.beginPath();x.moveTo(st[0]/2,st[1]/2);if(st.length===2)x.lineTo(st[0]/2+0.5,st[1]/2);for(let k=2;k<st.length;k+=2)x.lineTo(st[k]/2,st[k+1]/2);x.stroke()}}
+}
 function wallHTML(s){
+  if(isWb()) return wbWall(s);
   const J=[];let max=0; for(let t=1;t<=nTeams;t++){const j=judge(s,t);J.push(j);max=Math.max(max,j.pts)}
   const rows=J.map((j,i)=>{const t=i+1;
     const chips=j.none?'<i class="w-none">還沒作答</i>':(j.items.map(it=>`<button class="w-it ${it.v?'':'off'} ${it.p===2&&it.v?'two':''}" data-team="${t}" data-k="${escH(it.k)}">${escH(it.txt)}</button>`).join('')||'<i class="w-none">空白</i>');
@@ -506,22 +543,24 @@ function studentApp(){
   const ss={get(k){try{return sessionStorage.getItem('yz-'+JOIN+'-'+k)}catch(e){return null}},set(k,v){try{sessionStorage.setItem('yz-'+JOIN+'-'+k,v)}catch(e){}}};
   let team=+(ss.get('team')||0), st=null, ws=null, opened=false, retry=0, dead=false, localLeft=0, sig='', sendT=null;
   let drafts={}; try{drafts=JSON.parse(ss.get('d')||'{}')}catch(e){}
-  const draft=q=>drafts[q.id]||(drafts[q.id]=q.t==='fix'?{pick:{}}:q.t==='cross'?{c:['','','','']}:{list:[]});
+  const wbOn=()=>st&&st.mode==='wb';
+  const dkey=q=>q.id+(wbOn()?'w':'');
+  const draft=q=>drafts[dkey(q)]||(drafts[dkey(q)]=wbOn()?{s:[]}:q.t==='fix'?{pick:{}}:q.t==='cross'?{c:['','','','']}:{list:[]});
   function connect(){
     try{ws=new WebSocket(`${API}/room/${JOIN}?role=team&team=${team}`)}catch(e){dead=true;draw(true);return}
     const me=ws;
-    me.onopen=()=>{opened=true;retry=0;draw(true); if(st&&st.q&&drafts[st.q.id]) send(st.q,true)};
+    me.onopen=()=>{opened=true;retry=0;draw(true); if(st&&st.q&&drafts[dkey(st.q)]) send(st.q,true)};
     me.onmessage=e=>{let m;try{m=JSON.parse(e.data)}catch(_){return} if(m.t!=='state')return; st=m.state; if(st&&st.q)localLeft=st.q.left; draw()};
     me.onclose=()=>{if(ws!==me)return; ws=null; retry++; if(!opened&&retry>=3){dead=true;draw(true);return} draw(true); setTimeout(connect,Math.min(6000,1000*retry))};
     me.onerror=()=>{};
   }
-  function send(q,now){clearTimeout(sendT); const go=()=>{ss.set('d',JSON.stringify(drafts)); if(team&&ws&&ws.readyState===1) try{ws.send(JSON.stringify({t:'ans',qid:q.id,data:drafts[q.id]}))}catch(e){}}; now?go():(sendT=setTimeout(go,700))}
+  function send(q,now){clearTimeout(sendT); const go=()=>{ss.set('d',JSON.stringify(drafts)); if(team&&ws&&ws.readyState===1) try{ws.send(JSON.stringify({t:'ans',qid:q.id,data:drafts[dkey(q)]}))}catch(e){}}; now?go():(sendT=setTimeout(go,700))}
   const lastHan=v=>{const m=[...v].filter(c=>HAN.test(c));return m.length?m[m.length-1]:''};
   const fmt=s=>Math.floor(s/60)+':'+String(s%60).padStart(2,'0');
   setInterval(()=>{if(st&&st.q&&st.q.phase==='open'&&localLeft>0){localLeft--;const c=root.querySelector('.s-clock');if(c){c.textContent=fmt(localLeft);c.classList.toggle('low',localLeft<=10)}}},1000);
   function draw(force){
     const q=st&&st.q, n=st?st.n:0; if(team>n&&n) team=0;
-    const ns=JSON.stringify([team,n,q&&[q.id,q.phase,!!q.fix],st&&st.round,st&&st.scores,!!ws,dead]);
+    const ns=JSON.stringify([team,n,q&&[q.id,q.phase,!!q.fix],st&&st.round,st&&st.scores,!!ws,dead,st&&st.mode]);
     if(!force&&ns===sig){return} sig=ns;
     let top='',main='';
     if(dead){root.innerHTML=`<div class="s-main"><div class="s-big">連不上房間</div><div class="s-msg">請再掃一次老師螢幕上的 QR code，或請老師重新開房間。</div></div>`;return}
@@ -534,7 +573,13 @@ function studentApp(){
     else{
       const open=q.phase==='open', d=draft(q), dis=open?'':'disabled';
       const note=q.phase==='wait'?'準備好，等老師按開始':q.phase==='pause'?'暫停中':q.phase==='closed'?'時間到！請看電視':'';
-      if(q.t==='char'||q.t==='word'){
+      if(wbOn()){
+        const pr=q.t==='char'?`寫出有<span class="key">${escH(q.g)}</span>這個部件的字`:q.t==='word'?`寫出有<span class="key">${escH(q.g)}</span>的語詞`:q.t==='fix'?'找出錯字，寫出正確的成語':`接出四個有<span class="key">${escH(q.g)}</span>的語詞`;
+        main=`<div class="s-q">${pr}</div>${q.t==='fix'?`<div class="s-mini">${escH(q.shown)}</div>`:''}
+          <canvas class="s-pad ${open?'':'lock'}" id="sPad" width="1000" height="560"></canvas>
+          <div class="s-tools"><button data-wb="undo" ${dis}>↶ 復原</button><button data-wb="clear" ${dis}>清除全部</button></div><div class="s-count" id="sCount"></div>
+          ${q.fix?`<div class="s-count">正確：${escH(q.fix.full)}</div>`:''}`;
+      } else if(q.t==='char'||q.t==='word'){
         main=`<div class="s-q">${q.t==='char'?`寫出有<span class="key">${escH(q.g)}</span>這個部件的字`:`寫出有<span class="key">${escH(q.g)}</span>的語詞`}</div>
           <form class="s-form" id="sForm"><input id="sIn" ${dis} autocomplete="off" autocapitalize="off" placeholder="${q.t==='char'?'一次可以寫好幾個字':'一次寫一個語詞'}"><button ${dis}>加入</button></form>
           <div class="s-count" id="sCount"></div><div class="s-list ${open?'':'lock'}" id="sList"></div>`;
@@ -548,14 +593,25 @@ function studentApp(){
       if(note) main=`<div class="s-msg">${note}</div>`+main;
     }
     root.innerHTML=top+`<div class="s-main">${main}</div><div class="credit">© 老師媽咪／范范老師 製作</div>`;
-    if(q&&(q.t==='char'||q.t==='word')) drawList(q);
+    if(q&&wbOn()) setupPad(q); else if(q&&(q.t==='char'||q.t==='word')) drawList(q);
   }
+  function padDraw(c,d){const x=c.getContext('2d');x.clearRect(0,0,1000,560);x.lineCap='round';x.lineJoin='round';x.strokeStyle='#262340';x.lineWidth=9;
+    for(const s of d.s){if(s.length<2)continue;x.beginPath();x.moveTo(s[0],s[1]);if(s.length===2)x.lineTo(s[0]+.5,s[1]);for(let k=2;k<s.length;k+=2)x.lineTo(s[k],s[k+1]);x.stroke()}}
+  function setupPad(q){const c=$('sPad');if(!c)return;const d=draft(q);padDraw(c,d);
+    const size=()=>JSON.stringify(d.s).length; const msg=()=>{$('sCount').textContent=size()>5000?'寫滿了！按「清除全部」或「復原」再寫':''};msg();
+    let cur=null;
+    const pt=e=>{const r=c.getBoundingClientRect();return [Math.round((e.clientX-r.left)/r.width*1000),Math.round((e.clientY-r.top)/r.height*560)]};
+    c.onpointerdown=e=>{if(!st.q||st.q.phase!=='open'||size()>5000)return;e.preventDefault();c.setPointerCapture(e.pointerId);cur=pt(e);d.s.push(cur);padDraw(c,d)};
+    c.onpointermove=e=>{if(!cur)return;const [x,y]=pt(e),lx=cur[cur.length-2],ly=cur[cur.length-1];if(Math.abs(x-lx)+Math.abs(y-ly)<6)return;cur.push(x,y);
+      const g=c.getContext('2d');g.lineCap='round';g.strokeStyle='#262340';g.lineWidth=9;g.beginPath();g.moveTo(lx,ly);g.lineTo(x,y);g.stroke()};
+    const up=()=>{if(!cur)return;cur=null;msg();send(q)};c.onpointerup=up;c.onpointercancel=up;c.onpointerleave=up;}
   function drawList(q){const d=draft(q), l=$('sList'); if(!l)return; l.innerHTML=d.list.map((w,i)=>`<button data-del="${i}">${escH(w)}</button>`).join(''); $('sCount').textContent=d.list.length?`已經寫了 ${d.list.length} 個`:''}
   root.addEventListener('click',e=>{
     const b=e.target.closest('button'); if(!b)return; const q=st&&st.q;
     if(b.dataset.team){team=+b.dataset.team;ss.set('team',team);if(ws){const o=ws;ws=null;try{o.close()}catch(_){}}opened=false;connect();draw(true);return}
     if(b.dataset.change){team=0;ss.set('team',0);draw(true);return}
     if(!q||q.phase!=='open')return; const d=draft(q);
+    if(b.dataset.wb){if(b.dataset.wb==='undo')d.s.pop();else d.s.length=0;const c=$('sPad');if(c)padDraw(c,d);$('sCount').textContent='';send(q,true);return}
     if(b.dataset.del!==undefined){d.list.splice(+b.dataset.del,1);drawList(q);send(q)}
     else if(b.dataset.i!==undefined){const i=b.dataset.i; if(d.pick[i]!==undefined) delete d.pick[i]; else d.pick[i]=''; send(q); draw(true); const f=root.querySelector(`input[data-fi="${i}"]`); if(f)f.focus()}
   });
@@ -615,6 +671,7 @@ const GUIDE=`<button class="g-skip" data-g="skip">跳過 →</button>
    <li>最後一頁「結算」會自動排名</li></ul></div>
   <div class="g-card"><h3><span>5</span>平板連線（有平板再用）</h3><ul>
    <li>按上方「平板連線」，各組用一臺平板掃 QR code，選自己的組別</li>
+   <li>作答方式可以選「打字」或「手寫白板」：手寫白板讓小朋友直接用手指在平板上寫字</li>
    <li>老師按「開始」後平板才能作答，時間到自動鎖住</li>
    <li>按「各組答案」看每組寫了什麼，點一下答案可以切換算或不算，再一鍵加分</li>
    <li>連線要看學校的網路，建議上課前先用一臺平板試試看</li>
@@ -685,7 +742,7 @@ function render(noPush){
     extra='<button class="tool" data-act="again">同一冊再抽一次題目</button>';
   }
   if(room&&s.time){extra=`<button class="tool ${wall?'hot':''}" data-act="wall">各組答案 ${Object.keys(answers[s.id]||{}).length}/${nTeams}</button>`+extra; if(wall) h=wallHTML(s)}
-  el.innerHTML=h; $('extra').innerHTML=extra;
+  el.innerHTML=h; $('extra').innerHTML=extra; if(room&&s.time&&wall&&isWb()) paintWb();
   $('src').hidden=!src; $('src').textContent=src;
   $('prev').disabled=idx===0; $('next').disabled=idx===S.length-1;
   $('count').textContent=`${idx+1} / ${S.length}`;
@@ -709,6 +766,7 @@ $('extra').onclick=e=>{const a=e.target.dataset.act;
   else if(a==='again'){S=buildSlides();store.set('slides',S);go(1)}};
 $('slide').onclick=e=>{
   if(e.target.closest('[data-act="apply"]')) return applyScores();
+  const wa=e.target.closest('[data-wbadd]'); if(wa){const s=S[idx],t=+wa.dataset.wbadd,v=+wa.dataset.v;scores[t-1]=Math.max(0,scores[t-1]+v);const a=(wbAdded[s.id]=wbAdded[s.id]||{});a[t]=(a[t]||0)+v;store.set('wbAdded',wbAdded);renderTeams(t-1);return render(true)}
   const w=e.target.closest('.w-it'); if(w){const s=S[idx],t=w.dataset.team,k=w.dataset.k; const a=(inv[s.id]=inv[s.id]||{}), m=(a[t]=a[t]||{}); m[k]=!m[k]; store.set('inv',inv); return render(true)}
   const b=e.target.closest('.ch');if(!b||reveal)return;const i=b.dataset.i;marked[i]=!marked[i];render()};
 document.addEventListener('keydown',e=>{
