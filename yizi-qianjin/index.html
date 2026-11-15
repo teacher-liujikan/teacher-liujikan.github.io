@@ -250,6 +250,29 @@ input:disabled{opacity:.6}
 .s-tools{display:flex;gap:10px;justify-content:center}
 .s-tools button{border:2px solid var(--ink);background:var(--paper);border-radius:12px;padding:6px 18px;font-size:1.1rem;font-weight:900;color:var(--ink)}
 .s-mini{display:flex;gap:6px;justify-content:center;font-weight:900;font-size:1.8rem;letter-spacing:.1em}
+
+/* 聖誕小幫手：聖誕老公公、麋鹿、雪人在舞臺旁提醒 */
+.pals{position:absolute;inset:0;pointer-events:none;z-index:3}
+.stage.haspals .slide{padding-bottom:calc(clamp(64px,15vh,130px) + 1vh)}
+.pal{position:absolute;bottom:0;width:clamp(64px,15vh,130px);transition:transform .35s cubic-bezier(.3,1.6,.5,1),opacity .3s}
+.pal svg{width:100%;height:auto;display:block;filter:drop-shadow(0 3px 4px rgba(38,35,64,.18))}
+.pal.santa{left:1.2vw}
+.pal.deer{right:calc(1.2vw + clamp(64px,15vh,130px) + .6vw)}
+.pal.snow{right:1.2vw}
+.pal.on{animation:palhop 1.4s ease-in-out infinite}
+.pal:not(.on){transform:translateY(6%);opacity:.8}
+@keyframes palhop{0%,100%{transform:translateY(0)}50%{transform:translateY(-7%) rotate(-2deg)}}
+.pals.hide .pal{transform:translateY(110%)}
+.pals.hide .say{opacity:0}
+.say{position:absolute;bottom:clamp(20px,5vh,46px);max-width:min(36vw,380px);background:#fff;color:var(--ink);border:2.5px solid var(--berry);border-radius:16px;padding:.45em .8em;
+  font-weight:900;font-size:clamp(.85rem,2.3vh,1.25rem);line-height:1.35;box-shadow:0 4px 0 rgba(214,51,63,.18);transition:opacity .25s;text-align:left}
+.say::after{content:"";position:absolute;bottom:14px;width:14px;height:14px;background:#fff;border:2.5px solid var(--berry)}
+.say.l{left:calc(1.2vw + clamp(64px,15vh,130px) + 10px)}.say.l::after{left:-9px;border-top:none;border-right:none;transform:rotate(45deg)}
+.say.r{right:calc(2.4vw + clamp(64px,15vh,130px) * 2 + 10px)}.say.r::after{right:-9px;border-bottom:none;border-left:none;transform:rotate(45deg)}
+.say.pop{animation:saypop .35s cubic-bezier(.3,1.6,.5,1)}
+@keyframes saypop{from{transform:scale(.6);opacity:0}}
+.say.urgent{border-color:var(--berry);background:#fff1ef}
+@media (prefers-reduced-motion:reduce){.pal.on,.say.pop{animation:none}}
 </style>
 </head>
 <body>
@@ -270,6 +293,7 @@ input:disabled{opacity:.6}
     <section class="guide" id="guide" hidden></section>
     <section class="setup" id="setup" hidden></section>
     <section class="slide" id="slide"></section>
+    <div class="pals" id="pals" aria-live="polite"><div class="say l" id="say" hidden></div><div class="pal santa" data-p="santa"><svg viewBox="0 0 100 124" aria-hidden="true"><ellipse cx="50" cy="118" rx="30" ry="5" fill="#000" opacity=".08"/><path d="M18 120c0-26 14-40 32-40s32 14 32 40z" fill="#d6333f"/><rect x="18" y="104" width="64" height="7" fill="#262340"/><rect x="44" y="102" width="12" height="11" rx="2" fill="#f5b82e"/><path d="M50 80v40" stroke="#fff" stroke-width="7"/><path d="M24 30c4-20 18-28 32-26 12 2 20 12 22 22l-6 8z" fill="#d6333f"/><path d="M56 5c14 0 24 8 26 22" stroke="#d6333f" stroke-width="10" fill="none" stroke-linecap="round"/><circle cx="84" cy="32" r="7" fill="#fff"/><circle cx="50" cy="48" r="20" fill="#f7cfb2"/><path d="M28 50c0 22 10 36 22 36s22-14 22-36c-6 8-14 8-22 8s-16 0-22-8z" fill="#fff"/><path d="M40 62c4-4 8-4 10-1 2-3 6-3 10 1" stroke="#e7e1d6" stroke-width="3" fill="none" stroke-linecap="round"/><circle cx="50" cy="56" r="4.5" fill="#f08c80"/><circle cx="42" cy="46" r="2.6" fill="#262340"/><circle cx="58" cy="46" r="2.6" fill="#262340"/><circle cx="36" cy="53" r="3.5" fill="#f4a39a" opacity=".7"/><circle cx="64" cy="53" r="3.5" fill="#f4a39a" opacity=".7"/><rect x="24" y="26" width="52" height="10" rx="5" fill="#fff"/></svg></div><div class="pal deer" data-p="deer"><svg viewBox="0 0 100 124" aria-hidden="true"><ellipse cx="50" cy="118" rx="28" ry="5" fill="#000" opacity=".08"/><g stroke="#8a5a34" stroke-width="5" stroke-linecap="round" fill="none"><path d="M34 34C28 20 22 14 16 8M26 22l-10 2M30 28l-4-12"/><path d="M66 34c6-14 12-20 18-26M74 22l10 2M70 28l4-12"/></g><path d="M22 120c0-24 12-36 28-36s28 12 28 36z" fill="#a8703f"/><path d="M38 120c0-14 5-22 12-22s12 8 12 22z" fill="#e9cfa8"/><path d="M30 86h40l-6 10H36z" fill="#2f7d5b"/><circle cx="50" cy="96" r="4" fill="#f5b82e"/><ellipse cx="25" cy="44" rx="9" ry="5" fill="#a8703f" transform="rotate(-25 25 44)"/><ellipse cx="75" cy="44" rx="9" ry="5" fill="#a8703f" transform="rotate(25 75 44)"/><ellipse cx="50" cy="56" rx="20" ry="24" fill="#a8703f"/><ellipse cx="50" cy="68" rx="13" ry="10" fill="#e9cfa8"/><circle cx="50" cy="64" r="6.5" fill="#d6333f"/><circle cx="48" cy="62" r="2" fill="#fff" opacity=".7"/><circle cx="42" cy="50" r="2.8" fill="#262340"/><circle cx="58" cy="50" r="2.8" fill="#262340"/><path d="M45 74q5 4 10 0" stroke="#6b4426" stroke-width="2" fill="none" stroke-linecap="round"/></svg></div><div class="pal snow" data-p="snow"><svg viewBox="0 0 100 124" aria-hidden="true"><ellipse cx="50" cy="118" rx="30" ry="5" fill="#000" opacity=".08"/><path d="M22 86L6 74M78 86l16-12" stroke="#8a5a34" stroke-width="3.5" stroke-linecap="round"/><circle cx="50" cy="96" r="25" fill="#fff" stroke="#b9cdee" stroke-width="2.5"/><circle cx="50" cy="52" r="20" fill="#fff" stroke="#b9cdee" stroke-width="2.5"/><circle cx="50" cy="90" r="2.6" fill="#262340"/><circle cx="50" cy="102" r="2.6" fill="#262340"/><path d="M28 70q22 10 44 0l2 7q-24 10-48 0z" fill="#2f7d5b"/><path d="M62 74l6 16h-8l-3-14z" fill="#2f7d5b"/><rect x="30" y="28" width="40" height="5" rx="2" fill="#262340"/><rect x="36" y="8" width="28" height="22" rx="3" fill="#262340"/><rect x="36" y="22" width="28" height="5" fill="#d6333f"/><circle cx="43" cy="48" r="2.6" fill="#262340"/><circle cx="57" cy="48" r="2.6" fill="#262340"/><path d="M50 54l14 3-14 3z" fill="#e8735a"/><path d="M43 62q7 4 14 0" stroke="#262340" stroke-width="2" fill="none" stroke-linecap="round"/><circle cx="38" cy="56" r="3.2" fill="#f7c9bd"/><circle cx="62" cy="56" r="3.2" fill="#f7c9bd"/></svg></div></div>
   </main>
 
   <div class="bar">
@@ -689,12 +713,12 @@ function leaveGuide(){try{if($('gNo')&&$('gNo').checked)store.set('skipGuide',tr
 $('guide').onclick=e=>{const b=e.target.closest('[data-g]');if(!b)return;leaveGuide()};
 function render(noPush){
   const guide=mode==='guide'; $('guide').hidden=!guide;
-  if(guide){$('setup').hidden=true;$('slide').hidden=true;$('prev').hidden=$('next').hidden=true;$('rounds').hidden=true;$('count').hidden=true;$('bookchip').hidden=true;$('src').hidden=true;$('extra').innerHTML='';$('timerBox').hidden=true;snowOn=false;if(!$('guide').innerHTML)$('guide').innerHTML=GUIDE;return}
+  if(guide){helper();$('setup').hidden=true;$('slide').hidden=true;$('prev').hidden=$('next').hidden=true;$('rounds').hidden=true;$('count').hidden=true;$('bookchip').hidden=true;$('src').hidden=true;$('extra').innerHTML='';$('timerBox').hidden=true;snowOn=false;if(!$('guide').innerHTML)$('guide').innerHTML=GUIDE;return}
   const setup=mode==='setup';
   $('setup').hidden=!setup; $('slide').hidden=setup;
   $('prev').hidden=$('next').hidden=setup; $('rounds').hidden=setup; $('count').hidden=setup;
   $('bookchip').hidden=setup||!S;
-  if(setup){snowOn=true;$('src').hidden=true;$('extra').innerHTML=S?'<button class="tool" data-act="back">回到比賽</button>':'';$('timerBox').hidden=true;renderSetup();if(!noPush)pushState();return}
+  if(setup){snowOn=true;setTimeout(helper);$('src').hidden=true;$('extra').innerHTML=S?'<button class="tool" data-act="back">回到比賽</button>':'';$('timerBox').hidden=true;renderSetup();if(!noPush)pushState();return}
   idx=Math.min(idx,S.length-1);
   const s=S[idx]; const el=$('slide'); let h='', extra='', src='';
   const swap='<button class="tool" data-act="swap">換一題</button>';
@@ -752,6 +776,7 @@ function render(noPush){
     +`<button class="rchip ${s.t==='end'?'on':''}" data-end>結算</button>`;
   if(s.time){$('timerBox').hidden=false; if(timerFor!==idx) setTimer(tSec(s))} else {$('timerBox').hidden=true; stopTimer()}
   store.set('idx',idx);
+  helper();
   if(!noPush) pushState();
 }
 function go(i){ if(mode!=='game'||i<0||i>=S.length) return; idx=i; reveal=false; wall=false; marked={}; stopTimer(); timerFor=-1; render(); }
@@ -781,7 +806,7 @@ document.addEventListener('keydown',e=>{
 /* ---------- timer ---------- */
 let left=0,total=0,tick=null,timerFor=-1,actx=null;
 function fmt(s){return Math.floor(s/60)+':'+String(s%60).padStart(2,'0')}
-function drawClock(){const c=$('clock');c.textContent=fmt(left);c.classList.toggle('low',left<=10&&left>0);c.classList.toggle('done',left===0&&total>0&&!tick&&doneFlag)}
+function drawClock(){const c=$('clock');c.textContent=fmt(left);helper();c.classList.toggle('low',left<=10&&left>0);c.classList.toggle('done',left===0&&total>0&&!tick&&doneFlag)}
 let doneFlag=false;
 function setTimer(sec){stopTimer();total=sec;left=sec;timerFor=idx;doneFlag=false;drawClock();$('tStart').textContent='開始'}
 function stopTimer(){clearInterval(tick);tick=null;$('tStart').textContent=left>0&&left<total?'繼續':'開始'}
@@ -799,6 +824,45 @@ $('tReset').onclick=()=>setTimer(total);
 function ensureAudio(){try{actx=actx||new (window.AudioContext||window.webkitAudioContext)();actx.resume()}catch(e){}}
 function beep(f,d){if(!actx)return;try{const o=actx.createOscillator(),g=actx.createGain();o.frequency.value=f;o.type='triangle';
   g.gain.setValueAtTime(.25,actx.currentTime);g.gain.exponentialRampToValueAtTime(.001,actx.currentTime+d);o.connect(g).connect(actx.destination);o.start();o.stop(actx.currentTime+d)}catch(e){}}
+
+
+/* ---------- 聖誕小幫手 ---------- */
+const TIPS={char:['部件可以在左邊、右邊，也可以在上面或下面喔！','想想看：哪些字有這個部件？一人想一個！'],
+  fix:['錯字可能不只一個，每個字都要看仔細！','唸唸看，哪個字怪怪的？'],
+  word:['想到成語或四字語詞可以拿 2 分喔！','兩個字、三個字的語詞都可以！'],
+  cross:['照著箭頭的方向接，四個語詞要不一樣喔！','箭頭指進來，字放前面；指出去，字放後面！']};
+let lastSay='';
+function helper(){
+  const box=$('pals'); if(!box) return;
+  let who='',msg='',urgent=false;
+  if(mode==='guide'){box.classList.add('hide');$('stage').classList.remove('haspals');return}
+  if(mode==='setup'){box.classList.add('hide');$('stage').classList.remove('haspals');return}
+  else{
+    const s=S[idx];
+    if(wall){box.classList.add('hide');$('stage').classList.remove('haspals');return}
+    if(s.t==='title'){who='santa';msg='Ho Ho Ho！聖誕挑戰賽要開始了，各組準備好了嗎？'}
+    else if(s.t==='round'){who='deer';const k=ROUNDS[s.r].k;msg='第'+'一二三四'[s.r]+'關來了！'+TIPS[k][0]}
+    else if(s.t==='demo'){who='deer';msg='先看示範：學字在中間，接出四個語詞！'}
+    else if(s.t==='end'){who='all';msg='聖誕快樂！每一組都好棒，給自己拍拍手！'}
+    else if(s.time){
+      if(reveal){who='deer';msg='對答案囉！答對的組，老師幫你們加分！'}
+      else if(total>0&&left===0&&doneFlag){who='santa';msg='時間到！筆放下，請代表來發表～';urgent=true}
+      else if(tick&&left<=10){who='snow';msg='最後 '+left+' 秒！快快快！';urgent=true}
+      else if(tick&&left<=30){who='snow';msg='剩下 30 秒，加油！'}
+      else if(tick){who='santa';msg=TIPS[s.t]?TIPS[s.t][1]:'小組一起想，加油！'}
+      else {who='snow';msg='老師按「開始」，大家就可以動筆囉！'}
+    }
+  }
+  box.classList.toggle('hide',!who);$('stage').classList.toggle('haspals',!!who);
+  box.querySelectorAll('.pal').forEach(p=>p.classList.toggle('on',who==='all'||p.dataset.p===who));
+  const say=$('say');
+  if(!msg){say.hidden=true;lastSay='';return}
+  say.hidden=false;
+  say.className='say '+(who==='santa'||who==='all'?'l':'r')+(urgent?' urgent':'');
+  const key=who+'|'+msg.replace(/\d+/,'#');
+  if(say.textContent!==msg) say.textContent=msg;
+  if(key!==lastSay){lastSay=key;void say.offsetWidth;say.classList.add('pop')}
+}
 
 /* ---------- scoreboard ---------- */
 function renderTeams(bumpI){
