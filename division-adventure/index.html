@@ -966,7 +966,7 @@ body[data-mode="chal"] .tabs,body[data-mode="student"] .stats{display:none}
           <button class="btn" id="spin">轉扭蛋（10 幣）</button>
           <p class="price" id="spinMsg"></p>
           <div class="how">
-            <b>怎麼拿扭蛋幣？</b><br>在除法大挑戰裡：每答對 1 題 +1、每連續答對 5 題再 +2、60 秒挑戰打破紀錄 +5。
+            <b>怎麼拿扭蛋幣？</b><br>在除法大挑戰裡：每答對 1 題 +1、每連續答對 5 題再 +2、計時挑戰打破紀錄 +5（三年級 60 秒挑戰、四年級 5 題計時賽）。
           </div>
         </div>
         <div class="panel coll-r">
@@ -993,7 +993,7 @@ body[data-mode="chal"] .tabs,body[data-mode="student"] .stats{display:none}
           <h2>選玩法</h2>
           <div class="c-modes" id="cModes">
             <button class="c-opt" data-cm="practice" aria-pressed="true"><b>練習模式</b><span>不限時間，答錯會給提示</span></button>
-            <button class="c-opt" data-cm="timed" aria-pressed="false"><b>60 秒挑戰</b><span>看看一分鐘能答對幾題</span></button>
+            <button class="c-opt" data-cm="timed" aria-pressed="false" id="cTimedOpt"><b>60 秒挑戰</b><span>看看一分鐘能答對幾題</span></button>
           </div>
           <p class="c-best" id="cBest"></p>
           <button class="btn ghost" id="cColl">我的收藏・扭蛋機</button>
@@ -1002,7 +1002,7 @@ body[data-mode="chal"] .tabs,body[data-mode="student"] .stats{display:none}
       </div>
       <div class="c-game" id="cGame" hidden>
         <div class="panel c-main">
-          <div class="c-bar"><span class="c-chip">答對 <b id="cScore">0</b></span><span class="c-chip">連續 <b id="cStreak">0</b></span><span class="c-chip" id="cTimeChip" hidden>剩 <b id="cTime">60</b> 秒</span><span style="flex:1"></span><button class="btn ghost small" id="cQuit">結束</button></div>
+          <div class="c-bar"><span class="c-chip">答對 <b id="cScore">0</b></span><span class="c-chip">連續 <b id="cStreak">0</b></span><span class="c-chip" id="cTimeChip" hidden><span id="cTimeL">剩</span> <b id="cTime">60</b> <span id="cTimeU">秒</span></span><span style="flex:1"></span><button class="btn ghost small" id="cQuit">結束</button></div>
           <div class="c-timebar" id="cTimebar" hidden><i id="cTimefill"></i></div>
           <div class="c-q" id="cQ" aria-live="polite"></div>
           <div class="c-fb" id="cFb" aria-live="polite"></div>
@@ -2519,6 +2519,15 @@ function g4Explain(D,v){const q=Math.floor(D/v),r=D%v;return `驗算：${q} × $
 function dcG4(lv){const [D,v]=g4Prob(lv),q=Math.floor(D/v),r=D%v;return {parts:[D,'÷',v,'=',null,'…',null],ans:[q,r],D,v,g4:true,tip:g4Tip(D,v),explain:g4Explain(D,v)};}
 const CLV={3:[[1,'第 1 關：整除','24 ÷ 6 ＝ ( )'],[2,'第 2 關：有餘數','26 ÷ 6 ＝ ( ) … 2'],[3,'第 3 關：乘除找一找','6 × ( ) ＝ 24、( ) ÷ 6 ＝ 4'],[4,'第 4 關：0 和 1','0 ÷ 5、9 ÷ 9、9 ÷ 1'],[0,'大混合','四種題目通通來']],
   4:[[1,'第 1 關：四位數 ÷ 一位數','5918 ÷ 4 ＝ ( ) … ( )'],[2,'第 2 關：二位數 ÷ 二位數','86 ÷ 21 ＝ ( ) … ( )'],[3,'第 3 關：三位數 ÷ 二位數','215 ÷ 32，商是一位數'],[4,'第 4 關：商是二位數','672 ÷ 21、1900 ÷ 18'],[0,'大混合','四種題目通通來']]};
+const G4N=5;
+const fmtT=t=>t>=60?`${Math.floor(t/60)} 分 ${t%60} 秒`:`${t} 秒`;
+const g4Timed=()=>DC.g===4&&DC.mode==='timed';
+function dcModes(){const o=$id('cTimedOpt');o.innerHTML=DC.g===4?`<b>${G4N} 題計時賽</b><span>算完 ${G4N} 題，看看要花多久</span>`:'<b>60 秒挑戰</b><span>看看一分鐘能答對幾題</span>';}
+function dcNext(){
+  if(!g4Timed())return dcNew();
+  DC.done++;$id('cTimefill').style.width=(DC.done/G4N*100)+'%';
+  if(DC.done>=G4N)dcFinish();else dcNew();
+}
 function dcLevels(){$id('cLevels').innerHTML=CLV[DC.g].map(([v,b,t])=>`<button class="c-opt${v===0?' wide':''}" data-clv="${v}" aria-pressed="${v===DC.lv}"><b>${b}</b><span>${t}</span></button>`).join('');}
 const DC={g:3,inputs:[],bi:0,lv:1,mode:'practice',score:0,streak:0,maxStreak:0,total:0,tries:0,input:'',cur:null,lastKey:'',locked:false,timeLeft:60,timer:null,nextT:null};
 const dcPick=a=>a[Math.floor(Math.random()*a.length)];
@@ -2578,12 +2587,12 @@ function dcSubmit(){
     if(DC.streak%5===0){coin+=2;toast(`連續 ${DC.streak} 題！多送 2 個扭蛋幣`);}
     addCoins(coin);checkBadges();save();renderStats();
     fb.className='c-fb ok';fb.innerHTML=`${cheer}<small>${q.explain}</small>`;dcStats();
-    if(DC.mode==='practice'){dcHint();later(dcNew,q.g4?3600:2200);}else later(dcNew,650);
+    if(DC.mode==='practice'){dcHint();later(dcNew,q.g4?3600:2200);}else later(dcNext,650);
   }else{
     DC.streak=0;DC.tries++;dcStats();dcMark(good.map(g=>g?'ok':'bad'));
     if(DC.mode==='timed'||DC.tries>=2){
       DC.locked=true;fb.className='c-fb bad';fb.innerHTML=`答案是 ${ansTxt}<small>${q.explain}</small>`;
-      if(DC.mode==='practice'){DC.inputs=ans.map(String);dcRenderQ();dcMark(ans.map(()=>'ok'));dcHint();later(dcNew,q.g4?5200:3800);}else later(dcNew,1500);
+      if(DC.mode==='practice'){DC.inputs=ans.map(String);dcRenderQ();dcMark(ans.map(()=>'ok'));dcHint();later(dcNew,q.g4?5200:3800);}else later(dcNext,g4Timed()?2600:1500);
     }else{
       fb.className='c-fb bad';
       if(q.g4){const wr=good.length>1&&good[0]&&!good[1]?'商對了，再算一次餘數。':good.length>1&&!good[0]&&good[1]?'餘數對了，再檢查一次商。':'再想想看！';
@@ -2605,12 +2614,15 @@ function dcPress(k){
 }
 $id('cQ').addEventListener('click',e=>{const b=e.target.closest('[data-bi]');if(!b||DC.locked)return;DC.bi=+b.dataset.bi;dcRenderQ();});
 const dcBestKey=()=>(DC.g===4?'divchal-best-g4-':'divchal-best-')+DC.lv;
-function dcBestText(){let best=0;try{best=+(localStorage.getItem(dcBestKey())||0);}catch(e){}$id('cBest').textContent=best?`這一關 60 秒最高紀錄：${best} 題`:'這一關還沒有 60 秒紀錄';}
+function dcBestText(){if(DC.g===4&&DC.mode==='timed'||DC.g===4){let bt=0;try{bt=+(localStorage.getItem('divchal-bestt-g4-'+DC.lv)||0);}catch(e){}$id('cBest').textContent=bt?`${G4N} 題計時賽最快全對：${fmtT(bt)}`:`這一關還沒有 ${G4N} 題計時賽紀錄`;return;}
+  let best=0;try{best=+(localStorage.getItem(dcBestKey())||0);}catch(e){}$id('cBest').textContent=best?`這一關 60 秒最高紀錄：${best} 題`:'這一關還沒有 60 秒紀錄';}
 function dcStart(){
   Object.assign(DC,{score:0,streak:0,total:0,maxStreak:0});dcStats();
   const timed=DC.mode==='timed';$id('cHintBtn').textContent=DC.g===4?'看提示':'看藍莓提示';$id('cTimeChip').hidden=!timed;$id('cTimebar').hidden=!timed;$id('cHintBtn').hidden=timed;
   clearInterval(DC.timer);
-  if(timed){DC.timeLeft=60;$id('cTime').textContent=60;$id('cTimefill').style.width='100%';
+  if(timed&&DC.g===4){DC.done=0;DC.t0=Date.now();$id('cTimeL').textContent='用時';$id('cTimeU').textContent='';$id('cTime').textContent='0:00';$id('cTimefill').style.width='0%';
+    DC.timer=setInterval(()=>{const t=Math.floor((Date.now()-DC.t0)/1000);$id('cTime').textContent=`${Math.floor(t/60)}:${String(t%60).padStart(2,'0')}`;},500);}
+  else if(timed){$id('cTimeL').textContent='剩';$id('cTimeU').textContent='秒';DC.timeLeft=60;$id('cTime').textContent=60;$id('cTimefill').style.width='100%';
     DC.timer=setInterval(()=>{DC.timeLeft--;$id('cTime').textContent=DC.timeLeft;$id('cTimefill').style.width=(DC.timeLeft/60*100)+'%';if(DC.timeLeft<=0)dcFinish();},1000);}
   dcShow('cGame');dcNew();
 }
@@ -2620,7 +2632,12 @@ function dcFinish(){
   const acc=DC.total?Math.round(DC.score/DC.total*100):0;
   $id('cEndDetail').textContent=`作答 ${DC.total} 次，正確率 ${acc}%，最多連續答對 ${DC.maxStreak} 題`;
   let best=0;try{best=+(localStorage.getItem(dcBestKey())||0);}catch(e){}
-  if(DC.mode==='timed'){
+  if(g4Timed()){
+    const t=Math.max(1,Math.round((Date.now()-DC.t0)/1000)),k='divchal-bestt-g4-'+DC.lv;let bt=0;try{bt=+(localStorage.getItem(k)||0);}catch(e){}
+    $id('cEndDetail').textContent=`${G4N} 題答對 ${DC.score} 題，用了 ${fmtT(t)}`;
+    if(DC.score===G4N&&(!bt||t<bt)){try{localStorage.setItem(k,t);}catch(e){}addCoins(5);toast('打破紀錄！+5 扭蛋幣');save();renderStats();$id('cEndBest').textContent=bt?`比上次快了 ${fmtT(bt-t)}！`:'第一次全對的紀錄！';$id('cEndTitle').textContent='全對！新紀錄！';}
+    else{$id('cEndBest').textContent=bt?`最快全對紀錄：${fmtT(bt)}`:`${G4N} 題全對才會留下紀錄喔`;$id('cEndTitle').textContent=DC.score===G4N?'全對！':'完成了！';}
+  }else if(DC.mode==='timed'){
     if(DC.score>best){try{localStorage.setItem(dcBestKey(),DC.score);}catch(e){}S.cBest[DC.g===4?'g4-'+DC.lv:DC.lv]=DC.score;if(DC.score>0){addCoins(5);toast('打破紀錄！+5 扭蛋幣');}checkBadges();save();renderStats();$id('cEndBest').textContent='新紀錄！';$id('cEndTitle').textContent='時間到！打破紀錄了！';}
     else{$id('cEndBest').textContent=`這一關的最高紀錄：${best} 題`;$id('cEndTitle').textContent='時間到！';}
   }else{$id('cEndBest').textContent='';$id('cEndTitle').textContent=DC.score>=10?'練習得很認真！':'做得好！';}
@@ -2629,7 +2646,7 @@ function dcFinish(){
 function dcStop(){clearInterval(DC.timer);clearTimeout(DC.nextT);dcShow('cStart');dcBestText();}
 $id('cLevels').onclick=e=>{const b=e.target.closest('[data-clv]');if(!b)return;DC.lv=+b.dataset.clv;document.querySelectorAll('#cLevels .c-opt').forEach(x=>x.setAttribute('aria-pressed',x===b));dcBestText();};
 $id('cModes').onclick=e=>{const b=e.target.closest('[data-cm]');if(!b)return;DC.mode=b.dataset.cm;document.querySelectorAll('#cModes .c-opt').forEach(x=>x.setAttribute('aria-pressed',x===b));};
-$id('cGrade').onclick=e=>{const b=e.target.closest('[data-g]');if(!b)return;DC.g=+b.dataset.g;DC.lv=1;document.querySelectorAll('#cGrade button').forEach(x=>x.setAttribute('aria-pressed',x===b));dcLevels();dcBestText();};
+$id('cGrade').onclick=e=>{const b=e.target.closest('[data-g]');if(!b)return;DC.g=+b.dataset.g;DC.lv=1;document.querySelectorAll('#cGrade button').forEach(x=>x.setAttribute('aria-pressed',x===b));dcLevels();dcModes();dcBestText();};
 dcLevels();
 $id('cGo').onclick=dcStart;$id('cAgain').onclick=dcStart;$id('cMenu').onclick=dcStop;$id('cQuit').onclick=dcFinish;
 $id('cKeys').onclick=e=>{const b=e.target.closest('[data-ck]');if(b)dcPress(b.dataset.ck);};
