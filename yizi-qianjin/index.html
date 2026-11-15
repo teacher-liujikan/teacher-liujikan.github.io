@@ -270,7 +270,7 @@ input:disabled{opacity:.6}
   <aside class="board">
     <h2>計分板 <button class="mini" id="fs">全螢幕</button></h2>
     <div class="teams" id="teams"></div>
-    <div class="credit">製作：<b>老師媽咪／范范老師</b><br>遊戲設計參考：陳佳釧老師</div>
+    <div class="credit">製作：<b>老師媽咪／范范老師</b><br>參考陳佳釧老師教學分享內容</div>
     <div class="board-foot">
       組數
       <button id="tMinus">−</button><b id="tn">6</b><button id="tPlus">＋</button>
@@ -382,7 +382,7 @@ function renderSetup(){
    <button class="go" id="go" ${ok?'':'disabled'}>開始挑戰</button>
    <button class="linkbtn" id="openGuide">看使用方法</button>
    <div class="title-note">題目從選到的課裡隨機抽，每次都不一樣；選的課太少、題目不夠時，會從同一冊其他課補</div>
-   <div class="credit">© 老師媽咪／范范老師 製作・遊戲設計參考陳佳釧老師・免費分享給老師和家長使用，題目依各版本課程整理，非出版社官方產品<br>
+   <div class="credit">© 老師媽咪／范范老師 製作・參考陳佳釧老師教學分享內容・免費分享給老師和家長使用，題目依各版本課程整理，非出版社官方產品<br>
    Threads：<a href="https://www.threads.net/@teacher_liujikan" target="_blank" rel="noopener">@teacher_liujikan</a></div>`;
 }
 $('setup').onclick=e=>{const b=e.target.closest('button');if(!b)return;
@@ -625,7 +625,7 @@ const GUIDE=`<button class="g-skip" data-g="skip">跳過 →</button>
    <li>題目是程式從各課生字和成語整理出來的，看到不適合的題目就按「換一題」</li></ul></div>
  </div>
  <div class="g-act"><button class="go" data-g="go">開始選課本</button><label><input type="checkbox" id="gNo"> 下次直接跳過</label></div>
- <div class="credit">© 老師媽咪／范范老師 製作・遊戲設計參考陳佳釧老師</div>`;
+ <div class="credit">© 老師媽咪／范范老師 製作・參考陳佳釧老師教學分享內容</div>`;
 function leaveGuide(){try{if($('gNo')&&$('gNo').checked)store.set('skipGuide',true)}catch(e){} mode=S?'game':'setup'; if(S&&mode==='game'){} render()}
 $('guide').onclick=e=>{const b=e.target.closest('[data-g]');if(!b)return;leaveGuide()};
 function render(noPush){
