@@ -356,13 +356,15 @@ function take(scoped,all,k,skip){const out=[],used=new Set(skip||[]);
   return out}
 const newId=()=>Math.random().toString(36).slice(2,10);
 function mk(t,o){const x=mk0(t,o);x.id=newId();return x}
+function crossFill(o){const used=new Set();const pickA=arr=>{for(const w of arr){if(!used.has(w[0])){used.add(w[0]);return w[0]}}return arr[0][0]};const pickB=arr=>{for(const w of arr){if(!used.has(w[1])){used.add(w[1]);return w[1]}}return arr[0][1]};
+  const t=pickA(o.a),l=pickA(o.a),r=pickB(o.b),bt=pickB(o.b);return [t,l,r,bt]}
 function mk0(t,o){
   if(t==='char') return {t,r:0,time:120,g:o.g,mine:o.mine,more:o.more};
   if(t==='fix'){const [w,i1,c1,i2,c2]=o.q;const f={};f[i1]=c1;if(i2!==undefined&&Math.random()<.6)f[i2]=c2;
     const shown=[...w].map((c,i)=>f[i]||c).join('');const fixes={};for(const i in f)fixes[i]=w[i];
     return {t,r:1,time:30,q:shown,f:fixes,full:w,n:o.n};}
   if(t==='word') return {t,r:2,time:120,g:o.g,n:o.n,ref:o.w,ref2:o.i};
-  if(t==='cross') return {t,r:3,time:60,g:o.g,n:o.n,before:o.a,after:o.b,fill:[o.a[0][0],o.a[1][0],o.b[0][1],o.b[1][1]]};
+  if(t==='cross') return {t,r:3,time:60,g:o.g,n:o.n,before:o.a,after:o.b,fill:crossFill(o)};
 }
 function buildSlides(){
   const P=pools(), out=[{t:'title'}];
