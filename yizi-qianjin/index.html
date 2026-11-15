@@ -219,6 +219,19 @@ input:disabled{opacity:.6}
 .credit b{color:var(--coral);font-weight:700}
 .credit a{color:inherit}
 .stu .credit{margin-top:auto;padding-top:12px}
+.guide{flex:1;overflow:auto;position:relative;z-index:1;padding:3vh 3vw;display:flex;flex-direction:column;align-items:center;gap:14px}
+.guide h1{font-family:var(--f-display);font-weight:400;color:var(--coral);font-size:clamp(1.8rem,5vh,2.8rem);margin:0;letter-spacing:.1em}
+.guide .lead{color:var(--ink-soft);font-weight:700;text-align:center}
+.g-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:12px;width:100%;max-width:1000px}
+.g-card{background:var(--paper-2);border-radius:14px;padding:12px 16px;min-width:0}
+.g-card h3{margin:0 0 6px;font-size:1.05rem;display:flex;gap:8px;align-items:center}
+.g-card h3 span{background:var(--pine);color:#fff;border-radius:999px;min-width:1.6em;height:1.6em;display:inline-flex;align-items:center;justify-content:center;font-size:.85rem}
+.g-card ul{margin:0;padding-left:1.2em;line-height:1.65;font-size:.95rem}
+.g-card kbd{background:var(--paper);border:1px solid var(--line);border-radius:5px;padding:0 5px;font-family:inherit;font-size:.85em}
+.g-act{display:flex;gap:12px;align-items:center;flex-wrap:wrap;justify-content:center}
+.g-act label{font-size:.95rem;color:var(--ink-soft);display:flex;gap:6px;align-items:center}
+.g-skip{position:absolute;top:12px;right:14px;border:2px solid var(--line);background:var(--paper);border-radius:999px;padding:4px 14px;font-weight:700;color:var(--ink-soft)}
+.linkbtn{border:none;background:none;color:var(--pine);text-decoration:underline;font-weight:700;font-size:.9rem;padding:2px 4px}
 </style>
 </head>
 <body>
@@ -236,6 +249,7 @@ input:disabled{opacity:.6}
   <main class="stage" id="stage">
     <canvas class="snow" id="snow"></canvas>
     <div class="src" id="src" hidden></div>
+    <section class="guide" id="guide" hidden></section>
     <section class="setup" id="setup" hidden></section>
     <section class="slide" id="slide"></section>
   </main>
@@ -256,7 +270,7 @@ input:disabled{opacity:.6}
   <aside class="board">
     <h2>計分板 <button class="mini" id="fs">全螢幕</button></h2>
     <div class="teams" id="teams"></div>
-    <div class="credit">製作：<b>老師媽咪／范范老師</b></div>
+    <div class="credit">製作：<b>老師媽咪／范范老師</b><br>遊戲設計參考：陳佳釧老師</div>
     <div class="board-foot">
       組數
       <button id="tMinus">−</button><b id="tn">6</b><button id="tPlus">＋</button>
@@ -295,7 +309,7 @@ let S=store.get('slides',null);
 let idx=store.get('idx',0);
 let nTeams=store.get('n',6);
 let scores=store.get('scores',Array(8).fill(0));
-let reveal=false, marked={}, mode=S?'game':'setup';
+let reveal=false, marked={}, mode=S?'game':(store.get('skipGuide',false)?'setup':'guide');
 const bookKey=()=>pick.v+pick.g;
 const allLessons=()=>BOOKS[bookKey()].L.map(l=>l.n);
 const chosen=()=>pick.ls||allLessons();
@@ -366,8 +380,9 @@ function renderSetup(){
    <div class="pick"><span class="lab">年級</span>${GRADES.map(([g,n])=>`<button class="opt ${pick.g===g?'on':''}" data-g="${g}">${n}</button>`).join('')}</div>
    ${scope}
    <button class="go" id="go" ${ok?'':'disabled'}>開始挑戰</button>
+   <button class="linkbtn" id="openGuide">看使用方法</button>
    <div class="title-note">題目從選到的課裡隨機抽，每次都不一樣；選的課太少、題目不夠時，會從同一冊其他課補</div>
-   <div class="credit">© 老師媽咪／范范老師 製作・免費分享給老師和家長使用，題目依各版本課程整理，非出版社官方產品<br>
+   <div class="credit">© 老師媽咪／范范老師 製作・遊戲設計參考陳佳釧老師・免費分享給老師和家長使用，題目依各版本課程整理，非出版社官方產品<br>
    Threads：<a href="https://www.threads.net/@teacher_liujikan" target="_blank" rel="noopener">@teacher_liujikan</a></div>`;
 }
 $('setup').onclick=e=>{const b=e.target.closest('button');if(!b)return;
@@ -375,6 +390,7 @@ $('setup').onclick=e=>{const b=e.target.closest('button');if(!b)return;
   else if(b.dataset.g){pick.g=+b.dataset.g;pick.ls=null}
   else if(b.dataset.n){const n=+b.dataset.n, cur=chosen().slice(); const i=cur.indexOf(n); i>=0?cur.splice(i,1):cur.push(n); pick.ls=cur}
   else if(b.dataset.quick){const all=allLessons(), q=b.dataset.quick; pick.ls=q==='all'?null:q==='none'?[]:q==='a'?all.filter(n=>n<=6):all.filter(n=>n>6)}
+  else if(b.id==='openGuide'){mode='guide';$('guide').innerHTML='';render();return}
   else if(b.id==='go'){store.set('pick',pick);inv={};applied={};store.set('inv',inv);store.set('applied',applied);S=buildSlides();store.set('slides',S);idx=1;mode='game';reveal=false;timerFor=-1;render();return}
   renderSetup()};
 function toSetup(){mode='setup';stopTimer();render()}
@@ -575,7 +591,44 @@ const LEGEND=`<div class="legend"><span><i style="background:#e53935"></i>上 �
  <span><i style="background:#1e56b3"></i>中 → 右</span><span><i style="background:#f5c542"></i>中 → 下</span></div>`;
 
 /* ---------- render ---------- */
+const GUIDE=`<button class="g-skip" data-g="skip">跳過 →</button>
+ <h1>給老師的使用方法</h1>
+ <div class="lead">四個關卡的國字小組競賽，投影在教室電視上就能玩。看過的話可以直接跳過。</div>
+ <div class="g-grid">
+  <div class="g-card"><h3><span>1</span>選課本</h3><ul>
+   <li>選版本（南一、康軒、翰林）和年級（三上～六上）</li>
+   <li>課次可以一課一課點選，也可以按「第1～6課」快速選</li>
+   <li>按「開始挑戰」，題目會從選到的課隨機抽出</li></ul></div>
+  <div class="g-card"><h3><span>2</span>上課時操作</h3><ul>
+   <li>「下一頁」換題，也可以按鍵盤 <kbd>←</kbd> <kbd>→</kbd></li>
+   <li>按「開始」計時，或按 <kbd>空白鍵</kbd>；時間不夠可以「+30 秒」</li>
+   <li>「參考答案」可以打開或收起（鍵盤 <kbd>A</kbd>），不喜歡這題就「換一題」</li></ul></div>
+  <div class="g-card"><h3><span>3</span>四個關卡</h3><ul>
+   <li><b>件多識廣</b>：寫出有這個部件的字，字最多的組贏</li>
+   <li><b>字投羅網</b>：找出成語裡的錯字並改正</li>
+   <li><b>義不容詞</b>：寫出有這個字的語詞，成語或四字語詞 +2 分</li>
+   <li><b>接二連三</b>：照著箭頭接出四個語詞，一個一分</li></ul></div>
+  <div class="g-card"><h3><span>4</span>計分板</h3><ul>
+   <li>右邊每組有 +1、+2、−1，可以隨時加減分</li>
+   <li>下方可以調整組數（2～8 組）</li>
+   <li>最後一頁「結算」會自動排名</li></ul></div>
+  <div class="g-card"><h3><span>5</span>平板連線（有平板再用）</h3><ul>
+   <li>按上方「平板連線」，各組用一臺平板掃 QR code，選自己的組別</li>
+   <li>老師按「開始」後平板才能作答，時間到自動鎖住</li>
+   <li>按「各組答案」看每組寫了什麼，點一下答案可以切換算或不算，再一鍵加分</li>
+   <li>沒有平板也能玩，各組寫在小白板上舉起來就好</li></ul></div>
+  <div class="g-card"><h3><span>6</span>小提醒</h3><ul>
+   <li>按「全螢幕」投影比較清楚</li>
+   <li>分數和進度會記在這臺電腦的瀏覽器裡，不小心重新整理也不會不見</li>
+   <li>題目是程式從各課生字和成語整理出來的，看到不適合的題目就按「換一題」</li></ul></div>
+ </div>
+ <div class="g-act"><button class="go" data-g="go">開始選課本</button><label><input type="checkbox" id="gNo"> 下次直接跳過</label></div>
+ <div class="credit">© 老師媽咪／范范老師 製作・遊戲設計參考陳佳釧老師</div>`;
+function leaveGuide(){try{if($('gNo')&&$('gNo').checked)store.set('skipGuide',true)}catch(e){} mode=S?'game':'setup'; if(S&&mode==='game'){} render()}
+$('guide').onclick=e=>{const b=e.target.closest('[data-g]');if(!b)return;leaveGuide()};
 function render(noPush){
+  const guide=mode==='guide'; $('guide').hidden=!guide;
+  if(guide){$('setup').hidden=true;$('slide').hidden=true;$('prev').hidden=$('next').hidden=true;$('rounds').hidden=true;$('count').hidden=true;$('bookchip').hidden=true;$('src').hidden=true;$('extra').innerHTML='';$('timerBox').hidden=true;snowOn=false;if(!$('guide').innerHTML)$('guide').innerHTML=GUIDE;return}
   const setup=mode==='setup';
   $('setup').hidden=!setup; $('slide').hidden=setup;
   $('prev').hidden=$('next').hidden=setup; $('rounds').hidden=setup; $('count').hidden=setup;
