@@ -662,26 +662,77 @@ const done = i => S.stars[i] != null;
 const unlocked = () => { let n=0; while(n<N && done(n)) n++; return n; };
 const totalStars = () => Object.values(S.stars).reduce((a,b)=>a+b,0);
 
-/* ================= SOUND ================= */
-let AC=null;
-function tone(f, d=.12, type="square", vol=.08, when=0){
+/* ================= SOUND: music-box bells, sleigh bells, mysterious BGM ================= */
+let AC=null, MASTER=null, REV=null;
+function ac(){
+  if(AC) return AC;
+  AC = new (window.AudioContext||window.webkitAudioContext)();
+  MASTER = AC.createGain(); MASTER.gain.value=.9; MASTER.connect(AC.destination);
+  // tiny feedback echo = cosy room / snowy hall
+  const d=AC.createDelay(); d.delayTime.value=.19; const fb=AC.createGain(); fb.gain.value=.28; const lp=AC.createBiquadFilter(); lp.type="lowpass"; lp.frequency.value=2600;
+  REV=AC.createGain(); REV.gain.value=.35; REV.connect(d); d.connect(lp); lp.connect(fb); fb.connect(d); lp.connect(MASTER);
+  return AC;
+}
+// celesta / music-box bell: sine partials with fast attack and long soft decay
+function bell(f, when=0, vol=.12, dec=1.4, bus){
   if(!S.sound) return;
   try{
-    AC = AC || new (window.AudioContext||window.webkitAudioContext)();
-    const t = AC.currentTime + when, o = AC.createOscillator(), g = AC.createGain();
-    o.type=type; o.frequency.setValueAtTime(f,t);
-    g.gain.setValueAtTime(vol,t); g.gain.exponentialRampToValueAtTime(.001,t+d);
-    o.connect(g).connect(AC.destination); o.start(t); o.stop(t+d+.02);
+    const c=ac(), t=c.currentTime+when, g=c.createGain();
+    g.gain.setValueAtTime(0,t); g.gain.linearRampToValueAtTime(vol,t+.005); g.gain.exponentialRampToValueAtTime(.0005,t+dec);
+    g.connect(bus||MASTER); g.connect(REV);
+    [[1,1],[2.01,.32],[3.98,.12],[5.4,.05]].forEach(([m,a])=>{ const o=c.createOscillator(), og=c.createGain(); o.type="sine"; o.frequency.value=f*m; og.gain.value=a; o.connect(og).connect(g); o.start(t); o.stop(t+dec+.05); });
   }catch(e){}
 }
+// sleigh-bell shake: short bursts of bright filtered noise
+let NOISE=null;
+function jingle(when=0, vol=.08, n=3){
+  if(!S.sound) return;
+  try{
+    const c=ac();
+    if(!NOISE){ NOISE=c.createBuffer(1,c.sampleRate*.3,c.sampleRate); const d=NOISE.getChannelData(0); for(let i=0;i<d.length;i++) d[i]=Math.random()*2-1; }
+    for(let k=0;k<n;k++){
+      const t=c.currentTime+when+k*.045, src=c.createBufferSource(), bp=c.createBiquadFilter(), g=c.createGain();
+      src.buffer=NOISE; bp.type="bandpass"; bp.frequency.value=6500+Math.random()*2500; bp.Q.value=6;
+      g.gain.setValueAtTime(vol*(1-k*.2),t); g.gain.exponentialRampToValueAtTime(.0005,t+.12);
+      src.connect(bp).connect(g).connect(MASTER); src.start(t); src.stop(t+.14);
+    }
+  }catch(e){}
+}
+// soft low "thud" of snow, for wrong answers
+function thud(f, when=0, vol=.16){
+  if(!S.sound) return;
+  try{ const c=ac(), t=c.currentTime+when, o=c.createOscillator(), g=c.createGain(); o.type="triangle";
+    o.frequency.setValueAtTime(f,t); o.frequency.exponentialRampToValueAtTime(f*.7,t+.3);
+    g.gain.setValueAtTime(vol,t); g.gain.exponentialRampToValueAtTime(.0005,t+.35); o.connect(g).connect(MASTER); o.start(t); o.stop(t+.4); }catch(e){}
+}
+const NT={A3:220,B3:246.94,C4:261.63,D4:293.66,E4:329.63,F4:349.23,G4:392,A4:440,B4:493.88,C5:523.25,D5:587.33,E5:659.25,F5:698.46,G5:783.99,A5:880,B5:987.77,C6:1046.5,D6:1174.66,E6:1318.5,G6:1568};
 const sfx = {
-  tap:()=>tone(660,.06,"triangle",.1),
-  pick:()=>tone(880,.08,"triangle",.1),
-  right:()=>[523,659,784,1047].forEach((f,i)=>tone(f,.16,"square",.06,i*.09)),
-  wrong:()=>{tone(180,.25,"sawtooth",.07);tone(140,.3,"sawtooth",.06,.12)},
-  star:i=>tone(880+i*220,.18,"triangle",.1),
-  win:()=>[392,523,659,784,659,784,1047].forEach((f,i)=>tone(f,.2,"square",.06,i*.12))
+  tap:()=>bell(NT.E6,0,.05,.35),
+  pick:()=>{ bell(NT.A5,0,.07,.5); bell(NT.E6,.05,.04,.4); },
+  right:()=>{ jingle(0,.07,4); [NT.C5,NT.E5,NT.G5,NT.C6].forEach((f,i)=>bell(f,.05+i*.09,.11,1.2)); },
+  wrong:()=>{ thud(196); bell(NT.E5,.02,.05,.5); bell(NT.D5+0,.16,.05,.6); },
+  star:i=>{ bell([NT.G5,NT.B5,NT.D6][i]||NT.D6,0,.12,1.3); jingle(0,.04,2); },
+  // "Jingle Bells" (public domain) refrain on bells for the escape
+  win:()=>{ const m=[["E5",1],["E5",1],["E5",2],["E5",1],["E5",1],["E5",2],["E5",1],["G5",1],["C5",1.5],["D5",.5],["E5",4]]; let t=0;
+    m.forEach(([n,d])=>{ bell(NT[n],t,.12,1.2); t+=d*.17; }); [0,.68,1.36,2.04].forEach(w=>jingle(w,.06,4)); }
 };
+
+/* background music: quiet, a little mysterious music-box loop (A minor → C major colour) */
+const BGM={ on:false, timer:null, step:0,
+  mel:["A4","C5","E5","A5","G5","E5","D5","E5",  "F4","A4","C5","F5","E5","C5","B4","C5",
+       "C5","E5","G5","C6","B5","G5","E5","G5",  "E4","G4","B4","E5","D5","B4","G4","B4"],
+  bass:["A3","A3","F4","F4","C4","C4","E4","E4"],
+  start(){ if(this.on||!S.sound) return; this.on=true; this.step=0; this.tick(); },
+  stop(){ this.on=false; clearTimeout(this.timer); },
+  tick(){ if(!this.on) return; if(!S.sound){ this.stop(); return; }
+    const i=this.step%this.mel.length;
+    bell(NT[this.mel[i]]*(i%4===0?1:1),0,.028,1.6);
+    if(i%4===0) bell(NT[this.bass[(i/4)%this.bass.length]]/2,0,.04,2.6);
+    if(i%16===15) jingle(.1,.015,2);
+    this.step++; this.timer=setTimeout(()=>this.tick(), 330);
+  }
+};
+document.addEventListener("visibilitychange",()=>{ if(document.hidden){ BGM.wasOn=BGM.on; BGM.stop(); } else if(BGM.wasOn){ BGM.start(); } });
 
 /* ================= HELPERS ================= */
 const $ = s => document.querySelector(s);
@@ -702,7 +753,7 @@ function popup(html){ $("#panel").innerHTML = html; $("#veil").hidden=false; con
 function closePopup(){ $("#veil").hidden=true; }
 function shake(el){ el = el || $("#card"); if(!el) return; el.classList.remove("shake"); void el.offsetWidth; el.classList.add("shake"); }
 document.addEventListener("click", e=>{ if(e.target.closest(".btn,.iconbtn,.room,.doorbtn,.symc,.mz,.zy span")) sfx.tap(); }, true);
-document.querySelectorAll(".sndBtn").forEach(b=>b.onclick=()=>{ S.sound=!S.sound; save(); updHud(); });
+document.querySelectorAll(".sndBtn").forEach(b=>b.onclick=()=>{ S.sound=!S.sound; save(); updHud(); if(S.sound){ try{ac().resume()}catch(e){} BGM.start(); } else BGM.stop(); });
 const keypadHTML = `<div class="keypad">${[1,2,3,4,5,6,7,8,9].map(n=>`<button class="btn" type="button" data-k="${n}">${n}</button>`).join("")}
   <button class="btn del" type="button" data-k="del" aria-label="刪除">⌫</button><button class="btn" type="button" data-k="0">0</button><button class="btn ok" type="button" data-k="ok" aria-label="確定">OK</button></div>`;
 
@@ -713,7 +764,7 @@ function goTitle(){
   $("#startBtn").textContent = started ? "繼續冒險" : "開始遊戲";
   $("#resetBtn").hidden = !started;
 }
-$("#startBtn").onclick = ()=>{ if(!S.start){ S.start=Date.now(); save(); } goMap(); };
+$("#startBtn").onclick = ()=>{ if(!S.start){ S.start=Date.now(); save(); } try{ac().resume()}catch(e){} jingle(0,.08,5); BGM.start(); goMap(); };
 $("#resetBtn").onclick = ()=>{ const snd=S.sound; S=fresh(); S.sound=snd; save(); goTitle(); };
 $("#homeBtn").onclick = goTitle;
 
