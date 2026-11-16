@@ -490,7 +490,7 @@ img.potB,.pot-wrap.cooking img.potA{display:none}
       <div class="setg"><h3>每道菜要買幾樣</h3><div class="seg" data-k="ings"><button type="button" data-v="1">1 樣</button><button type="button" data-v="2">2 樣</button><button type="button" data-v="3">2～3 樣</button></div></div>
       <div class="setg"><h3>一次來幾位客人</h3><div class="seg" data-k="guests"><button type="button" data-v="1">1 位</button><button type="button" data-v="2">2 位</button></div></div>
       <div class="setg" id="swapG"><h3>換隊方式</h3><div class="seg" data-k="swap"><button type="button" data-v="one">答對一題就換隊</button><button type="button" data-v="time">時間內越多越好</button></div><p class="note" id="swapNote"></p></div>
-      <div class="setg" id="turnG"><h3>每一隊作答時間</h3><div class="seg" data-k="turn"><button type="button" data-v="0">不限</button><button type="button" data-v="60">60 秒</button><button type="button" data-v="45">45 秒</button><button type="button" data-v="30">30 秒</button></div><p class="note">時間到就換下一隊試試看，不會扣分。</p></div>
+      <div class="setg" id="turnG"><h3>每一隊作答時間</h3><div class="seg" data-k="turn"><button type="button" data-v="0">不限</button><button type="button" data-v="60">60 秒</button><button type="button" data-v="45">45 秒</button><button type="button" data-v="30">30 秒</button></div><p class="note" id="turnNote">時間到就換下一隊試試看，不會扣分。</p></div>
       <div class="setg"><h3>開場教學</h3><div class="seg" data-k="tutor"><button type="button" data-v="1">要</button><button type="button" data-v="0">不要</button></div><p class="note">每次開場都會先帶著點一題。這一次不需要的話，改成「不要」。</p></div>
     </div>
     <div class="qrrow" id="qrRow" hidden>
@@ -2968,6 +2968,12 @@ function renderSettings(){
   $('#qrRow').hidden=set.mode!=='solo';
   $('#turnG').hidden=set.mode!=='team';
   $('#swapG').hidden=set.mode!=='team';
+  {const n=+set.teams,turn=+set.turn||(set.swap==='time'?60:0),round=(+set.minutes)*60;let t='時間到就換下一隊試試看，不會扣分。';
+   if(set.mode==='team'&&turn&&round&&set.swap==='time'){const lap=n*turn,k=Math.floor(round/lap);
+     t=k<1?`${n} 隊各 ${turn} 秒，輪一圈要 ${Math.ceil(lap/60*10)/10} 分鐘，比回合時間長。時間到後會讓每一隊都輪到才結束。`
+          :`${n} 隊各 ${turn} 秒，大約可以輪 ${k} 圈。時間到時會把最後一圈輪完，每一隊次數一樣。`}
+   else if(set.mode==='team'&&round)t+='回合時間到時，會讓每一隊輪到一樣多次才結束。';
+   $('#turnNote').textContent=t}
   $('#swapNote').textContent=set.swap==='time'?'同一隊在作答時間內可以一直算，時間到才換下一隊。作答時間選「不限」時會用 60 秒。':'每答對一題就輪到下一隊，算得快多 1 顆星。';
   $('#modeNote').textContent=NOTES.mode[set.mode];
   $('#levelNote').textContent=NOTES.level[set.level];
@@ -3190,7 +3196,7 @@ function leave(c,happy){
     c.el.classList.add('walk');c.el.style.transform=`translateX(${-custW()-60}px)`;
     setTimeout(()=>{c.el.remove();g.queue=g.queue.filter(x=>x!==c)},1300);
     if(G!==g)return;
-    renderPot();G.spawnCd=Math.min(G.spawnCd,1.5);
+    renderPot();G.spawnCd=Math.min(G.spawnCd,G.keep?.3:1.5);
   },happy?1100:900);
 }
 
@@ -3299,7 +3305,17 @@ function serve(c,team){
   if(set.mode==='coop'&&G.goal&&G.served===G.goal)setTimeout(()=>{SND.end();say('達成今天的目標了！繼續挑戰更多客人','good')},1300);
   setTimeout(()=>{if(G){G.busy=false;rotateTeam()}},1200);
 }
-function rotateTeam(){if(G.keep){G.hinted=false;return}if(set.mode==='team'&&G.teams.length>1&&G.autoRotate){G.active=(G.active+1)%G.teams.length;renderStrip()}resetTurn()}
+function nextTeam(){G.active=(G.active+1)%G.teams.length;if(G.lastLap&&G.active===0){renderStrip();endRound();return true}return false}
+function startLastLap(){
+  G.timeLeft=0;
+  const canLap=set.mode==='team'&&G.teams.length>1&&(G.turnMax||G.autoRotate);
+  if(!canLap){endRound();return true}
+  G.lastLap=true;$('#clockText').textContent='最後一輪';$('#clock').classList.remove('low');
+  const left=G.teams.slice(G.active+1).map(t=>t.name);
+  say(left.length?`時間到！${G.teams[G.active].name}做完，再讓${left.join('、')}輪完就結束`:`時間到！${G.teams[G.active].name}做完這一次就結束`,'good');
+  return false;
+}
+function rotateTeam(){if(G.keep){G.hinted=false;return}if(set.mode==='team'&&G.teams.length>1&&G.autoRotate){if(nextTeam())return;renderStrip()}resetTurn()}
 function resetTurn(){G.turnLeft=G.turnMax;G.hinted=false;paintTurn()}
 function paintTurn(){
   const bar=$('#turnBar');bar.hidden=!G.turnMax;if(!G.turnMax)return;
@@ -3310,7 +3326,7 @@ function paintTurn(){
 function turnOut(){
   SND.op();G.sel={path:[],ops:[]};clearGlow();renderBoard();renderExpr();
   const was=G.teams[G.active].name;
-  if(G.teams.length>1)G.active=(G.active+1)%G.teams.length;
+  if(G.teams.length>1&&nextTeam())return;
   renderStrip();resetTurn();
   say(G.teams.length>1?`時間到，換${G.teams[G.active].name}試試看！`:'時間到，再試一次！','');
 }
@@ -3375,7 +3391,7 @@ function tick(){tick0();paintBig()}
 function paintBig(){
   const el=$('#bigCount');let n=0,lab='';
   if(!G||G.over||G.tut){el.hidden=true;el.dataset.n='';return}
-  if(G.timeLeft!=null&&G.timeLeft<=10){n=Math.ceil(G.timeLeft);lab='這一回合還有'}
+  if(!G.lastLap&&G.timeLeft!=null&&G.timeLeft>0&&G.timeLeft<=10){n=Math.ceil(G.timeLeft);lab='這一回合還有'}
   else if(G.turnMax&&G.turnLeft<=10&&actives().length){n=Math.ceil(G.turnLeft);lab=G.teams.length>1?`${G.teams[G.active].name}還有`:'還有'}
   if(n<=0){el.hidden=true;el.dataset.n='';return}
   el.hidden=false;
@@ -3388,7 +3404,8 @@ function tick0(){
   const now=performance.now();const dt=Math.min(.5,(now-lastT)/1000);lastT=now;
   if(!G||G.paused||G.over)return;
   if(G.tut){}
-  else if(G.timeLeft!=null){G.timeLeft-=dt;$('#clockText').textContent=fmt(G.timeLeft);$('#clock').classList.toggle('low',G.timeLeft<=30);if(G.timeLeft<=0){endRound();return}}
+  else if(G.lastLap){$('#clockText').textContent='最後一輪'}
+  else if(G.timeLeft!=null){G.timeLeft-=dt;$('#clockText').textContent=fmt(G.timeLeft);$('#clock').classList.toggle('low',G.timeLeft<=30);if(G.timeLeft<=0){if(startLastLap())return}}
   else{G.elapsed+=dt;$('#clockText').textContent=fmt(G.elapsed)}
   if(G.turnMax&&!G.busy&&!G.tut&&actives().length){G.turnLeft-=dt;paintTurn();if(G.turnLeft<=0)turnOut()}
   if(live().length<maxLive()){G.spawnCd-=dt;if(G.spawnCd<=0){spawn();G.spawnCd=2.5+Math.random()*2}}
