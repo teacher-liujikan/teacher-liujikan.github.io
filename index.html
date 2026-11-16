@@ -194,7 +194,8 @@ const $=id=>document.getElementById(id);
 const VIDEOS={
  [G+"meiwei-suanchu/"]:"videos/meiwei-suanchu.mp4",
  [G+"christmas-escape/"]:"videos/christmas-escape.mp4",
- [G+"xuefu/yizi/"]:"videos/xuefu-yizi.mp4"
+ [G+"xuefu/yizi/"]:"videos/xuefu-yizi.mp4",
+ [G+"division-adventure/"]:"videos/division-adventure.mp4"
 };
 const PLAY='<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="10.5" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M10 8.2v7.6l6-3.8z" fill="currentColor"/></svg>';
 const item=o=>{const v=o.v||VIDEOS[o.u];return `<div class="row"><a class="item" href="${link(o.u)}" target="_blank" rel="noopener"><span class="txt"><span class="t">${o.t}${[].concat(o.tag||[]).map(x=>`<span class="tag">${x}</span>`).join("")}</span><span class="d">${o.d}</span></span><span class="arrow" aria-hidden="true">→</span></a>${v?`<button type="button" class="vbtn" data-v="${v}" data-t="${o.t}" aria-label="看「${o.t}」介紹影片">${PLAY}影片</button>`:""}</div>`};
