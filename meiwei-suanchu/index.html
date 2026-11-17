@@ -336,6 +336,11 @@ img.potB,.pot-wrap.cooking img.potA{display:none}
 @keyframes bigpop{from{transform:scale(1.7);opacity:.3}}
 #bigCount.last b{color:var(--lemon)}
 #bigCount span{background:var(--red);color:#fff;border:4px solid var(--line);border-radius:999px;padding:1px 18px;font-weight:900;font-size:clamp(14px,2.8vh,28px);white-space:nowrap}
+#stuNote{display:none}
+body.student #stuNote{display:block;margin:0;text-align:center;font-weight:700;font-size:clamp(16px,2.2vw,22px);line-height:1.6;background:#fff1d6;border:3px solid var(--line);border-radius:18px;padding:10px 16px}
+body.student #stuNote .lock{display:inline-block;font-size:.78em;background:var(--ink);color:#fff;border-radius:999px;padding:0 12px;margin-bottom:4px}
+body.student #stuNote b{color:#d9412b;font-weight:900}
+body.student #startOv .setgrid{display:none}
 #rotate{display:none;position:fixed;inset:0;z-index:100;background:var(--bg);place-items:center;text-align:center;padding:24px}
 #rotate div{display:grid;gap:14px;justify-items:center;font-weight:900;font-size:24px}
 #rotate svg{width:120px;height:auto;animation:turn 2.4s ease-in-out infinite}
@@ -479,6 +484,7 @@ img.potB,.pot-wrap.cooking img.potA{display:none}
       <div class="logo" id="bigLogo" aria-label="美味算廚"></div>
       <p>客人上門點菜囉！在攤位上連出算式，算對價錢就買到食材，買齊了就上菜。</p>
     </div>
+    <p class="stunote" id="stuNote"></p>
     <div class="cast" id="cast" aria-label="今天的客人"></div>
     <div class="setgrid">
       <div class="setg wide"><h3>年級</h3><div class="seg" data-k="grade"><button type="button" data-v="g1">一年級</button><button type="button" data-v="g2">二年級</button><button type="button" data-v="g3">三年級</button><button type="button" data-v="g4">四年級</button><button type="button" data-v="all">全部項目</button></div></div>
@@ -495,7 +501,7 @@ img.potB,.pot-wrap.cooking img.potA{display:none}
     </div>
     <div class="qrrow" id="qrRow" hidden>
       <button type="button" id="qrBtn" aria-label="放大 QR code"><span id="qrSmall"></span></button>
-      <p>想自己玩的人，用平板或手機掃這個 QR code 就能打開遊戲。<br>點一下 QR code 可以放大給全班掃。</p>
+      <p>先選好上面的年級和練習項目，再讓學生掃這個 QR code。學生打開就是你設定好的內容，不用再設定。<br>點一下 QR code 可以放大給全班掃。</p>
     </div>
     <ol class="howto">
       <li>看客人的對話框：想吃什麼菜、每樣食材多少錢。</li>
@@ -2943,7 +2949,13 @@ const DEF={mode:'team',teams:'3',grade:'g3',level:'mul2',speed:'slow',minutes:'5
 let set={...DEF};
 try{const s=JSON.parse(localStorage.getItem('msc-settings-v3')||'null');if(s)set={...DEF,...s}}catch(e){}
 set.tutor='1';
-const saveSet=()=>{try{localStorage.setItem('msc-settings-v3',JSON.stringify(set))}catch(e){}};
+const STUDENT=(()=>{
+  const m=/^#s-(g1|g2|g3|g4|all)-(starter|easy|easy3|mul2|mid|hard|mix)-([123])-([12])-(slow|normal|fast)-(0|3|5|8)$/.exec(location.hash);
+  if(!m)return false;
+  Object.assign(set,{mode:'solo',grade:m[1],level:m[2],ings:m[3],guests:m[4],speed:m[5],minutes:m[6],tutor:'1'});
+  return true;
+})();
+const saveSet=()=>{if(STUDENT)return;try{localStorage.setItem('msc-settings-v3',JSON.stringify(set))}catch(e){}};
 const NOTES={
   mode:{team:'每一隊是一位廚師，輪流上來算。答對就有 1 顆星，算得快再多 1 顆；上菜的星星每道菜不一樣，看菜單左上角。可以用提示，時間到也不會扣分。',coop:'全班一起顧餐廳，看時間內能讓幾位客人吃飽。',solo:'一個人玩：抽一位廚師當你的角色，看能拿到幾顆星。'},
   level:{starter:'找兩個相連的數字加起來就好，價錢最多 18 元。',easy:'兩個相連的數字相加或相減，價錢最多 18 元。',easy3:'價錢在 3 到 24 元之間，有時要連三個數字，從左邊算到右邊。',mul2:'九九乘法：找兩個相連的數字乘起來。',div2:'九九除法：找兩個相連的數字，前面除以後面，要剛好除得盡。',mix:'加、減、乘都可以用，可以連三、四個數字，要記得先算乘法、再算加減，例如 2＋3×4＝14。',mid:'先把兩個相連的數字相乘，再決定要不要加或減第三個數字，例如 3×5−2＝13。',hard:'先乘或先除，再決定要不要加或減第三個數字，例如 8÷2＋5＝9。'},
@@ -2965,7 +2977,10 @@ function renderSettings(){
     seg.querySelectorAll('button').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.v===String(set[k]))));
   });
   $('#teamsG').hidden=set.mode!=='team';
-  $('#qrRow').hidden=set.mode!=='solo';
+  $('#qrRow').hidden=set.mode!=='solo'||STUDENT;
+  try{makeQR()}catch(e){}
+  if(STUDENT){const g=GRADES[set.grade]||GRADES.all,it=(g.items.find(i=>i[0]===set.level)||GRADES.all.items.find(i=>i[0]===set.level)||['',''])[1];
+    $('#stuNote').innerHTML=`<span class="lock">老師已鎖定設定</span><br>老師已經設定好了：<b>${{g1:'一年級',g2:'二年級',g3:'三年級',g4:'四年級',all:''}[set.grade]}${it?'・'+it:''}</b><br>按「開店！」就可以開始玩。`}
   $('#turnG').hidden=set.mode!=='team';
   $('#swapG').hidden=set.mode!=='team';
   {const n=+set.teams,turn=+set.turn||(set.swap==='time'?60:0),round=(+set.minutes)*60;let t='時間到就換下一隊試試看，不會扣分。';
@@ -2981,6 +2996,7 @@ function renderSettings(){
   $('#btnSound').textContent='聲音：'+(set.sound?'開':'關');
 }
 document.querySelectorAll('.seg').forEach(seg=>seg.addEventListener('click',e=>{
+  if(STUDENT)return;
   const b=e.target.closest('button');if(!b)return;
   set[seg.dataset.k]=b.dataset.v;
   if(seg.dataset.k==='grade'){const g=GRADES[set.grade];set.level=g.items[0][0];if(g.ings){set.ings=g.ings;set.guests=g.guests}}
@@ -3557,7 +3573,7 @@ function endRound(){
     const ok=G.goal&&G.served>=G.goal;
     h=`<h2>${ok?'目標達成！':'打烊囉！'}</h2><p>全班一起讓 <b style="color:var(--ink);font-size:1.4em;font-family:var(--f-num)">${G.served}</b> 位客人吃飽了${G.goal?`（目標 ${G.goal} 位）`:''}</p>${G.missed?`<p>有 ${G.missed} 位客人等太久走掉，下次可以再快一點！</p>`:''}`;
   }
-  h+=`<div class="btn-row"><button type="button" class="big-btn" id="btnAgain">再玩一次</button></div><p class="copy">© 2026 老師媽咪／范范老師　美味算廚</p><div class="btn-row"><button type="button" class="pill" id="btnBack">回到設定</button></div>`;
+  h+=`<div class="btn-row"><button type="button" class="big-btn" id="btnAgain">再玩一次</button></div><p class="copy">© 2026 老師媽咪／范范老師　美味算廚</p><div class="btn-row"><button type="button" class="pill" id="btnBack">${STUDENT?'回到開始畫面':'回到設定'}</button></div>`;
   $('#endSheet').innerHTML=h;
   $('#endOv').hidden=false;$('#pauseOv').hidden=true;
   $('#btnAgain').onclick=startGame;
@@ -3596,14 +3612,17 @@ let rz;window.addEventListener('resize',()=>{clearTimeout(rz);rz=setTimeout(()=>
 
 /* QR code for playing alone: the page's own address once it is on GitHub Pages, otherwise the published page */
 const SHARE_URL=/github\.io$/.test(location.hostname)?location.href.split('#')[0].split('?')[0]:'https://claude.ai/artifact/PyiKrfC1USCW5WGgYBFiSi';
-(function(){
+function makeQR(){
+  const url=SHARE_URL+`#s-${set.grade}-${set.level}-${set.ings}-${set.guests}-${set.speed}-${set.minutes}`;
+  if(makeQR.last===url)return;makeQR.last=url;
   let svg='';
-  try{const q=qrcode(0,'M');q.addData(SHARE_URL);q.make();svg=q.createSvgTag({cellSize:4,margin:2,scalable:true})}catch(e){}
+  try{const q=qrcode(0,'M');q.addData(url);q.make();svg=q.createSvgTag({cellSize:4,margin:2,scalable:true})}catch(e){}
   $('#qrSmall').innerHTML=svg||'QR';$('#qrBig').innerHTML=svg;$('#qrBig').hidden=!svg;
-  $('#qrUrl').textContent=SHARE_URL;
-  $('#qrBtn').onclick=()=>{$('#qrOv').hidden=false};
-  $('#qrClose').onclick=()=>{$('#qrOv').hidden=true};
-})();
+  $('#qrUrl').textContent=url;
+}
+$('#qrBtn').onclick=()=>{$('#qrOv').hidden=false};
+$('#qrClose').onclick=()=>{$('#qrOv').hidden=true};
+if(STUDENT){document.body.classList.add('student');$('#btnToMenu').textContent='回到開始畫面'}
 /* a ready-looking board behind the start screen */
 G={nums:[],reach:new Map(),queue:[],sel:{path:[],ops:[]},potItems:[],teams:[],over:true};
 randomBoard();renderBoard();renderExpr();
