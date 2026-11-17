@@ -112,9 +112,10 @@ h1{font-size:clamp(28px,5.2vw,40px)}
 .pal.locked svg,.figcell.locked svg{filter:brightness(0);opacity:.2}
 :root[data-theme="dark"] .pal.locked svg,:root[data-theme="dark"] .figcell.locked svg{filter:brightness(0) invert(1);opacity:.22}
 @media (prefers-color-scheme: dark){:root:not([data-theme="light"]) .pal.locked svg,:root:not([data-theme="light"]) .figcell.locked svg{filter:brightness(0) invert(1);opacity:.22}}
-.medal{flex:none;width:36px;height:36px;border-radius:50%;display:grid;place-items:center;font-family:var(--f-display);font-size:17px;background:var(--gold-soft);color:var(--gold);border:2px solid var(--gold)}
-.pal .medal{width:58px;height:58px;font-size:26px;border-width:3px;margin:12px 0 4px}
-.pal.locked .medal{background:transparent;border-color:var(--lock);color:var(--lock)}
+.medal{flex:none;width:44px;height:44px;display:block}
+.medal svg{display:block;width:100%;height:100%}
+.pal .medal{width:66px;height:66px;margin:10px 0 4px}
+.pal.locked .medal,.badge.locked .medal{filter:grayscale(1);opacity:.4}
 
 .rules{margin:0;padding:10px 14px;border:1.5px dashed var(--line);border-radius:12px;font-size:15px;color:var(--muted);background:var(--card)}
 .rules b{color:var(--ink)}
@@ -133,8 +134,7 @@ h1{font-size:clamp(28px,5.2vw,40px)}
 .badge{border:1.5px solid var(--line);border-radius:12px;padding:8px 10px;background:var(--card);display:flex;gap:10px;align-items:center;min-width:0;text-align:left}
 .badge b{display:block;font-size:15px;line-height:1.4}
 .badge small{display:block;font-size:12px;color:var(--muted);line-height:1.4}
-.badge.locked{opacity:.5}
-.badge.locked .medal{background:transparent;border-color:var(--lock);color:var(--lock)}
+.badge.locked b,.badge.locked small{opacity:.6}
 
 /* wrong book */
 .wb{display:flex;flex-direction:column;gap:6px}
@@ -451,7 +451,7 @@ async function enterStudent(cls,seat){
   if(pending)flush();
   if(clash)seatClash();
 }
-function enterPreview(cls){me.role='student';me.cls=cls;me.seat='T';me.preview=true;state=fresh();Object.keys(FIGS).forEach(id=>{state.figs[id]=1});render(true)}
+function enterPreview(cls){me.role='student';me.cls=cls;me.seat='T';me.preview=true;state=fresh();Object.keys(FIGS).forEach(id=>{state.figs[id]=1});BADGES.forEach(b=>{state.badges[b.id]=1});render(true)}
 function logout(){
   if(pending)flush();
   clearInterval(pollT);LOGIN.set(null);me.role=null;me.seat=null;me.key=null;me.preview=false;state=fresh();
@@ -575,6 +575,36 @@ const ART={
   <circle cx="40" cy="22" r="3.2" fill="#fff"/><circle cx="66" cy="22" r="3.2" fill="#fff"/>
   <path d="M45 39 Q50 43 55 39" fill="none" stroke="#7a221a" stroke-width="1.8" stroke-linecap="round"/>`
 };
+/* ---------- badges: woven-style geometric medallions (diamonds, sawtooth, zigzag, sun) drawn in code ---------- */
+const BK='#211c1a',RD='#b3261e',CR='#f7edd8',GD='#d79a12',WH='#ffffff';
+const UC=['#2b7fba','#3a9a5e','#b87a08','#c4553a','#5a62c6','#9a4fa0'];
+const BSPEC={
+ first:['diamond',RD,BK,12],perfect:['eye',RD,BK,12],
+ combo5:['zig',RD,BK,10,1],combo10:['zig',RD,BK,10,2],combo20:['zig',RD,BK,10,3],combo30:['zig',GD,BK,10,4],
+ oneshot:['cross',RD,BK,16],grit:['mount',RD,BK,16],rescue:['wave',UC[0],BK,16],
+ u1:['quad',UC[0],BK,12],u2:['quad',UC[1],BK,12],u3:['quad',UC[2],BK,12],u4:['quad',UC[3],BK,12],u5:['quad',UC[4],BK,12],u6:['quad',UC[5],BK,12],
+ fig6:['sun',GD,BK,20,6],figall:['sun',GD,RD,20,12],allstar:['star',GD,BK,20],top:['crown',GD,RD,24]
+};
+function badgeSVG(id){
+  const [m,c,d,n,k]=BSPEC[id]||BSPEC.first;
+  const P=(r,a)=>(32+r*Math.cos(a)).toFixed(1)+','+(32+r*Math.sin(a)).toFixed(1);
+  let s=`<circle cx="32" cy="32" r="31" fill="${d}"/>`;
+  for(let i=0;i<n;i++){const a0=i/n*2*Math.PI-Math.PI/2,a1=(i+1)/n*2*Math.PI-Math.PI/2,am=(a0+a1)/2;s+=`<polygon points="${P(30,a0)} ${P(30,a1)} ${P(23.5,am)}" fill="${i%2?CR:c}"/>`}
+  s+=`<circle cx="32" cy="32" r="21.5" fill="${CR}" stroke="${d}" stroke-width="1.5"/>`;
+  const rh=(cx,cy,w,h,f,st)=>`<polygon points="${cx},${cy-h} ${cx+w},${cy} ${cx},${cy+h} ${cx-w},${cy}" fill="${f}"${st?` stroke="${st}" stroke-width="1.6"`:''}/>`;
+  if(m==='diamond')s+=rh(32,32,15,17,d)+rh(32,32,10.5,12,c)+rh(32,32,6,7,CR)+rh(32,32,2.4,2.8,d);
+  if(m==='eye')s+=rh(32,32,17,11,d)+rh(32,32,13,8,CR)+rh(32,32,8,8,c)+rh(32,32,3,3,CR)+[[32,16],[32,48]].map(q=>rh(q[0],q[1],2.6,2.6,c)).join('');
+  if(m==='zig'){const ys=k===1?[32]:k===2?[27,37]:k===3?[23,32,41]:[20,28,36,44];s+=`<clipPath id="bc-${id}"><circle cx="32" cy="32" r="20"/></clipPath><g clip-path="url(#bc-${id})" fill="none" stroke-linejoin="miter" stroke-width="3.6">${ys.map((y,i)=>`<polyline points="${[...Array(9)].map((_,j)=>(8+j*6)+','+(y+(j%2?-3.4:3.4))).join(' ')}" stroke="${i%2?d:c}"/>`).join('')}</g>`}
+  if(m==='cross')s+=rh(32,32,16,16,d)+rh(32,32,11.5,11.5,CR)+`<path d="M32 22 V42 M22 32 H42" stroke="${c}" stroke-width="5"/>`+rh(32,32,3,3,d);
+  if(m==='mount')s+=`<clipPath id="bc-${id}"><circle cx="32" cy="32" r="20"/></clipPath><g clip-path="url(#bc-${id})"><polygon points="8,46 20,22 32,46" fill="${d}"/><polygon points="32,46 44,22 56,46" fill="${d}"/><polygon points="18,48 32,16 46,48" fill="${c}"/><polygon points="25,48 32,32 39,48" fill="${CR}"/><rect x="8" y="46" width="48" height="3" fill="${d}"/></g>`;
+  if(m==='wave')s+=`<clipPath id="bc-${id}"><circle cx="32" cy="32" r="20"/></clipPath><g clip-path="url(#bc-${id})" fill="none" stroke-width="3.6" stroke-linecap="round">${[22,32,42].map((y,i)=>`<path d="M8 ${y} q4 -6 8 0 t8 0 t8 0 t8 0 t8 0 t8 0" stroke="${i%2?d:c}"/>`).join('')}</g>`;
+  if(m==='quad')s+=[[32,21],[21,32],[43,32],[32,43]].map(q=>rh(q[0],q[1],7.5,7.5,c,d)).join('')+rh(32,32,3.4,3.4,d)+[[32,21],[21,32],[43,32],[32,43]].map(q=>rh(q[0],q[1],2.4,2.4,CR)).join('');
+  if(m==='sun'){for(let i=0;i<12;i++){const a=i/12*2*Math.PI-Math.PI/2,w=.2;s+=`<polygon points="${P(10,a-w)} ${P(20,a)} ${P(10,a+w)}" fill="${i<k?c:'#cbbfa6'}"/>`}s+=`<circle cx="32" cy="32" r="9" fill="${d}"/><circle cx="32" cy="32" r="5.5" fill="${c}"/><circle cx="32" cy="32" r="2" fill="${CR}"/>`}
+  if(m==='star'){for(let i=0;i<8;i++){const a=i/8*2*Math.PI-Math.PI/2;s+=`<polygon points="${P(7,a-.42)} ${P(i%2?14:20,a)} ${P(7,a+.42)}" fill="${i%2?d:c}"/>`}s+=rh(32,32,6,6,d)+rh(32,32,3,3,CR)}
+  if(m==='crown'){s+=rh(32,32,19,19,d)+rh(32,32,15,15,c)+rh(32,32,11,11,CR)+rh(32,32,7.5,7.5,d)+rh(32,32,4,4,c)+rh(32,32,1.6,1.6,CR)}
+  return `<svg viewBox="0 0 64 64" aria-hidden="true">${s}</svg>`;
+}
+const medal=id=>`<span class="medal">${badgeSVG(id)}</span>`;
 const figSVG=id=>`<svg viewBox="0 0 100 110" aria-hidden="true">${ART[id]()}</svg>`;
 const LOCK='<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="5" y="10.5" width="14" height="10" rx="2.5" fill="currentColor"/><path d="M8 10.5 V8 a4 4 0 0 1 8 0 v2.5" fill="none" stroke="currentColor" stroke-width="2.4"/></svg>';
 
@@ -618,7 +648,7 @@ function mapHTML(){
     const side=x>0?'l':'r';
     let pal='';
     if(l.fig){const got=!!state.figs[l.fig];pal=`<button type="button" class="pal ${side}${got?'':' locked'}" data-fig="${l.fig}" aria-label="公仔：${got?FIGS[l.fig].name:'還沒蒐集到'}">${figSVG(l.fig)}<small>${got?FIGS[l.fig].name:'？？？'}</small></button>`}
-    else{const b=BADGES.find(z=>z.id===l.badge),got=!!state.badges[b.id];pal=`<div class="pal ${side}${got?'':' locked'}"><span class="medal">${b.m}</span><small>${b.name}</small></div>`}
+    else{const b=BADGES.find(z=>z.id===l.badge),got=!!state.badges[b.id];pal=`<div class="pal ${side}${got?'':' locked'}">${medal(b.id)}<small>${b.name}</small></div>`}
     h+=`<div class="row" style="--x:${x}px">${pal}<div class="spot" style="--c:${U.c}">
       ${i===cur?`<span class="bubble">${inRun?'繼續':'開始'}</span>`:''}
       <button type="button" class="node ${l.type}${i===cur?' cur':''}" id="node-${l.id}" style="--c:${U.c}" data-start="${l.id}" ${open?'':'disabled'} aria-label="${l.name}，${sizeOf(l)} 題，${status}">${open?label:LOCK}</button>
@@ -641,7 +671,7 @@ function renderHome(scrollToCur){
     <section><div class="block-h"><h2>公仔收藏</h2><small>${nf} / ${Object.keys(FIGS).length}</small></div>
      <div class="figs">${Object.keys(FIGS).map(id=>{const got=!!state.figs[id];return `<button type="button" class="figcell${got?'':' locked'}" data-fig="${id}" aria-label="${got?FIGS[id].name:'還沒蒐集到的公仔'}">${figSVG(id)}<small>${got?FIGS[id].name:'？？？'}</small></button>`}).join('')}</div></section>
     <section><div class="block-h"><h2>徽章</h2><small>${Object.keys(state.badges).length} / ${BADGES.length}・最高連對 ${state.bestStreak} 題</small></div>
-     <div class="badges">${BADGES.map(b=>`<div class="badge${state.badges[b.id]?'':' locked'}"><span class="medal">${b.m}</span><div><b>${b.name}</b><small>${b.desc}</small></div></div>`).join('')}</div></section>
+     <div class="badges">${BADGES.map(b=>`<div class="badge${state.badges[b.id]?'':' locked'}">${medal(b.id)}<div><b>${b.name}</b><small>${b.desc}</small></div></div>`).join('')}</div></section>
     <section><div class="block-h"><h2>錯題本</h2><small>${wb.length} 題待救回</small></div>
      ${wb.length?`<p class="muted" style="margin:0 0 8px;font-size:15px">在複習站或錯題特訓答對，題目就會從這裡畢業。</p><p style="margin:0 0 10px"><button type="button" class="btn primary" id="drillBtn">錯題特訓（${Math.min(15,wb.length)} 題）</button></p>
       <div class="wb">${wb.map(q=>`<details data-q="${q.id}"><summary><span class="n">第 ${q.n} 題</span><span class="s">${q.s}</span><span class="c">錯 ${state.wrong[q.id]||1} 次</span></summary><div class="wbody"></div></details>`).join('')}</div>`
@@ -760,7 +790,7 @@ function renderQuiz(){
       ${r.newFig?`<div class="gotfig"><small>獲得新公仔</small><div class="bigfig">${figSVG(r.newFig)}</div><b>${FIGS[r.newFig].name}</b><span style="font-size:15px;max-width:22em">${FIGS[r.newFig].note}</span></div>`:''}
       ${r.replay?'<p class="muted">重玩模式不加 XP，星星和最佳紀錄會保留比較好的那次。</p>':`<div class="earn">${earned.map(([k,v])=>`<div><span>${k}</span><b>+${v}</b></div>`).join('')}<div><span>這一關合計</span><b>+${total} XP</b></div></div>`}
       ${r.rankUp?`<p class="big">升級成「${r.rankUp}」</p>`:''}
-      ${(r.newBadges||[]).length?`<div class="newbadge">${r.newBadges.map(id=>{const b=BADGES.find(x=>x.id===id);return `<div class="badge"><span class="medal">${b.m}</span><div><b>${b.name}</b><small>${b.desc}</small></div></div>`}).join('')}</div>`:''}
+      ${(r.newBadges||[]).length?`<div class="newbadge">${r.newBadges.map(id=>{const b=BADGES.find(x=>x.id===id);return `<div class="badge">${medal(b.id)}<div><b>${b.name}</b><small>${b.desc}</small></div></div>`}).join('')}</div>`:''}
       <div class="rowb">${nx?`<button type="button" class="btn primary big" data-start="${nx.id}">下一關：${nx.name} →</button>`:'<p class="big">整張地圖走完了！</p>'}<button type="button" class="btn big" id="homeBtn2">回地圖</button></div></section>`;
   }
   $('#main').innerHTML=head+body;
