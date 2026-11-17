@@ -451,7 +451,7 @@ async function enterStudent(cls,seat){
   if(pending)flush();
   if(clash)seatClash();
 }
-function enterPreview(cls){me.role='student';me.cls=cls;me.seat='T';me.preview=true;state=fresh();render(true)}
+function enterPreview(cls){me.role='student';me.cls=cls;me.seat='T';me.preview=true;state=fresh();Object.keys(FIGS).forEach(id=>{state.figs[id]=1});render(true)}
 function logout(){
   if(pending)flush();
   clearInterval(pollT);LOGIN.set(null);me.role=null;me.seat=null;me.key=null;me.preview=false;state=fresh();
