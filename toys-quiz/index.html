@@ -363,7 +363,7 @@ function say(w,onEnd){
 /* ===== 後台：和山海闖關地圖、國語學習站同一個 Cloudflare 後台，用班級代碼＋這個網頁的代號分開存 ===== */
 const API_URL='https://guoyu-class.tina12345920.workers.dev/api';
 const TAG='-TOYSQ',CLS='三甲',NSEAT=16,LK='toysq';
-/* 老師密碼：網頁裡只放 SHA-256 雜湊（和山海闖關地圖同一組密碼） */
+/* 老師後台的密碼由 Cloudflare 後台檢查（和國語學習站同一組）；下面的雜湊只用在不是 GitHub 網址時的測試模式 */
 const PIN_HASH='f1e0be5a4902c004c18be85f94107c6717c41ff00bb5c716458c52a3a15fb9d6';
 async function pinOK(s){try{const b=await crypto.subtle.digest('SHA-256',new TextEncoder().encode(String(s)));return Array.from(new Uint8Array(b)).map(x=>x.toString(16).padStart(2,'0')).join('')===PIN_HASH}catch(e){return false}}
 const ONLINE=/(^|\.)github\.io$/.test(location.hostname);
@@ -467,8 +467,9 @@ function tLogin(){
     <button type="button" class="btn ghost" id="tback">回到小考</button></form>`;
   $("tback").onclick=leaveTeacher;
   $("tform").onsubmit=async e=>{e.preventDefault();const k=$("tkey").value;
-    if(!await pinOK(k)){$("terr").textContent="密碼不對。";return}
-    try{await API.check(k)}catch(err){$("terr").textContent="連不上後台，請確認網路後再試一次。";return}
+    $("terr").textContent="登入中…";
+    try{await API.check(k)}catch(err){const m=String(err&&err.message||"");
+      $("terr").textContent=/key|pin|pass|auth|denied|forbid|wrong|unauthor/i.test(m)?"密碼不對。請用國語學習站老師後台的那組密碼。":(err instanceof TypeError||/fetch|network/i.test(m))?"連不上後台，請確認網路後再試一次。":"後台回覆："+m;return}
     T.key=k;try{sessionStorage.setItem(LK+'-tk',k)}catch(_){}
     await tLoad();tRender();poll=setInterval(async()=>{if(document.hidden||!T.key)return;await tLoad();tRender(true)},15000)};
 }
@@ -540,7 +541,7 @@ function route(){
   if(location.hash==="#teacher"){
     $("tnote").hidden=false;
     let k=null;try{k=sessionStorage.getItem(LK+'-tk')}catch(_){}
-    if(k){pinOK(k).then(async ok=>{if(ok){T.key=k;await tLoad();tRender();if(!poll)poll=setInterval(async()=>{if(document.hidden||!T.key)return;await tLoad();tRender(true)},15000)}else tLogin()})}
+    if(k){API.check(k).then(async()=>{T.key=k;await tLoad();tRender();if(!poll)poll=setInterval(async()=>{if(document.hidden||!T.key)return;await tLoad();tRender(true)},15000)},()=>tLogin())}
     else tLogin();
   }else{$("tnote").hidden=true;startScreen();upload(seat)}
 }
