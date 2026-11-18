@@ -248,12 +248,65 @@ button:disabled{opacity:.45;cursor:not-allowed}
 .total{text-align:center;font-size:clamp(1.5rem,5vw,2rem);font-weight:900;margin:0}
 .total b{font-family:var(--en);font-size:1.4em;font-weight:400}
 @media (max-width:560px){.keys{grid-template-columns:repeat(7,1fr);gap:6px}}
+.seats{display:grid;grid-template-columns:repeat(8,1fr);gap:8px;width:100%;max-width:560px}
+.seatb{font:inherit;font-size:1.4rem;font-weight:900;aspect-ratio:1/1;max-width:100%;min-width:0;border-radius:12px;border:2px solid var(--line);background:var(--paper);color:var(--ink);cursor:pointer;touch-action:manipulation}
+.seatb[aria-pressed="true"]{border-color:var(--cyan);background:var(--cyan);color:#fff}
+.sync{text-align:center;margin:0;font-weight:700;color:var(--soft);display:flex;gap:10px;justify-content:center;align-items:center;flex-wrap:wrap}
+.sync[data-s="ok"]{color:var(--good)} .sync[data-s="bad"]{color:var(--bad)}
+.tlink{font:inherit;font-size:.85rem;border:0;background:none;color:var(--soft);cursor:pointer;text-decoration:underline;padding:4px}
+.thead{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap}
+.wstat{display:flex;flex-wrap:wrap;gap:8px}
+.wst{display:flex;align-items:center;gap:6px;padding:4px 12px 4px 6px;border-radius:999px;border:2px solid var(--line);font-family:var(--en);font-size:1.25rem}
+.wst .p{font-size:1.6rem;line-height:1}
+.wst b{font-family:var(--zh);font-size:.8rem;color:var(--soft)}
+.wst.has{border-color:var(--bad)} .wst.has b{color:var(--bad)}
+.tscroll{overflow-x:auto;border:2px solid var(--line);border-radius:14px}
+.tt{width:100%;border-collapse:collapse;font-variant-numeric:tabular-nums}
+.tt th,.tt td{padding:8px 10px;text-align:left;border-bottom:1px solid var(--line);white-space:nowrap}
+.tt th{font-size:.85rem;color:var(--soft);background:var(--paper)}
+.tt tr.none td{color:var(--soft)}
+.tt small{color:var(--soft)}
+.tt input{width:20px;height:20px}
+.sc.full{color:var(--good)}
+.wrong{font-family:var(--en);font-size:1.15rem;margin-right:10px;white-space:nowrap}
+.wrong s{color:var(--bad)}
+.muted{color:var(--soft)}
+.tbox{display:grid;gap:10px;padding:14px;border-radius:14px;background:var(--cyan-bg)}
+.radio{display:inline-flex;align-items:center;gap:4px;font-weight:700}
+#sheets{display:grid;gap:18px}
+/* 習寫單：紙張的樣子，深色模式也維持白紙 */
+.sheet{--rule:#8fb0c9;--baseline:#e0584f;--ink:#1f3047;--soft:#5d6f86;background:#fff;color:#1f3047;border:1px solid #c9d3de;border-radius:6px;padding:14px 18px;display:grid;gap:10px;max-width:760px}
+.shead{display:flex;justify-content:space-between;align-items:flex-end;gap:12px;flex-wrap:wrap;border-bottom:2px solid #1f3047;padding-bottom:8px}
+.stitle{font-size:1.35rem;font-weight:900}
+.ssub{font-size:.9rem;color:#5d6f86}
+.sfill{display:flex;gap:18px;font-weight:700}
+.sblk{display:grid;grid-template-columns:96px 1fr;gap:10px;align-items:center;break-inside:avoid;padding:4px 0;border-bottom:1px dashed #c9d3de}
+.sleft{text-align:center}
+.sleft .p{font-size:2.6rem;line-height:1}
+.sleft .z{font-weight:900}
+.sleft .was{font-size:.75rem;color:#5d6f86;line-height:1.3}
+.sleft .was s{font-family:var(--en);font-size:1.15rem;color:#d9463c}
+.srows{display:grid;gap:2px;min-width:0}
+.sline2{font-size:42px;height:1.8316em;padding:0 .2em;overflow:hidden;color:#1f3047;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+.sline2 span{margin-right:.9em}
+.sline2 .trc{color:#b9c3cf}
+.sfoot{text-align:right;font-size:.75rem;color:#8a97a8}
+@page{size:A4;margin:12mm}
+@media print{
+  body{background:#fff!important;padding:0!important}
+  .wrap>*:not(#box),#box>*:not(#sheets),.sheetnote{display:none!important}
+  .wrap{display:block;max-width:none}
+  #box{border:0;padding:0;background:none;display:block}
+  #sheets{display:block}
+  .sheet{border:0;border-radius:0;padding:0;max-width:none;break-after:page}
+  .sheet:last-child{break-after:auto}
+}
 </style>
 
 <div class="wrap">
   <header class="top">
     <div class="ttl"><h1>My Toys<span>單字小考</span></h1>
-    <p>看圖點字母，拼出玩具的英文單字。6 題考完才會看到分數。</p></div>
+    <p>看圖點字母，拼出玩具的英文單字。6 題考完才會看到分數，成績會交給老師。</p></div>
     <div class="topbtns"><button class="qrbtn" id="sndbtn">🔊 聲音測試</button><button class="qrbtn" id="qrbtn" aria-haspopup="dialog">📱 QR Code</button></div>
   </header>
   <p class="sndtip" id="sndtip" hidden>聽到「ball」了嗎？沒聲音的話：① 把音量調大 ② iPad / iPhone 關掉靜音（側邊開關或控制中心的🔔）③ 檢查是不是連到藍牙耳機了 ④ 重新整理網頁再點一次。</p>
@@ -265,7 +318,9 @@ button:disabled{opacity:.45;cursor:not-allowed}
       <div class="row" style="justify-content:center"><button class="btn" id="qrcopy">複製網址</button><button class="btn ghost" id="qrclose">關閉</button></div>
     </div>
   </div>
+  <p class="teacher" id="tnote" hidden>👩‍🏫 老師後台：學生請用沒有 #teacher 的網址（按右上角 QR Code）。</p>
   <section id="box" aria-live="polite"></section>
+  <div class="row" style="justify-content:flex-end"><button class="tlink" id="tlink">老師後台</button></div>
 </div>
 <script>
 /* Original toy drawings (inline SVG, sized by font-size) */
@@ -305,22 +360,50 @@ function say(w,onEnd){
   try{speechSynthesis.cancel();const u=new SpeechSynthesisUtterance(w);u.lang="en-US";u.rate=.8;if(voice)u.voice=voice;u.onend=fin;u.onerror=fin;speechSynthesis.speak(u)}catch(e){}
   if(onEnd)setTimeout(fin,2500);
 }
+/* ===== 後台：和山海闖關地圖、國語學習站同一個 Cloudflare 後台，用班級代碼＋這個網頁的代號分開存 ===== */
+const API_URL='https://guoyu-class.tina12345920.workers.dev/api';
+const TAG='-TOYSQ',CLS='三甲',NSEAT=16,LK='toysq';
+/* 老師密碼：網頁裡只放 SHA-256 雜湊（和山海闖關地圖同一組密碼） */
+const PIN_HASH='f1e0be5a4902c004c18be85f94107c6717c41ff00bb5c716458c52a3a15fb9d6';
+async function pinOK(s){try{const b=await crypto.subtle.digest('SHA-256',new TextEncoder().encode(String(s)));return Array.from(new Uint8Array(b)).map(x=>x.toString(16).padStart(2,'0')).join('')===PIN_HASH}catch(e){return false}}
+const ONLINE=/(^|\.)github\.io$/.test(location.hostname);
+const esc=s=>String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const LS={get(k,d){try{const v=localStorage.getItem(k);return v?JSON.parse(v):d}catch(e){return d}},set(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}}};
+const Remote={
+  async get(p){const r=await fetch(API_URL+'?'+new URLSearchParams(p).toString());const j=await r.json();if(!j.ok)throw new Error(j.err||'error');return j},
+  async post(b){const r=await fetch(API_URL,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify(b)});const j=await r.json();if(!j.ok)throw new Error(j.err||'error');return j},
+  mine:s=>Remote.get({a:'mine',c:CLS+TAG,s}),
+  all:k=>Remote.get({a:'all',c:CLS+TAG,k}),
+  save:(s,rec)=>Remote.post({a:'save',c:CLS+TAG,s,stage:'quiz',rec}),
+  check:k=>Remote.get({a:'check',c:CLS+TAG,k})
+};
+/* 不是在 GitHub 網址上打開時（例如自己電腦測試），紀錄只存在這台裝置 */
+const Local={
+  db(){return LS.get(LK+'-demo',{})},
+  async mine(s){const d=Local.db();return {ok:1,recs:d[s]?[d[s]]:[]}},
+  async all(k){if(!await pinOK(k))throw new Error('key');return {ok:1,recs:Object.values(Local.db())}},
+  async save(s,rec){const d=Local.db();d[s]=rec;LS.set(LK+'-demo',d);return {ok:1}},
+  async check(k){if(!await pinOK(k))throw new Error('key');return {ok:1}}
+};
+const API=ONLINE?Remote:Local;
 
+/* ===== 學生端：小考 ===== */
 const KEYS=[..."abcdefghijklmnopqrstuvwxyz","-"],MAXLEN=8;
-let seat="",order=[],qi=0,typed="",answers=[];
+let seat=LS.get(LK+'-seat',""),order=[],qi=0,typed="",answers=[],kind="full";
 const box=$("box");
 function startScreen(){
-  box.innerHTML=`<div class="start"><p class="big">準備好了嗎？</p>
-    <label for="seat" style="font-weight:700">座號</label><input id="seat" inputmode="numeric" maxlength="3" value="${seat}" autocomplete="off">
-    <button class="btn" id="go">開始小考</button>
+  box.innerHTML=`<div class="start"><p class="big">先點你的座號</p>
+    <div class="seats">${Array.from({length:NSEAT},(_,i)=>i+1).map(n=>`<button class="seatb" data-s="${n}" aria-pressed="${String(n)===String(seat)}">${n}</button>`).join("")}</div>
+    <button class="btn" id="go" ${seat?"":"disabled"}>${seat?seat+" 號，":""}開始小考</button>
     <p class="hint">每一題看圖，點下面的字母拼出英文，拼好按「送出」。點錯字母可以按「⌫ 擦掉」。</p></div>`;
-  $("go").onclick=()=>{seat=$("seat").value.replace(/\D/g,"");begin(shuffle(WORDS))};
+  box.querySelectorAll(".seatb").forEach(b=>b.onclick=()=>{seat=b.dataset.s;LS.set(LK+'-seat',seat);startScreen()});
+  $("go").onclick=()=>{if(seat)begin(shuffle(WORDS),"full")};
 }
-function begin(list){order=list;qi=0;answers=[];show()}
+function begin(list,k){order=list;kind=k;qi=0;answers=[];show()}
 function show(){
   if(qi>=order.length)return result();
   const w=order[qi];typed="";
-  box.innerHTML=`<div class="qhead"><span class="meter">第 ${qi+1} / ${order.length} 題</span>${seat?`<span class="meter">${seat} 號</span>`:""}</div>
+  box.innerHTML=`<div class="qhead"><span class="meter">${kind==="retry"?"練錯的字 · ":""}第 ${qi+1} / ${order.length} 題</span><span class="meter">${seat} 號</span></div>
     <div class="qpic">${w.pic}</div>
     <div class="qzh">${w.zh}<button class="say" id="qsay" aria-label="聽發音">🔊</button></div>
     <div class="ruled ans" id="ans" aria-label="你拼的字"></div>
@@ -332,12 +415,12 @@ function show(){
   $("del").onclick=back;$("send").onclick=send;
   draw();
 }
-function draw(){const a=$("ans");if(a)a.innerHTML=`<span>${typed}</span><span class="caret"></span>`;const m=$("qmsg");if(m)m.textContent=""}
+function draw(){const a=$("ans");if(a)a.innerHTML=`<span>${esc(typed)}</span><span class="caret"></span>`;const m=$("qmsg");if(m)m.textContent=""}
 function add(k){if(typed.length<MAXLEN){typed+=k;draw()}}
 function back(){typed=typed.slice(0,-1);draw()}
 function send(){
   if(!typed){$("qmsg").textContent="還沒拼字喔！";return}
-  answers.push({w:order[qi],a:typed});qi++;show();
+  answers.push({w:order[qi].en,a:typed});qi++;show();
 }
 document.addEventListener("keydown",e=>{
   if(!$("ans")||!$("qrwrap").hidden)return;
@@ -346,15 +429,124 @@ document.addEventListener("keydown",e=>{
   else if(e.key==="Backspace"){e.preventDefault();back()}
   else if(e.key==="Enter"){e.preventDefault();send()}
 });
-function result(){
-  const right=answers.filter(x=>x.a===x.w.en).length,n=answers.length,missed=answers.filter(x=>x.a!==x.w.en).map(x=>x.w);
-  box.innerHTML=`<p class="total">${seat?seat+" 號 · ":""}答對 <b>${right}</b> / ${n} 題${right===n?" 🎉":""}</p>
-    <div class="res">${answers.map(x=>{const ok=x.a===x.w.en;return `<div class="rrow ${ok?"ok":"no"}"><span class="p">${x.w.pic}</span><span class="w">${ok?x.a:`<s>${x.a}</s> → ${x.w.en}`}<small>${x.w.zh}</small></span><span class="m">${ok?"✔":"✘"}</span></div>`}).join("")}</div>
-    <div class="row" style="justify-content:center">${missed.length?`<button class="btn" id="rm">只練錯的字</button>`:""}<button class="btn ghost" id="ra">6 題重考一次</button></div>`;
-  if(missed.length)$("rm").onclick=()=>begin(shuffle(missed));
-  $("ra").onclick=()=>begin(shuffle(WORDS));
+const W=en=>WORDS.find(x=>x.en===en);
+/* 交給老師：先讀回這個座號的紀錄，把這一次加在後面再存；沒連上就先存在平板，下次再送 */
+const pendKey=s=>LK+'-pending-'+s;
+async function upload(s){
+  const pend=LS.get(pendKey(s),[]);if(!pend.length)return true;
+  try{
+    const j=await API.mine(s);const old=(j.recs||[]).find(r=>r&&r.stage==='quiz');
+    const atts=((old&&old.attempts)||[]).concat(pend).slice(-30);
+    await API.save(s,{seat:Number(s),stage:'quiz',attempts:atts,at:Date.now()});
+    LS.set(pendKey(s),[]);return true;
+  }catch(e){return false}
 }
-startScreen();
+async function result(){
+  const right=answers.filter(x=>x.a===x.w).length,n=answers.length,missed=answers.filter(x=>x.a!==x.w).map(x=>W(x.w));
+  const p=LS.get(pendKey(seat),[]);p.push({t:Date.now(),kind,ans:answers});LS.set(pendKey(seat),p);
+  box.innerHTML=`<p class="total">${seat} 號 · 答對 <b>${right}</b> / ${n} 題${right===n?" 🎉":""}</p>
+    <p class="sync" id="sync" data-s="wait">正在交給老師…</p>
+    <div class="res">${answers.map(x=>{const ok=x.a===x.w,w=W(x.w);return `<div class="rrow ${ok?"ok":"no"}"><span class="p">${w.pic}</span><span class="w">${ok?esc(x.a):`<s>${esc(x.a)}</s> → ${w.en}`}<small>${w.zh}</small></span><span class="m">${ok?"✔":"✘"}</span></div>`}).join("")}</div>
+    <div class="row" style="justify-content:center">${missed.length?`<button class="btn" id="rm">只練錯的字</button>`:""}<button class="btn ghost" id="ra">6 題重考一次</button></div>`;
+  if(missed.length)$("rm").onclick=()=>begin(shuffle(missed),"retry");
+  $("ra").onclick=()=>begin(shuffle(WORDS),"full");
+  syncNow();
+}
+async function syncNow(){
+  const ok=await upload(seat),el=$("sync");if(!el)return;
+  el.dataset.s=ok?"ok":"bad";
+  el.innerHTML=ok?(ONLINE?"✔ 已經交給老師了":"✔ 已存在這台裝置（測試模式）"):`沒有交出去，網路可能斷了 <button class="btn ghost" id="resend">再送一次</button>`;
+  if(!ok)$("resend").onclick=()=>{el.dataset.s="wait";el.textContent="正在交給老師…";syncNow()};
+}
+
+/* ===== 老師後台 ===== */
+let T={key:null,recs:[],err:null,at:0,basis:"first",pick:null},poll=null;
+function tLogin(){
+  box.innerHTML=`<form class="start" id="tform"><p class="big">老師後台</p><label for="tkey" style="font-weight:700">老師密碼</label>
+    <input id="tkey" type="password" autocomplete="current-password" style="width:8em"><button class="btn">登入</button><p class="msg bad" id="terr"></p>
+    <button type="button" class="btn ghost" id="tback">回到小考</button></form>`;
+  $("tback").onclick=leaveTeacher;
+  $("tform").onsubmit=async e=>{e.preventDefault();const k=$("tkey").value;
+    if(!await pinOK(k)){$("terr").textContent="密碼不對。";return}
+    try{await API.check(k)}catch(err){$("terr").textContent="連不上後台，請確認網路後再試一次。";return}
+    T.key=k;try{sessionStorage.setItem(LK+'-tk',k)}catch(_){}
+    await tLoad();tRender();poll=setInterval(async()=>{if(document.hidden||!T.key)return;await tLoad();tRender(true)},15000)};
+}
+function leaveTeacher(){clearInterval(poll);poll=null;T.key=null;try{sessionStorage.removeItem(LK+'-tk')}catch(_){}history.replaceState(null,"",location.pathname);$("tnote").hidden=true;startScreen()}
+async function tLoad(){try{const j=await API.all(T.key);T.recs=(j.recs||[]).filter(r=>r&&r.stage==='quiz');T.err=null;T.at=Date.now()}catch(e){T.err="連不上後台，畫面是上一次的資料。"}}
+const recOf=s=>T.recs.find(r=>String(r.seat)===String(s));
+const fulls=r=>(r&&r.attempts||[]).filter(a=>a.kind==="full");
+const wrongOf=a=>(a?a.ans:[]).filter(x=>x.a!==x.w);
+const scoreOf=a=>a?a.ans.filter(x=>x.a===x.w).length:null;
+/* 習寫單要練的字：第一次正式考錯的／最新一次錯的／考過錯過的全部 */
+function sheetWords(r){
+  const f=fulls(r);if(!f.length)return [];
+  if(T.basis==="first")return wrongOf(f[0]);
+  if(T.basis==="last")return wrongOf(f[f.length-1]);
+  const m=new Map();(r.attempts||[]).forEach(a=>wrongOf(a).forEach(x=>{if(!m.has(x.w))m.set(x.w,x)}));
+  return WORDS.filter(w=>m.has(w.en)).map(w=>m.get(w.en));
+}
+function tRender(keep){
+  if(!T.key)return;
+  const seats=Array.from({length:NSEAT},(_,i)=>i+1);
+  if(!T.pick)T.pick=new Set(seats);
+  const done=seats.filter(s=>fulls(recOf(s)).length);
+  const cnt={};WORDS.forEach(w=>cnt[w.en]=0);done.forEach(s=>wrongOf(fulls(recOf(s))[0]).forEach(x=>cnt[x.w]++));
+  const tm=t=>{const d=new Date(t);return (d.getMonth()+1)+"/"+d.getDate()+" "+String(d.getHours()).padStart(2,"0")+":"+String(d.getMinutes()).padStart(2,"0")};
+  const y=keep?window.scrollY:0;
+  box.innerHTML=`<div class="thead"><h2 style="margin:0">老師後台 · ${done.length} / ${NSEAT} 人考完</h2><button class="btn ghost" id="tout">登出</button></div>
+    ${ONLINE?"":`<p class="sndtip">現在不是在 GitHub 網址上打開，資料只存在這台裝置（測試模式）。</p>`}
+    <div class="wstat">${WORDS.map(w=>`<span class="wst ${cnt[w.en]?"has":""}"><span class="p">${w.pic}</span>${w.en}<b>${cnt[w.en]} 人錯</b></span>`).join("")}</div>
+    <p class="hint" style="margin:0">上面是「第一次正式考」各個字錯的人數。</p>
+    <div class="tscroll"><table class="tt"><thead><tr><th><input type="checkbox" id="pall" aria-label="全選" ${T.pick.size===NSEAT?"checked":""}></th><th>座號</th><th>第一次正式考</th><th>錯的字（寫成 → 正確）</th><th>最新一次</th><th>考／練次數</th></tr></thead><tbody>
+    ${seats.map(s=>{const r=recOf(s),f=fulls(r),a0=f[0],al=f[f.length-1],nr=(r&&r.attempts||[]).length-f.length;
+      return `<tr class="${a0?"":"none"}"><td><input type="checkbox" class="pk" data-s="${s}" aria-label="${s} 號" ${T.pick.has(s)?"checked":""}></td><td><b>${s}</b></td>
+      <td>${a0?`<b class="sc ${scoreOf(a0)===6?"full":""}">${scoreOf(a0)} / 6</b> <small>${tm(a0.t)}</small>`:'<span class="muted">還沒考</span>'}</td>
+      <td>${a0?(wrongOf(a0).map(x=>`<span class="wrong"><s>${esc(x.a)}</s> → ${x.w}</span>`).join(" ")||"全對 🎉"):""}</td>
+      <td>${f.length>1?`${scoreOf(al)} / 6 <small>${tm(al.t)}</small>`:""}</td>
+      <td>${r?`${f.length} 次考${nr?`・${nr} 次練錯字`:""}`:""}</td></tr>`}).join("")}
+    </tbody></table></div>
+    <p class="hint" style="margin:0">${T.err?`<span style="color:var(--bad)">${T.err}</span>`:`每 15 秒自動更新・上次更新 ${tm(T.at)}`}</p>
+    <div class="tbox"><h3 style="margin:0">產生訂正習寫單</h3>
+      <div class="row"><span style="font-weight:700">依據</span>
+        ${[["first","第一次正式考"],["last","最新一次考"],["all","所有錯過的字"]].map(([v,l])=>`<label class="radio"><input type="radio" name="basis" value="${v}" ${T.basis===v?"checked":""}>${l}</label>`).join("")}</div>
+      <p class="hint" style="margin:0">勾選的座號裡，有錯字的同學每人一張 A4。全對、還沒考的不會印。</p>
+      <div class="row"><button class="btn" id="tprint">🖨 列印習寫單</button><span class="meter" id="tcount"></span></div></div>
+    <div id="sheets"></div>`;
+  $("tout").onclick=leaveTeacher;
+  $("pall").onchange=e=>{T.pick=new Set(e.target.checked?seats:[]);tRender(true)};
+  box.querySelectorAll(".pk").forEach(c=>c.onchange=()=>{const s=Number(c.dataset.s);c.checked?T.pick.add(s):T.pick.delete(s);renderSheets()});
+  box.querySelectorAll('input[name="basis"]').forEach(r=>r.onchange=()=>{T.basis=r.value;renderSheets()});
+  $("tprint").onclick=()=>{if(!renderSheets()){$("tcount").textContent="沒有要印的習寫單";return}window.print()};
+  renderSheets();
+  if(keep)window.scrollTo(0,y);
+}
+/* 一張習寫單：每個錯的字一組，範例描 3 次，再自己寫 3 次（兩行四線格） */
+function renderSheets(){
+  const list=[...T.pick].sort((a,b)=>a-b).map(s=>({s,ws:sheetWords(recOf(s))})).filter(x=>x.ws.length);
+  const el=$("sheets");if(!el)return 0;
+  $("tcount").textContent=list.length?`會印 ${list.length} 張：${list.map(x=>x.s+" 號").join("、")}`:"沒有要印的習寫單";
+  el.innerHTML=list.length?`<p class="hint sheetnote">預覽（列印時只會印出下面的習寫單）</p>`+list.map(({s,ws})=>`<div class="sheet">
+    <div class="shead"><div><div class="stitle">My Toys 單字訂正習寫單</div><div class="ssub">先描灰色的字 3 次，再自己寫 3 次。寫完念給大人聽。</div></div>
+      <div class="sfill"><span>座號 <b>${s}</b></span><span>姓名 ________</span></div></div>
+    ${ws.map(x=>{const w=W(x.w);return `<div class="sblk"><div class="sleft"><div class="p">${w.pic}</div><div class="z">${w.zh}</div><div class="was">考試寫成<br><s>${esc(x.a)}</s></div></div>
+      <div class="srows"><div class="ruled sline2"><span class="mdl">${w.en}</span>${`<span class="trc">${w.en}</span>`.repeat(3)}</div><div class="ruled sline2"> </div></div></div>`}).join("")}
+    <div class="sfoot">老師媽咪／范范老師</div></div>`).join(""):"";
+  return list.length;
+}
+
+/* ===== 進入點：網址加 #teacher 是老師後台 ===== */
+function route(){
+  if(location.hash==="#teacher"){
+    $("tnote").hidden=false;
+    let k=null;try{k=sessionStorage.getItem(LK+'-tk')}catch(_){}
+    if(k){pinOK(k).then(async ok=>{if(ok){T.key=k;await tLoad();tRender();if(!poll)poll=setInterval(async()=>{if(document.hidden||!T.key)return;await tLoad();tRender(true)},15000)}else tLogin()})}
+    else tLogin();
+  }else{$("tnote").hidden=true;startScreen();upload(seat)}
+}
+window.addEventListener("hashchange",route);
+$("tlink").onclick=()=>{location.hash="teacher"};
+route();
 
 //---------------------------------------------------------------------
 //
