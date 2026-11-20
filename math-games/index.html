@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="zh-Hant-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>數學遊戲樂園</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@500;700;900&family=Noto+Serif+TC:wght@700;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<header class="top">
+  <button id="homeBtn" class="home-btn" hidden>← 遊戲大廳</button>
+  <span id="leftSpacer" class="spacer"></span>
+  <h1 id="pageTitle">數學遊戲樂園</h1>
+  <span class="spacer"></span>
+</header>
+<main id="app"></main>
+<footer>© 老師媽咪／范范老師</footer>
+
+<div id="modal" class="modal" hidden>
+  <div class="modal-box">
+    <div class="modal-emoji" id="mEmoji">🎉</div>
+    <h2 id="mTitle"></h2>
+    <p id="mText"></p>
+    <div class="modal-actions">
+      <button class="btn big" id="mAgain">再玩一次</button>
+      <button class="btn ghost" id="mExplain">🎓 數學講解</button>
+      <button class="btn ghost" id="mHome">回大廳</button>
+    </div>
+  </div>
+</div>
+<div id="explain" class="modal" hidden>
+  <div class="modal-box wide">
+    <h2 id="eTitle"></h2>
+    <div id="eTabs" class="etabs"></div>
+    <div id="eBody" class="explain-body"></div>
+    <div class="modal-actions"><button class="btn big" id="eClose">我懂了！</button></div>
+  </div>
+</div>
+
+<script src="data.js"></script>
+<script src="core.js"></script>
+<script src="games-number.js"></script>
+<script src="games-geometry.js"></script>
+<script src="games-logic.js"></script>
+<script src="games-board.js"></script>
+<script src="games-board2.js"></script>
+<script src="games-calendar.js"></script>
+<script src="explain.js"></script>
+<script>boot();</script>
+</body>
+</html>
