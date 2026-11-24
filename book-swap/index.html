@@ -4,10 +4,10 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="robots" content="noindex">
-<meta name="description" content="聖誕換書典禮：班級二手書交換的抽書典禮、聖誕樹點燈與一鍵列印學習單。">
+<meta name="description" content="書的聖誕旅行：班級二手書交換的抽書典禮、聖誕樹點燈與一鍵列印學習單。">
 <meta name="copyright" content="© 2026 老師媽咪／范范老師">
 <style>:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}body{margin:0}img{max-width:100%}[hidden]{display:none!important}</style>
-<title>聖誕換書典禮</title>
+<title>書的聖誕旅行</title>
 <meta name="claude:viewport-fit-sides" content="cover">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -238,7 +238,7 @@ button:focus-visible,input:focus-visible,textarea:focus-visible,label:focus-visi
 
 <div class="wrap">
   <header class="top">
-    <p class="brand"><span class="dot" aria-hidden="true"></span>聖誕換書典禮</p>
+    <p class="brand"><span class="dot" aria-hidden="true"></span>書的聖誕旅行</p>
     <nav class="nav" aria-label="切換畫面">
       <button class="tab" id="tabPrep" type="button" aria-current="page">準備室</button>
       <button class="tab" id="tabStage" type="button" disabled>典禮舞台</button>
@@ -344,7 +344,7 @@ button:focus-visible,input:focus-visible,textarea:focus-visible,label:focus-visi
       <button class="btn btn-ghost" id="again" type="button">重新配對</button>
     </div>
   </section>
-  <p class="credit">© 2026 老師媽咪／范范老師　聖誕換書典禮</p>
+  <p class="credit">© 2026 老師媽咪／范范老師　書的聖誕旅行</p>
 </div>
 
 <div class="modal" id="modal" hidden>
@@ -675,7 +675,7 @@ function sheetPair(p){
   const Lm=(a,b)=>`<div class="wl"><span>${a}</span><i></i><span>${b}</span><i></i></div>`;
   return `
 <section class="sheet">
-  <div class="hd"><div class="ttl">聖誕交換二手書<small>學習單</small></div><div class="who">三年＿＿班　座號：＿＿＿　姓名：<span class="fill">${name}</span></div></div>
+  <div class="hd"><div class="ttl">書的聖誕旅行<small>交換二手書學習單</small></div><div class="who">三年＿＿班　座號：＿＿＿　姓名：<span class="fill">${name}</span></div></div>
   <p class="intro">聖誕節快到了！把自己讀過、喜歡的書送給一位同學，再收到另一位同學送來的書。一本書換了新主人，就能再被讀一次。完成下面四關，讓你的書漂漂亮亮地出發！</p>
   <h2><i>第一關</i>我的書檢查站<small>每一項都做到了，才打勾。</small></h2>
   <div class="cols">
@@ -716,9 +716,9 @@ function worksheetDoc(withRecv,autoprint){
   if(withRecv&&paired()&&S.step>=n()){for(let i=0;i<n();i++){const {give,recv}=pair(i);got.set(recv.id,give)}}
   const body=S.people.map(p=>sheetPair(p)).join('');
   const ap=autoprint?`<script>addEventListener('load',()=>{(document.fonts?document.fonts.ready:Promise.resolve()).then(()=>setTimeout(()=>print(),400))})<\/script>`:'';
-  return `<!doctype html><html lang="zh-Hant"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>聖誕交換二手書學習單</title>
+  return `<!doctype html><html lang="zh-Hant"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>書的聖誕旅行學習單</title>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=LXGW+WenKai+TC:wght@400;700&family=Noto+Sans+TC:wght@400;500;700&display=swap"><style>${WS_CSS}</style></head><body>
-<div class="bar"><span>聖誕交換二手書學習單・${n()} 位同學、每人一頁</span><button type="button" onclick="print()">列印</button></div>${body}${ap}</body></html>`;
+<div class="bar"><span>書的聖誕旅行學習單・${n()} 位同學、每人一頁</span><button type="button" onclick="print()">列印</button></div>${body}${ap}</body></html>`;
 }
 let pendingRecv=false;
 function openWs(withRecv){
@@ -734,7 +734,7 @@ $('mClose').onclick=()=>{$('modal').hidden=true};
 $('modal').addEventListener('click',e=>{if(e.target.id==='modal')$('modal').hidden=true});
 addEventListener('keydown',e=>{if(e.key==='Escape'){$('modal').hidden=true;$('finder').hidden=true}});
 function wsBlobUrl(){return URL.createObjectURL(new Blob([worksheetDoc(pendingRecv,true)],{type:'text/html;charset=utf-8'}))}
-function saveWs(url){const a=document.createElement('a');a.href=url||wsBlobUrl();a.download='聖誕交換二手書學習單.html';document.body.appendChild(a);a.click();a.remove();toast('已下載，打開檔案就會跳出列印視窗')}
+function saveWs(url){const a=document.createElement('a');a.href=url||wsBlobUrl();a.download='書的聖誕旅行學習單.html';document.body.appendChild(a);a.click();a.remove();toast('已下載，打開檔案就會跳出列印視窗')}
 $('mSave').onclick=()=>{const url=wsBlobUrl();const w=window.open(url,'_blank');if(!w){saveWs(url)}};
 $('mFile').onclick=()=>saveWs();
 
