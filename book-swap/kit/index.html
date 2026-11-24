@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="robots" content="noindex">
+<meta name="description" content="書的聖誕旅行教師包：活動說明、典禮網頁、可下載的 PDF 學習單和可複製的家長通知。">
+<meta name="copyright" content="© 2026 老師媽咪／范范老師">
+<style>:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}body{margin:0}img{max-width:100%}[hidden]{display:none!important}</style>
+<title>書的聖誕旅行教師包</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=LXGW+WenKai+TC:wght@400;700&family=Noto+Sans+TC:wght@400;500;700&display=swap">
+<style>
+/* Layout: one scroll. Night-sky hero (title + mascot), then a 4-step timeline, then three tool cards (典禮網頁 / 學習單 PDF / 家長訊息), then tips. Same winter-night look as the ceremony page. */
+:root{
+  --night:#0e1829; --night2:#14223a; --panel:#1a2a46; --panel2:#213456; --line:#30466e;
+  --snow:#f6f2e7; --mute:#a7b3c9; --dim:#7d8dab;
+  --gold:#f2c45c; --gold2:#ffe7a3; --berry:#d84b5e; --pine:#2e7a58; --pine2:#45a077;
+  --display:"LXGW WenKai TC","Kaiti TC","STKaiti","KaiTi",serif;
+  --body:"Noto Sans TC","PingFang TC","Microsoft JhengHei",system-ui,sans-serif;
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+body{background:var(--night);color:var(--snow);font-family:var(--body);font-size:16px;line-height:1.7}
+.wrap{max-width:1080px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:0 40px}
+a{color:var(--gold2)}
+button,input{font-family:inherit}
+:focus-visible{outline:3px solid var(--gold2);outline-offset:2px}
+
+.hero{background:linear-gradient(to bottom,rgba(14,24,41,.35),rgba(14,24,41,.1) 55%,var(--night)),url("../art/night.webp") 80% 20%/cover no-repeat,var(--night2)}
+.hero .wrap{display:flex;align-items:center;gap:24px;padding-block:48px 64px}
+.hero img{width:clamp(110px,16vw,170px);flex:none;animation:bob 3s ease-in-out infinite}
+@keyframes bob{50%{transform:translateY(-8px) rotate(-3deg)}}
+.eyebrow{margin:0;color:var(--gold2);letter-spacing:.2em;font-size:14px}
+h1{font-family:var(--display);font-size:clamp(36px,6vw,60px);line-height:1.15;margin:4px 0 8px;text-shadow:0 0 24px rgba(242,196,92,.4)}
+.lead{margin:0;max-width:40em;font-size:17px}
+h2{font-family:var(--display);font-size:clamp(24px,3vw,30px);margin:44px 0 6px;text-wrap:balance}
+.sub{margin:0 0 18px;color:var(--mute)}
+
+.steps{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;counter-reset:s}
+.steps li{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:14px 16px;display:grid;gap:4px;align-content:start;min-width:0}
+.steps .when{font-size:13px;color:var(--gold2);letter-spacing:.06em}
+.steps b{font-size:17px}
+.steps span{color:var(--mute);font-size:15px}
+
+.tools{display:grid;gap:16px}
+.tool{background:var(--panel);border:1px solid var(--line);border-radius:20px;padding:20px;display:grid;grid-template-columns:minmax(0,1fr) auto;gap:18px;align-items:center}
+.tool h3{margin:0;font-family:var(--display);font-size:24px}
+.tool .tag{display:inline-block;background:var(--pine);color:#fff;font-size:12px;border-radius:99px;padding:1px 10px;margin-bottom:6px;font-family:var(--body);letter-spacing:.08em}
+.tool p{margin:4px 0 0;color:var(--mute)}
+.tool ul{margin:8px 0 0;padding-left:1.2em;color:var(--mute)}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;border:0;border-radius:14px;padding:12px 22px;font-size:17px;font-weight:700;text-decoration:none;cursor:pointer;white-space:nowrap}
+.btn-gold{background:var(--gold);color:#3a2604;box-shadow:0 4px 0 #b58a2b}
+.btn-red{background:var(--berry);color:#fff;box-shadow:0 4px 0 #8f2737}
+.btn-ghost{background:transparent;color:var(--snow);border:1px solid var(--line);font-weight:500}
+.btn:active{transform:translateY(2px)}
+.preview{width:150px;border-radius:6px;box-shadow:0 10px 30px rgba(0,0,0,.4);display:block}
+.tool-ws{grid-template-columns:auto minmax(0,1fr) auto}
+
+.msg{grid-template-columns:minmax(0,1fr)}
+.fields{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;margin-top:12px}
+.fields label{display:grid;gap:4px;font-size:14px;color:var(--mute);min-width:0}
+.fields input{width:100%;min-width:0;background:var(--night);color:var(--snow);border:1px solid var(--line);border-radius:10px;padding:9px 11px;font-size:16px}
+.letter{white-space:pre-wrap;background:var(--snow);color:#1f2a40;border-radius:14px;padding:18px 20px;font-size:15.5px;line-height:1.8;margin:0;max-height:none}
+.letter mark{background:#ffe7a3;color:inherit;border-radius:4px;padding:0 2px}
+.copyrow{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
+.copyrow span{color:var(--gold2);font-size:15px}
+
+.tips{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
+.tips div{background:var(--night2);border:1px solid var(--line);border-radius:16px;padding:14px 16px}
+.tips b{display:block;margin-bottom:2px}
+.tips p{margin:0;color:var(--mute);font-size:15px}
+.credit{text-align:center;color:var(--dim);font-size:13px;margin-top:40px}
+
+@media (max-width:860px){
+  .steps{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .tool,.tool-ws{grid-template-columns:minmax(0,1fr)}
+  .preview{width:120px}
+  .fields{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .tips{grid-template-columns:minmax(0,1fr)}
+}
+@media (max-width:480px){
+  .hero .wrap{flex-direction:column;align-items:flex-start;padding-block:32px 44px}
+  .steps,.fields{grid-template-columns:minmax(0,1fr)}
+}
+@media (prefers-reduced-motion:reduce){.hero img{animation:none}}
+</style>
+</head>
+<body>
+<header class="hero">
+  <div class="wrap">
+    <img src="../art/book.webp" alt="">
+    <div>
+      <p class="eyebrow">聖誕二手書交換・教師包</p>
+      <h1>書的聖誕旅行</h1>
+      <p class="lead">每個孩子帶一本自己讀過、喜歡的書，送給一位同學，也收到一本同學送的書。一本書換了新主人，就能再被讀一次。這裡有帶活動需要的全部東西：典禮網頁、學習單和給家長的通知。</p>
+    </div>
+  </div>
+</header>
+
+<main class="wrap">
+  <h2>活動怎麼進行</h2>
+  <p class="sub">以 12/23 舉辦典禮為例，大約提前三週開始。</p>
+  <ol class="steps">
+    <li><span class="when">約三週前</span><b>發家長通知</b><span>用下面的範本，填好日期就能貼到 LINE 群組或聯絡簿。</span></li>
+    <li><span class="when">交書期限前</span><b>帶書、寫學習單</b><span>孩子檢查書況、整理內容，寫一封推薦信夾在書裡，把書包好交給老師。</span></li>
+    <li><span class="when">典禮前</span><b>準備典禮網頁</b><span>貼上全班名單，幫每本書找封面或拍照。</span></li>
+    <li><span class="when">典禮當天</span><b>書的聖誕旅行</b><span>投影典禮網頁，一本一本揭曉新主人，全班一起點亮聖誕樹。</span></li>
+  </ol>
+
+  <h2>三樣工具</h2>
+  <p class="sub">都不用註冊、不用安裝，打開就能用。</p>
+  <div class="tools">
+    <section class="tool">
+      <div>
+        <span class="tag">典禮當天</span>
+        <h3>典禮網頁</h3>
+        <ul>
+          <li>老師按「交換」，兩個禮物飛上天，聖誕老人駕雪橇送來，揭曉書和新主人。</li>
+          <li>隨機配對，不會拿到自己的書，也不會兩個人互換，一路接力到全班換完。</li>
+          <li>輸入 ISBN 或書名自動找封面，找不到就拍照或上傳。有背景音樂和音效。</li>
+          <li>名單和照片只存在<strong>當下那台電腦的那個瀏覽器</strong>，換一個就會不見，準備和典禮請用同一台。</li>
+        </ul>
+      </div>
+      <a class="btn btn-red" href="../">打開典禮網頁</a>
+    </section>
+
+    <section class="tool tool-ws">
+      <img class="preview" src="worksheet-preview.webp" alt="學習單預覽：四關，檢查書況、書的基本資料、內容大意、寫信推薦給新主人">
+      <div>
+        <span class="tag">交書前</span>
+        <h3>學習單（PDF）</h3>
+        <p>A4 單面一頁，共四關：</p>
+        <ul>
+          <li>我的書檢查站：書況完整、適合三年級</li>
+          <li>書的基本資料</li>
+          <li>這本書在說什麼</li>
+          <li>寫信推薦給新主人（剪下夾在書裡）</li>
+        </ul>
+      </div>
+      <a class="btn btn-gold" href="worksheet.pdf" download="書的聖誕旅行學習單.pdf">下載 PDF</a>
+    </section>
+
+    <section class="tool msg" aria-labelledby="msgTitle">
+      <div>
+        <span class="tag">約三週前</span>
+        <h3 id="msgTitle">給家長的訊息</h3>
+        <p>填好下面四格，訊息會自動更新，按「複製訊息」就能貼到 LINE 群組或聯絡簿。</p>
+        <div class="fields">
+          <label for="fDate">典禮日期<input id="fDate" type="date" value="2026-12-23"></label>
+          <label for="fDue">交書期限<input id="fDue" type="date" value="2026-12-18"></label>
+          <label for="fWho">誰要舉辦<input id="fWho" type="text" value="我們班" placeholder="例如：三甲和三乙"></label>
+          <label for="fSign">署名<input id="fSign" type="text" value="導師　敬上" placeholder="例如：三甲導師　敬上"></label>
+        </div>
+      </div>
+      <pre class="letter" id="letter" aria-live="polite"></pre>
+      <div class="copyrow"><button class="btn btn-gold" id="copyBtn" type="button">複製訊息</button><span id="copyNote" role="status"></span></div>
+    </section>
+  </div>
+
+  <h2>小提醒</h2>
+  <div class="tips">
+    <div><b>包書</b><p>歡迎用漂亮的包裝紙；沒有的話用報紙包也可以，只要包牢。在家不方便包，可以帶到學校一起包。</p></div>
+    <div><b>找不到書的孩子</b><p>請家長私下告訴老師，一起想辦法，讓每個孩子都能參加。</p></div>
+    <div><b>書況檢查</b><p>學習單第一關有 8 個勾選項目，有一項打不了勾，就先和老師或家長討論換一本。</p></div>
+  </div>
+
+  <p class="credit">© 2026 老師媽咪／范范老師　書的聖誕旅行</p>
+</main>
+
+<script>
+(()=>{
+const $=id=>document.getElementById(id);
+const W='日一二三四五六';
+function fmt(v){if(!v)return '＿月＿日';const d=new Date(v+'T00:00:00');if(isNaN(d))return '＿月＿日';return `${d.getMonth()+1} 月 ${d.getDate()} 日（${W[d.getDay()]}）`}
+const esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+function text(mark){
+  const m=s=>mark?`\u0001${s}\u0002`:s;
+  const who=$('fWho').value.trim()||'我們班',sign=$('fSign').value.trim()||'導師　敬上';
+  return `親愛的家長您好：
+
+聖誕節快到了！🎄 ${m(fmt($('fDate').value))}，${m(who)}要舉辦「書的聖誕旅行」。每個孩子帶一本自己讀過、喜歡的書送給同學，也會收到一本同學送的書，讓好書換個新主人，繼續被讀下去 📚
+
+📦 請幫忙準備
+・一本孩子讀完、喜歡、書況完整的書，不用買新書。
+・用包裝紙包好，沒有的話用報紙包也很棒；在家不方便包，帶來學校，老師陪孩子一起包。
+・${m(fmt($('fDue').value))}前交給老師。
+・書送出後就屬於新主人，請先和孩子聊好喔。
+
+🎁 典禮當天
+孩子會寫一封推薦信夾在書裡。典禮上禮物飛起、聖誕老人送來，揭曉每本書的新主人，全班再一起點亮聖誕樹！
+
+家裡一時找不到合適的書，請私下跟老師說，我們一起想辦法，每個孩子都能參加。
+
+謝謝家長的協助與幫忙！
+${m(sign)}`;
+}
+function render(){$('letter').innerHTML=esc(text(true)).replace(/\u0001/g,'<mark>').replace(/\u0002/g,'</mark>');$('copyNote').textContent=''}
+['fDate','fDue','fWho','fSign'].forEach(id=>$(id).addEventListener('input',render));
+$('copyBtn').onclick=async()=>{
+  const t=text(false);
+  try{await navigator.clipboard.writeText(t);$('copyNote').textContent='已複製，可以貼到 LINE 了'}
+  catch(e){const r=document.createRange();r.selectNodeContents($('letter'));const s=getSelection();s.removeAllRanges();s.addRange(r);$('copyNote').textContent='已選取訊息，請按「複製」'}
+};
+render();
+})();
+</script>
+</body>
+</html>
