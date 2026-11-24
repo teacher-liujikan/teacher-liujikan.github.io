@@ -68,6 +68,16 @@ h2{font-family:var(--display);font-size:clamp(24px,3vw,30px);margin:44px 0 6px;t
 .copyrow{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
 .copyrow span{color:var(--gold2);font-size:15px}
 
+.poster{grid-template-columns:minmax(0,1fr) minmax(0,380px);align-items:start}
+#posterCv{width:100%;height:auto;border-radius:10px;box-shadow:0 14px 40px rgba(0,0,0,.45);display:block;background:var(--night2)}
+.pfields{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin:12px 0 14px}
+.pfields .wide{grid-column:1/-1}
+.pfields label{display:grid;gap:4px;font-size:14px;color:var(--mute);min-width:0}
+.pfields fieldset{grid-column:1/-1;border:1px solid var(--line);border-radius:12px;padding:6px 10px 10px;margin:0;display:grid;grid-template-columns:minmax(0,5.5em) minmax(0,1fr) minmax(0,1.6fr);gap:6px;min-width:0}
+.pfields legend{font-size:14px;color:var(--mute);padding:0 4px}
+.pfields input{width:100%;min-width:0;background:var(--night);color:var(--snow);border:1px solid var(--line);border-radius:10px;padding:8px 10px;font-size:15px}
+.pfields fieldset input:first-of-type{color:#ff9aa8;font-weight:700}
+@media (max-width:860px){.poster{grid-template-columns:minmax(0,1fr)}#posterCv{max-width:380px;margin:0 auto}.pfields,.pfields fieldset{grid-template-columns:minmax(0,1fr)}}
 .tips{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
 .tips div{background:var(--night2);border:1px solid var(--line);border-radius:16px;padding:14px 16px}
 .tips b{display:block;margin-bottom:2px}
@@ -104,13 +114,13 @@ h2{font-family:var(--display);font-size:clamp(24px,3vw,30px);margin:44px 0 6px;t
   <h2>活動怎麼進行</h2>
   <p class="sub">以 12/23 舉辦典禮為例，大約提前三週開始。</p>
   <ol class="steps">
-    <li><span class="when">約三週前</span><b>發家長通知</b><span>用下面的範本，填好日期就能貼到 LINE 群組或聯絡簿。</span></li>
+    <li><span class="when">約三週前</span><b>發通知、貼海報</b><span>家長訊息填好日期就能貼到 LINE；海報改好印出來貼在教室。</span></li>
     <li><span class="when">交書期限前</span><b>帶書、寫學習單</b><span>孩子檢查書況、整理內容，寫一封推薦信夾在書裡，把書包好交給老師。</span></li>
     <li><span class="when">典禮前</span><b>準備典禮網頁</b><span>貼上全班名單，幫每本書找封面或拍照。</span></li>
     <li><span class="when">典禮當天</span><b>書的聖誕旅行</b><span>投影典禮網頁，一本一本揭曉新主人，全班一起點亮聖誕樹。</span></li>
   </ol>
 
-  <h2>三樣工具</h2>
+  <h2>四樣工具</h2>
   <p class="sub">都不用註冊、不用安裝，打開就能用。</p>
   <div class="tools">
     <section class="tool">
@@ -157,6 +167,41 @@ h2{font-family:var(--display);font-size:clamp(24px,3vw,30px);margin:44px 0 6px;t
       </div>
       <pre class="letter" id="letter" aria-live="polite"></pre>
       <div class="copyrow"><button class="btn btn-gold" id="copyBtn" type="button">複製訊息</button><span id="copyNote" role="status"></span></div>
+    </section>
+
+    <section class="tool poster" aria-labelledby="posterTitle">
+      <div class="pform">
+        <span class="tag">約三週前</span>
+        <h3 id="posterTitle">活動海報</h3>
+        <p>每一格都可以改，右邊的海報會跟著變。典禮日期和交書期限跟上面的家長訊息共用。改好後下載圖片傳到 LINE，或直接印成 A4 貼在教室。</p>
+        <div class="pfields">
+          <label for="pTitle" class="wide">主標題<input id="pTitle" type="text" value="書的聖誕旅行" maxlength="10"></label>
+          <label for="pSub" class="wide">副標題<input id="pSub" type="text" value="一本書，換一位新主人" maxlength="16"></label>
+          <fieldset><legend>第一格</legend>
+            <input id="pH1" type="text" value="帶一本" maxlength="4" aria-label="第一格紅字">
+            <input id="pA1" type="text" value="自己讀完、喜歡的書" maxlength="14" aria-label="第一格大字">
+            <input id="pB1" type="text" value="書況完整、適合三年級，用包裝紙或報紙包好" maxlength="26" aria-label="第一格小字">
+          </fieldset>
+          <fieldset><legend>第二格</legend>
+            <input id="pH2" type="text" value="寫一封" maxlength="4" aria-label="第二格紅字">
+            <input id="pA2" type="text" value="給新主人的推薦信" maxlength="14" aria-label="第二格大字">
+            <input id="pB2" type="text" value="完成學習單，把推薦信夾在書裡一起送出" maxlength="26" aria-label="第二格小字">
+          </fieldset>
+          <fieldset><legend>第三格</legend>
+            <input id="pH3" type="text" value="換一本" maxlength="4" aria-label="第三格紅字">
+            <input id="pA3" type="text" value="典禮上揭曉收到誰的書" maxlength="14" aria-label="第三格大字">
+            <input id="pB3" type="text" value="禮物飛起、雪橇送來，全班一起點亮聖誕樹" maxlength="26" aria-label="第三格小字">
+          </fieldset>
+          <label for="pFoot" class="wide">最下面的小字<input id="pFoot" type="text" value="不用買新書｜沒有包裝紙，用報紙包也可以｜不會拿到自己的書｜每個人都能參加" maxlength="48"></label>
+        </div>
+        <div class="copyrow">
+          <button class="btn btn-gold" id="pngBtn" type="button">下載海報圖片</button>
+          <button class="btn btn-ghost" id="printBtn" type="button">列印 A4</button>
+          <button class="btn btn-ghost" id="resetBtn" type="button">恢復原本文字</button>
+          <span id="posterNote" role="status"></span>
+        </div>
+      </div>
+      <canvas id="posterCv" width="2110" height="2982" aria-label="海報預覽"></canvas>
     </section>
   </div>
 
@@ -205,6 +250,80 @@ $('copyBtn').onclick=async()=>{
   catch(e){const r=document.createRange();r.selectNodeContents($('letter'));const s=getSelection();s.removeAllRanges();s.addRange(r);$('copyNote').textContent='已選取訊息，請按「複製」'}
 };
 render();
+
+/* ---------- poster: background picture + editable text drawn on a canvas ---------- */
+const PW=1055,PH=1491,SC=2;
+const cv=$('posterCv'),cx=cv.getContext('2d');
+const FONT='"LXGW WenKai TC","Kaiti TC","KaiTi","Noto Sans TC",serif';
+const bg=new Image();bg.src='poster-bg.webp';
+const DEF={};['pTitle','pSub','pH1','pA1','pB1','pH2','pA2','pB2','pH3','pA3','pB3','pFoot'].forEach(id=>DEF[id]=$(id).value);
+const v=id=>$(id).value.trim();
+function md(val){if(!val)return null;const d=new Date(val+'T00:00:00');return isNaN(d)?null:d}
+function spaced(t,x,y,sp,align){ // draw text with letter spacing; align: 'center' | 'left'
+  const chars=[...t];const w=chars.reduce((s,c)=>s+cx.measureText(c).width,0)+sp*(chars.length-1);
+  let px=align==='center'?x-w/2:x;for(const c of chars){cx.fillText(c,px,y);px+=cx.measureText(c).width+sp}return w}
+function fit(t,weight,size,maxW){let s=size;do{cx.font=`${weight} ${s}px ${FONT}`;if(cx.measureText(t).width<=maxW)break;s-=1}while(s>12);return s}
+function rrect(x,y,w,h,r){cx.beginPath();cx.moveTo(x+r,y);cx.arcTo(x+w,y,x+w,y+h,r);cx.arcTo(x+w,y+h,x,y+h,r);cx.arcTo(x,y+h,x,y,r);cx.arcTo(x,y,x+w,y,r);cx.closePath()}
+function drawPoster(){
+  cx.setTransform(SC,0,0,SC,0,0);cx.clearRect(0,0,PW,PH);
+  if(bg.complete&&bg.naturalWidth)cx.drawImage(bg,0,0,PW,PH);else{cx.fillStyle='#14223a';cx.fillRect(0,0,PW,PH)}
+  cx.textBaseline='top';
+  // date badge
+  const d=md($('fDate').value);
+  const big=d?`${d.getMonth()+1}/${d.getDate()}`:'日期',small=d?`星期${W[d.getDay()]}`:'';
+  cx.font=`700 44px ${FONT}`;const bw=Math.max(cx.measureText(big).width,90)+48,bh=small?84:62;
+  cx.save();cx.translate(PW-44-bw/2,212+bh/2);cx.rotate(3*Math.PI/180);
+  rrect(-bw/2,-bh/2+6,bw,bh,22);cx.fillStyle='#8f2737';cx.fill();
+  rrect(-bw/2,-bh/2,bw,bh,22);cx.fillStyle='#d84b5e';cx.fill();
+  cx.fillStyle='#fff';cx.textAlign='center';cx.fillText(big,0,-bh/2+10);
+  if(small){cx.font=`400 22px ${FONT}`;spaced(small,0,-bh/2+56,2.6,'center')}
+  cx.restore();cx.textAlign='left';
+  // title + subtitle
+  const t=v('pTitle')||' ';const ts=fit(t,700,84,640);cx.font=`700 ${ts}px ${FONT}`;
+  cx.save();cx.shadowColor='rgba(242,196,92,.55)';cx.shadowBlur=28;cx.fillStyle='#f6f2e7';
+  spaced(t,PW/2,280+(84-ts)/2,ts*.08,'center');cx.restore();
+  cx.font=`400 29px ${FONT}`;cx.fillStyle='#ffe7a3';spaced(v('pSub'),PW/2,372,29*.22,'center');
+  // three boxes
+  [[431,139],[596,141],[766,142]].forEach(([top,h],i)=>{
+    const n=i+1,x=236,maxW=PW-66-x-10;
+    const head=v('pH'+n),main=v('pA'+n),sub=v('pB'+n);
+    cx.font=`700 40px ${FONT}`;const hw=head?cx.measureText(head).width+14:0;
+    const ms=fit(main,700,40,maxW-hw);const ss=fit(sub,400,25,maxW);
+    const y=top+(h-(44+6+33))/2;
+    cx.font=`700 40px ${FONT}`;cx.fillStyle='#d84b5e';if(head)cx.fillText(head,x,y);
+    cx.font=`700 ${ms}px ${FONT}`;cx.fillStyle='#14223a';cx.fillText(main,x+hw,y+(40-ms)*.8);
+    cx.font=`400 ${ss}px ${FONT}`;cx.fillStyle='#3a4a66';cx.fillText(sub,x,y+50);
+  });
+  // footer: deadline + small print
+  const due=md($('fDue').value);const dueT=due?`${due.getMonth()+1} 月 ${due.getDate()} 日（${W[due.getDay()]}）`:'＿月＿日';
+  const parts=[['交書期限：','#14223a'],[dueT,'#d84b5e'],['前交給老師','#14223a']];
+  cx.font=`700 34px ${FONT}`;let tw=parts.reduce((s,[p])=>s+cx.measureText(p).width,0);let px=PW/2-tw/2;
+  for(const [p,c] of parts){cx.fillStyle=c;cx.fillText(p,px,1383);px+=cx.measureText(p).width}
+  const fs=fit(v('pFoot'),400,21,PW-120);cx.font=`400 ${fs}px ${FONT}`;cx.fillStyle='#3a4a66';spaced(v('pFoot'),PW/2,1428,fs*.04,'center');
+}
+let pending=0;
+async function redraw(){
+  const my=++pending;
+  const all=['pTitle','pSub','pH1','pA1','pB1','pH2','pA2','pB2','pH3','pA3','pB3','pFoot'].map(v).join('')+'0123456789/月日星期一二三四五六交書期限前交給老師（）：';
+  try{await Promise.all([document.fonts.load(`700 40px "LXGW WenKai TC"`,all),document.fonts.load(`400 25px "LXGW WenKai TC"`,all)])}catch(e){}
+  if(my===pending)drawPoster();
+}
+bg.onload=redraw;
+['pTitle','pSub','pH1','pA1','pB1','pH2','pA2','pB2','pH3','pA3','pB3','pFoot','fDate','fDue'].forEach(id=>$(id).addEventListener('input',redraw));
+$('resetBtn').onclick=()=>{for(const k in DEF)$(k).value=DEF[k];redraw();$('posterNote').textContent='已恢復原本的文字'};
+function posterBlob(){return new Promise(r=>cv.toBlob(r,'image/png'))}
+$('pngBtn').onclick=async()=>{
+  await redraw();const b=await posterBlob();if(!b)return;
+  const a=document.createElement('a');a.href=URL.createObjectURL(b);a.download=(v('pTitle')||'活動')+'海報.png';document.body.appendChild(a);a.click();a.remove();
+  $('posterNote').textContent='已下載海報圖片';
+};
+$('printBtn').onclick=async()=>{
+  await redraw();const url=cv.toDataURL('image/png');const w=window.open('','_blank');
+  if(!w){$('posterNote').textContent='瀏覽器擋住了新視窗，請改用「下載海報圖片」再列印';return}
+  w.document.write(`<!doctype html><html><head><meta charset="utf-8"><title>${esc(v('pTitle')||'活動')}海報</title><style>@page{size:A4;margin:0}html,body{margin:0;background:#fff}img{display:block;width:210mm;height:297mm;object-fit:contain;margin:0 auto}</style></head><body><img src="${url}" onload="setTimeout(()=>print(),300)"></body></html>`);
+  w.document.close();
+};
+redraw();
 })();
 </script>
 </body>
