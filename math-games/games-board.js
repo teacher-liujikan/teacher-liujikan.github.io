@@ -1,5 +1,5 @@
 /* ===================== 棋牌 ===================== */
-CATS.board = {name:'棋牌', emoji:'♟️', color:'#8a6a2f'};
+CATS.board = {name:'棋牌', emoji:'♟️', color:'#f0a832'};
 const OPP = [['easy','電腦普通'],['hard','電腦高手'],['pvp','兩人對戰']], FIRST = [['me','我先'],['cpu','對方先']];
 function endTwoPlayer(ui, mode, winner, again, drawText){
   const n = playerNames(mode);

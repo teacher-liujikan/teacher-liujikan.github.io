@@ -390,54 +390,6 @@ reg({id:'taxman', cat:'num', title:'因數收稅員', emoji:'💰',
     newGame();
   }});
 
-/* ---------- 冰雹數 ---------- */
-reg({id:'hail', cat:'num', title:'冰雹數', emoji:'🌨️',
-  desc:'雙數除以 2、單數乘 3 加 1，數字會像冰雹一樣上上下下！',
-  explain:`<p>規則超簡單：<b>雙數 ÷ 2，單數 × 3 ＋ 1</b>，一直做下去。</p>
-  <div class="ex">6 → 3 → 10 → 5 → 16 → 8 → 4 → 2 → 1</div>
-  <p>數字忽大忽小，像冰雹在雲裡上上下下，最後掉到地面（1）。</p>
-  <p><b>神奇的地方：</b>不管從哪個數開始，到目前為止試過的每一個數，最後都會回到 1！</p>
-  <p>但是——<b>沒有人能證明「所有的數」都會這樣</b>。這個問題叫做<b>考拉茲猜想</b>，已經難倒全世界的數學家 80 多年了。電腦已經檢查過非常非常大的數，都沒有例外，可是「檢查很多」不等於「證明全部」。</p>
-  <p>💭 試試 27：它要走 111 步，中間還會衝到 9232！</p>
-  <p>數學裡還有很多像這樣「小學生看得懂、數學家解不開」的問題喔。</p>`,
-  mount(el){
-    const opts = {start:6};
-    const ui = shell(el, `
-      <p>從一個數字出發，照規則一直算下去：</p>
-      <ul><li>如果是<b>雙數（偶數）</b>：÷ 2</li><li>如果是<b>單數（奇數）</b>：× 3 ＋ 1</li>
-      <li>你來判斷要按哪一個！看看最後會變成多少？</li></ul>`,
-      [{key:'start', label:'起點', options:[[6,'6'],[7,'7'],[12,'12'],[19,'19'],[27,'27'],['r','隨機']]}], opts, newGame);
-    let seq, msg, auto;
-    function newGame(){ runId++; seq=[opts.start==='r' ? 2+rand(49) : opts.start]; msg=''; auto=false; draw(); }
-    function chart(){
-      const W=600,H=220,max=Math.max(...seq),n=seq.length;
-      const pts=seq.map((v,i)=>`${n===1?W/2:10+i*(W-20)/(n-1)},${H-10-(v/max)*(H-30)}`);
-      return `<svg class="hail-chart" viewBox="0 0 ${W} ${H}"><polyline points="${pts.join(' ')}" fill="none" stroke="#2d7dd2" stroke-width="3" stroke-linejoin="round"/>
-        ${n<=40?pts.map(p=>`<circle cx="${p.split(',')[0]}" cy="${p.split(',')[1]}" r="5" fill="#2d7dd2"/>`).join(''):''}</svg>`;
-    }
-    function draw(){
-      const cur=seq[seq.length-1], end=cur===1 && seq.length>1;
-      ui.board.innerHTML = `${chart()}
-        <div class="hail-seq">${seq.map((v,i)=>`<span class="${i===seq.length-1?'cur':''}">${v}</span>`).join('<i>→</i>')}</div>
-        <div class="msg">${msg}</div>
-        <div class="actions">${end||auto?'':`<button class="btn big even" style="background:var(--blue);box-shadow:0 4px 0 #1d5a9c">雙數　÷ 2</button>
-          <button class="btn big odd">單數　× 3 ＋ 1</button><button class="btn ghost autob">⏩ 自動算完</button>`}</div>`;
-      ui.setStatus(`走了 ${big(seq.length-1)} 步　｜　最高 ${Math.max(...seq)}`);
-    }
-    function step(){ const c=seq[seq.length-1]; seq.push(c%2===0 ? c/2 : c*3+1); }
-    function finish(){ draw(); showWin('🌨️','掉到 1 了！',`從 <b>${seq[0]}</b> 出發，走了 <b>${seq.length-1}</b> 步，最高衝到 <b>${Math.max(...seq)}</b>。<br>換個起點試試看？`, newGame); }
-    function run(){ if(seq[seq.length-1]===1){ auto=false; finish(); return; } step(); draw(); later(run, seq.length>40?40:160); }
-    ui.board.addEventListener('click', e=>{
-      const c=seq[seq.length-1]; msg='';
-      if(e.target.closest('.even')){ if(c%2) msg=`${c} 是單數喔！`; else step(); }
-      else if(e.target.closest('.odd')){ if(c%2===0) msg=`${c} 是雙數喔！`; else step(); }
-      else if(e.target.closest('.autob')){ auto=true; run(); return; }
-      else return;
-      if(seq[seq.length-1]===1) finish(); else draw();
-    });
-    newGame();
-  }});
-
 /* ---------- 倒水問題 ---------- */
 reg({id:'jug', cat:'num', title:'倒水問題', emoji:'🫗',
   desc:'只有 3 公升和 5 公升的水壺，怎麼量出剛好 4 公升？',
