@@ -246,7 +246,7 @@ button:focus-visible,input:focus-visible,textarea:focus-visible,label:focus-visi
     </nav>
     <button class="sound" id="soundBtn" type="button" aria-pressed="true">音效：開</button>
     <div class="music">
-      <button class="sound" id="musicBtn" type="button" aria-pressed="false">♪ 音樂：關</button>
+      <button class="sound" id="musicBtn" type="button" aria-pressed="false">♪ 音樂：點一下畫面開始</button>
       <label class="vh" for="songSel">選擇背景音樂</label>
       <select id="songSel">
         <option value="jingle">Jingle Bells</option>
@@ -806,7 +806,7 @@ const SEMI={C:0,D:2,E:4,F:5,G:7,A:9,B:11};
 for(const k in SONGS)SONGS[k].seq=SONGS[k].notes.split(' ').map(t=>{const [nm,d]=t.split(':');let f=0;
   if(nm!=='R'){const m=nm.match(/^([A-G])(#|b)?(\d)$/);const midi=12*(+m[3]+1)+SEMI[m[1]]+(m[2]==='#'?1:m[2]==='b'?-1:0)+12;f=440*Math.pow(2,(midi-69)/12)}
   return [f,+d]});
-const mus={on:false,want:false,song:'jingle',vol:.45,gain:null,timer:null,idx:0,next:0,bnext:0,duck:1};
+const mus={on:false,want:true,song:'jingle',vol:.45,gain:null,timer:null,idx:0,next:0,bnext:0,duck:1};
 function musLevel(){return mus.vol*.55*mus.duck}
 function box(f,t,dur){const a=AC,out=mus.gain;
   [[f,'sine',.22,Math.min(2.2,dur+.9)],[f*2,'triangle',.035,.35],[f/2,'sine',.07,Math.min(1.6,dur+.4)]].forEach(([fr,ty,v,len])=>{
