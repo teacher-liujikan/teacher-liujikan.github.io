@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>宸宸競猜卡</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Huninn&family=Noto+Sans+TC:wght@400;700&display=swap" rel="stylesheet">
+<style>
+:root{--ink:#3f3340;--sub:#5a4b57;--rose:#a8385e;--pink:#f7b8c9;--mint:#bfe9e6;--teal:#2f6f6b;--sun:#ffe7a3;--cream:#fff6ee;--line:#f0d9e1}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+body{font-family:"Noto Sans TC",sans-serif;color:var(--ink);background:var(--cream);min-height:100vh}
+.h{font-family:"Huninn","Noto Sans TC",sans-serif;font-weight:400}
+button,input{font:inherit;color:inherit}
+.wrap{max-width:560px;margin:0 auto;padding:22px 16px 60px}
+header{text-align:center;margin-bottom:18px}
+header .k{font-size:13px;letter-spacing:3px;color:#5b6f6d}
+header h1{font-size:40px;color:var(--rose);letter-spacing:3px;margin:4px 0}
+header p{color:var(--sub);font-size:15px}
+.card{background:#fff;border-radius:20px;padding:16px;margin-bottom:12px;border:1.5px solid var(--line)}
+.q{display:flex;gap:10px;align-items:center;margin-bottom:10px}
+.n{width:30px;height:30px;flex-shrink:0;border-radius:50%;background:var(--rose);color:#fff;display:grid;place-items:center;font-size:17px}
+.q b{font-size:18px}.q small{display:block;color:var(--sub);font-size:14px}
+.grid{display:grid;gap:8px}
+.g4{grid-template-columns:repeat(4,1fr)}.g6{grid-template-columns:repeat(6,1fr)}.g2{grid-template-columns:repeat(2,1fr)}
+.opt{border:2px solid var(--line);background:#fff;border-radius:14px;min-height:46px;padding:6px 4px;font-size:16px;cursor:pointer}
+.opt[aria-pressed=true]{background:var(--pink);border-color:var(--rose);font-weight:700}
+.row{display:flex;align-items:center;gap:8px;font-size:18px}
+.inp{flex:1;min-width:0;border:2px solid var(--line);border-radius:14px;padding:10px 12px;font-size:20px;background:#fff}
+.inp:focus{outline:none;border-color:var(--rose)}
+.btn{border:0;border-radius:999px;background:var(--rose);color:#fff;font-size:18px;padding:14px 28px;cursor:pointer;width:100%}
+.btn.ghost{background:#fff;color:var(--rose);border:2px solid var(--rose)}
+.btn:disabled{opacity:.4}
+.msg{text-align:center;margin-top:10px;font-size:15px;min-height:1.4em}
+.bad{color:#b3261e}.ok{color:var(--teal)}
+.who{display:flex;align-items:center;justify-content:space-between;background:var(--sun);border-radius:999px;padding:8px 8px 8px 18px;margin-bottom:14px}
+.who button{border:0;background:#fff;border-radius:999px;padding:6px 14px;cursor:pointer;font-size:14px}
+.foot{text-align:center;margin-top:28px}.foot button{border:0;background:none;color:#8a7a85;font-size:13px;text-decoration:underline;cursor:pointer}
+
+/* 主持人 */
+body.host{background:#fff}
+.hw{max-width:1200px;margin:0 auto;padding:18px 20px 60px}
+.tabs{display:flex;flex-wrap:wrap;gap:8px;margin:12px 0 16px}
+.tab{border:2px solid var(--line);background:#fff;border-radius:999px;padding:8px 16px;cursor:pointer;font-size:15px}
+.tab[aria-pressed=true]{background:var(--teal);border-color:var(--teal);color:#fff}
+.bar{display:flex;flex-wrap:wrap;align-items:center;gap:10px;justify-content:space-between}
+.stat{font-size:14px;color:var(--sub)}
+table{border-collapse:collapse;width:100%;font-size:15px}
+th,td{border-bottom:1px solid var(--line);padding:8px 6px;text-align:left;vertical-align:middle}
+th{font-size:13px;color:var(--sub);font-weight:400}
+td.win{background:#ffe7a3;font-weight:700}
+.keyrow{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin:10px 0 18px}
+.keyrow label{display:flex;flex-direction:column;gap:4px;font-size:13px;color:var(--sub)}
+.keyrow input,.keyrow select{border:2px solid var(--line);border-radius:10px;padding:8px;font-size:16px;background:#fff}
+.reveal{background:var(--mint);border-radius:28px;padding:34px 40px;display:grid;grid-template-columns:1.2fr 1fr;gap:30px;min-height:62vh}
+.reveal .ql{font-size:22px;color:var(--teal)}
+.reveal .qt{font-size:52px;line-height:1.25;margin:8px 0 18px}
+.reveal .ans{background:#fff;border-radius:24px;padding:20px 28px;display:inline-flex;align-items:baseline;gap:14px}
+.reveal .ans span{font-size:22px;color:var(--sub)}.reveal .ans b{font-size:88px;line-height:1;color:var(--rose);font-weight:400}
+.reveal .wn{font-size:30px;margin-top:20px}
+.dist{display:flex;flex-direction:column;gap:8px;align-self:center}
+.dl{display:grid;grid-template-columns:110px 1fr 40px;align-items:center;gap:10px;font-size:18px}
+.dl i{display:block;height:26px;border-radius:8px;background:#fff}
+.dl i.hit{background:var(--rose)}
+.lb{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:10px}
+.lbi{background:#fff;border:2px solid var(--line);border-radius:18px;padding:12px 16px;display:flex;justify-content:space-between;font-size:22px}
+.lbi.top{background:var(--sun);border-color:#e7c25c}
+.qr{display:flex;gap:16px;align-items:center;background:var(--cream);border-radius:18px;padding:12px 16px}
+.qr #qrc{background:#fff;padding:8px;border-radius:10px}
+.chk{width:26px;height:26px;cursor:pointer}
+@media (max-width:760px){.reveal{grid-template-columns:1fr;padding:22px}.reveal .qt{font-size:34px}.reveal .ans b{font-size:56px}.keyrow{grid-template-columns:1fr 1fr}}
+</style>
+</head>
+<body>
+<div id="app"></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<script>
+/* ============ 要改的地方 ============ */
+// 家人名單：座號只是後台用的編號，畫面上只顯示稱呼。要增減就改這裡（座號不要重複）
+const FAMILY = [
+  {seat:1, name:'台南阿公'}, {seat:2, name:'台南阿嬤'}, {seat:3, name:'芬園阿公'}, {seat:4, name:'芬園阿婆'}, {seat:5, name:'舅舅'}, {seat:6, name:'舅媽'}, {seat:7, name:'叔叔'}, {seat:8, name:'嬸嬸'}
+];
+const ITEMS = ['聽診器','獎盃','放大鏡','手機','算盤','調色盤','警槍','足球','印章','法官槌','書本','金元寶','蔥','蒜','芹菜','虎頭鞋'];
+const Q = [
+  {id:'w',   kind:'num',  t:'猜體重',     q:'宸宸今天幾公斤？',               unit:'公斤', step:'0.1', rule:'near'},
+  {id:'g',   kind:'pick', t:'猜抓周',     q:'第一個會抓起什麼？',             opts:ITEMS, cols:4, rule:'same'},
+  {id:'s',   kind:'num',  t:'猜幾秒',     q:'從起點出發，幾秒會抓起第一樣？', unit:'秒',   step:'1',   rule:'near'},
+  {id:'m',   kind:'pick', t:'猜月份',     q:'大螢幕上這張照片，宸宸幾個月大？', opts:Array.from({length:12},(_,i)=>(i+1)+''), cols:6, unit:'個月', rule:'same'},
+  {id:'toy', kind:'pick', t:'猜最愛玩具', q:'大螢幕上哪一個是他的最愛？',     opts:['A','B','C','D'], cols:4, rule:'same'},
+  {id:'f',   kind:'text', t:'宸宸小問答', q:'宸宸最愛吃的食物是什麼？',       rule:'host'}
+];
+
+/* ============ 後台：和國語學習站同一個 Cloudflare 後台，用班級代碼＋這個網頁的代號分開存 ============ */
+const API_URL='https://guoyu-class.tina12345920.workers.dev/api';
+const TAG='-ZZ1129', CLS='三甲', LK='zz1129', STAGE='guess';
+const PIN_HASH='f1e0be5a4902c004c18be85f94107c6717c41ff00bb5c716458c52a3a15fb9d6';
+async function pinOK(s){try{const b=await crypto.subtle.digest('SHA-256',new TextEncoder().encode(String(s)));return Array.from(new Uint8Array(b)).map(x=>x.toString(16).padStart(2,'0')).join('')===PIN_HASH}catch(e){return false}}
+const ONLINE=/(^|\.)github\.io$/.test(location.hostname);
+const $=id=>document.getElementById(id);
+const esc=s=>String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const LS={get(k,d){try{const v=localStorage.getItem(k);return v?JSON.parse(v):d}catch(e){return d}},set(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}}};
+const Remote={
+  async get(p){const r=await fetch(API_URL+'?'+new URLSearchParams(p).toString());const j=await r.json();if(!j.ok)throw new Error(j.err||'error');return j},
+  async post(b){const r=await fetch(API_URL,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify(b)});const j=await r.json();if(!j.ok)throw new Error(j.err||'error');return j},
+  mine:s=>Remote.get({a:'mine',c:CLS+TAG,s}),
+  all:k=>Remote.get({a:'all',c:CLS+TAG,k}),
+  save:(s,rec)=>Remote.post({a:'save',c:CLS+TAG,s,stage:STAGE,rec}),
+  check:k=>Remote.get({a:'check',c:CLS+TAG,k})
+};
+/* 不是在 GitHub 網址上打開時（例如自己電腦測試），紀錄只存在這台裝置 */
+const Local={
+  db(){return LS.get(LK+'-demo',{})},
+  async mine(s){const d=Local.db();return {ok:1,recs:d[s]?[d[s]]:[]}},
+  async all(k){if(!await pinOK(k))throw new Error('key');return {ok:1,recs:Object.values(Local.db())}},
+  async save(s,rec){const d=Local.db();d[s]=rec;LS.set(LK+'-demo',d);return {ok:1}},
+  async check(k){if(!await pinOK(k))throw new Error('key');return {ok:1}}
+};
+const API=ONLINE?Remote:Local;
+const nameOf=s=>{const p=FAMILY.find(f=>String(f.seat)===String(s));return p?p.name:s+' 號'};
+const errText=e=>{const m=String(e&&e.message||'');return (e instanceof TypeError||/fetch|network/i.test(m))?'連不上網路，請確認網路後再按一次。':'後台回覆：'+m};
+
+/* ============ 家人：作答 ============ */
+let me=LS.get(LK+'-me',''), ans=LS.get(LK+'-ans',{}), sent=LS.get(LK+'-sent',false);
+const app=$('app');
+function pickWho(){
+  app.innerHTML=`<div class="wrap"><header><div class="k">忻願成真抓周趣・宸星閃耀慶生辰</div><h1 class="h">宸宸競猜卡</h1><p>猜猜看，你有多了解今天的小壽星？</p></header>
+  <div class="card"><div class="q"><div><b class="h">先點你是誰</b></div></div>
+  <div class="grid g2">${FAMILY.map(f=>`<button class="opt" data-s="${f.seat}" aria-pressed="${String(f.seat)===String(me)}">${esc(f.name)}</button>`).join('')}</div></div>
+  <button class="btn" id="go" ${me?'':'disabled'}>開始作答</button>
+  <div class="foot"><button id="hl">主持人入口</button></div></div>`;
+  app.querySelectorAll('[data-s]').forEach(b=>b.onclick=()=>{me=b.dataset.s;LS.set(LK+'-me',me);pickWho()});
+  $('go').onclick=async()=>{ // 換過人就重新抓這個人的答案
+    try{const j=await API.mine(me);const r=(j.recs||[]).find(x=>x&&x.stage===STAGE);if(r){ans=r.ans||{};sent=true}else if(LS.get(LK+'-for','')!==me){ans={};sent=false}}catch(e){}
+    LS.set(LK+'-for',me);LS.set(LK+'-ans',ans);LS.set(LK+'-sent',sent);form()};
+  $('hl').onclick=()=>{location.hash='host'};
+}
+function form(msg,cls){
+  app.innerHTML=`<div class="wrap"><header><h1 class="h" style="font-size:32px">宸宸競猜卡</h1></header>
+  <div class="who"><span>我是 <b class="h" style="font-size:20px">${esc(nameOf(me))}</b></span><button id="chg">換人</button></div>
+  ${Q.map((q,i)=>`<div class="card"><div class="q"><div class="n h">${i+1}</div><div><b class="h">${q.t}</b><small>${q.q}</small></div></div>${field(q)}</div>`).join('')}
+  <button class="btn" id="send">${sent?'修改後再送出一次':'送出答案'}</button>
+  <p class="msg ${cls||''}" id="msg">${msg||(sent?'已經送出囉！想改答案，改完再按一次就好。':'每題都可以先空著，之後再回來補。')}</p></div>`;
+  $('chg').onclick=()=>{pickWho()};
+  app.querySelectorAll('[data-q]').forEach(b=>b.onclick=()=>{ans[b.dataset.q]=b.dataset.v;LS.set(LK+'-ans',ans);
+    b.parentNode.querySelectorAll('[data-q]').forEach(x=>x.setAttribute('aria-pressed',String(x===b)))});
+  app.querySelectorAll('input[data-i]').forEach(inp=>inp.oninput=()=>{ans[inp.dataset.i]=inp.value.trim();LS.set(LK+'-ans',ans)});
+  $('send').onclick=async()=>{
+    const n=Q.filter(q=>ans[q.id]!==undefined&&ans[q.id]!=='').length;
+    if(!n){$('msg').textContent='至少答一題再送出喔！';$('msg').className='msg bad';return}
+    $('send').disabled=true;$('msg').textContent='送出中…';$('msg').className='msg';
+    try{await API.save(me,{seat:Number(me),stage:STAGE,ans,at:Date.now()});sent=true;LS.set(LK+'-sent',true);form(`送出成功！答了 ${n} 題，等揭曉吧 🎉`,'ok')}
+    catch(e){$('send').disabled=false;$('msg').textContent=errText(e);$('msg').className='msg bad'}
+  };
+}
+function field(q){
+  const v=ans[q.id]??'';
+  if(q.kind==='pick') return `<div class="grid g${q.cols}">${q.opts.map(o=>`<button class="opt" data-q="${q.id}" data-v="${esc(o)}" aria-pressed="${String(v)===o}">${esc(o)}</button>`).join('')}</div>`;
+  if(q.kind==='num') return `<div class="row"><input class="inp" data-i="${q.id}" type="number" inputmode="decimal" step="${q.step}" min="0" value="${esc(v)}" aria-label="${q.t}"><span>${q.unit}</span></div>`;
+  return `<div class="row"><input class="inp" data-i="${q.id}" type="text" maxlength="20" value="${esc(v)}" aria-label="${q.t}"></div>`;
+}
+
+/* ============ 主持人：統計與揭曉（網址加 #host） ============ */
+let H={key:null,recs:[],err:null,at:0,view:'table',key2:LS.get(LK+'-key',{}),f6:LS.get(LK+'-f6',{})},poll=null;
+function hostLogin(){
+  document.body.classList.add('host');
+  app.innerHTML=`<div class="wrap"><form class="card" id="hf"><b class="h" style="font-size:24px">主持人入口</b>
+  <p style="margin:8px 0;color:var(--sub);font-size:14px">用國語學習站老師後台的那組密碼。</p>
+  <div class="row"><input class="inp" id="hk" type="password" autocomplete="current-password" aria-label="密碼"><button class="btn" style="width:auto">登入</button></div>
+  <p class="msg bad" id="he"></p><button type="button" class="btn ghost" id="hb" style="margin-top:8px">回到作答畫面</button></form></div>`;
+  $('hb').onclick=leaveHost;
+  $('hf').onsubmit=async e=>{e.preventDefault();const k=$('hk').value;$('he').textContent='登入中…';
+    try{await API.check(k)}catch(err){const m=String(err&&err.message||'');$('he').textContent=/key|pin|pass|auth|denied|forbid|wrong|unauthor/i.test(m)?'密碼不對。':errText(err);return}
+    H.key=k;try{sessionStorage.setItem(LK+'-hk',k)}catch(_){}startPoll()};
+}
+function leaveHost(){clearInterval(poll);poll=null;H.key=null;try{sessionStorage.removeItem(LK+'-hk')}catch(_){}document.body.classList.remove('host');history.replaceState(null,'',location.pathname);pickWho()}
+async function hLoad(){try{const j=await API.all(H.key);H.recs=(j.recs||[]).filter(r=>r&&r.stage===STAGE).sort((a,b)=>a.seat-b.seat);H.err=null;H.at=Date.now()}catch(e){H.err='連不上後台，畫面是上一次的資料。'}}
+async function startPoll(){await hLoad();hRender();clearInterval(poll);poll=setInterval(async()=>{if(document.hidden||!H.key)return;await hLoad();hRender(true)},8000)}
+
+const num=x=>{const n=parseFloat(x);return isNaN(n)?null:n};
+function winners(q){
+  const key=H.key2[q.id];
+  if(q.rule==='host') return H.recs.filter(r=>H.f6[r.seat]===true||(H.f6[r.seat]===undefined&&key&&r.ans&&r.ans.f&&String(r.ans.f).includes(key))).map(r=>r.seat);
+  if(key===undefined||key==='') return [];
+  if(q.rule==='same') return H.recs.filter(r=>r.ans&&String(r.ans[q.id])===String(key)).map(r=>r.seat);
+  const k=num(key);if(k===null)return[];
+  const ds=H.recs.map(r=>({s:r.seat,d:num(r.ans&&r.ans[q.id])})).filter(x=>x.d!==null).map(x=>({s:x.s,d:Math.abs(x.d-k)}));
+  if(!ds.length)return[];const m=Math.min(...ds.map(x=>x.d));return ds.filter(x=>Math.abs(x.d-m)<1e-9).map(x=>x.s);
+}
+function scores(){const sc={};H.recs.forEach(r=>sc[r.seat]=0);Q.forEach(q=>winners(q).forEach(s=>sc[s]=(sc[s]||0)+1));return sc}
+
+function hRender(quiet){
+  if(quiet&&document.activeElement&&/INPUT|SELECT/.test(document.activeElement.tagName))return; // 正在輸入答案時不要重畫
+  const v=H.view,url=location.href.split('#')[0];
+  const tabs=[['table','全部答案'],...Q.map((q,i)=>['q'+i,`揭曉 ${i+1}・${q.t}`]),['rank','總排行']];
+  app.innerHTML=`<div class="hw">
+  <div class="bar"><div><b class="h" style="font-size:28px;color:var(--rose)">宸宸競猜・主持人</b>
+    <div class="stat">已作答 ${H.recs.length} / ${FAMILY.length} 人・每 8 秒自動更新${H.err?`・<span class="bad">${H.err}</span>`:''}</div></div>
+    <div style="display:flex;gap:8px"><button class="tab" id="ref">立刻更新</button><button class="tab" id="out">登出</button></div></div>
+  <div class="tabs">${tabs.map(([k,l])=>`<button class="tab" data-v="${k}" aria-pressed="${v===k}">${l}</button>`).join('')}</div>
+  <div id="body"></div></div>`;
+  app.querySelectorAll('[data-v]').forEach(b=>b.onclick=()=>{H.view=b.dataset.v;hRender()});
+  $('ref').onclick=async()=>{await hLoad();hRender()};$('out').onclick=leaveHost;
+  const body=$('body');
+  if(v==='table'){
+    const wn=Object.fromEntries(Q.map(q=>[q.id,winners(q)]));
+    body.innerHTML=`<div class="qr"><div id="qrc"></div><div><b class="h" style="font-size:22px">家人掃這裡作答</b><div class="stat" style="word-break:break-all">${esc(url)}</div></div></div>
+    <h3 class="h" style="margin:18px 0 4px">正確答案（揭曉時再填，只存在這台電腦）</h3>
+    <div class="keyrow">${Q.map(q=>`<label>${q.t}${q.kind==='pick'?`<select data-k="${q.id}"><option value="">—</option>${q.opts.map(o=>`<option ${String(H.key2[q.id])===o?'selected':''}>${esc(o)}</option>`).join('')}</select>`:`<input data-k="${q.id}" ${q.kind==='num'?'type="number" step="'+q.step+'"':''} value="${esc(H.key2[q.id]??'')}">`}</label>`).join('')}</div>
+    <div style="overflow-x:auto"><table><thead><tr><th>誰</th>${Q.map(q=>`<th>${q.t}</th>`).join('')}<th>答對</th></tr></thead><tbody>
+    ${H.recs.map(r=>`<tr><td class="h" style="font-size:17px">${esc(nameOf(r.seat))}</td>${Q.map(q=>{const a=r.ans?r.ans[q.id]:'';const w=wn[q.id].includes(r.seat);
+      if(q.rule==='host')return `<td class="${w?'win':''}">${esc(a||'')} <input type="checkbox" class="chk" data-f6="${r.seat}" ${w?'checked':''} aria-label="${esc(nameOf(r.seat))}答對"></td>`;
+      return `<td class="${w?'win':''}">${esc(a??'')}${a!==undefined&&a!==''&&q.unit?' '+q.unit:''}</td>`}).join('')}<td class="h" style="font-size:20px">${scores()[r.seat]||0}</td></tr>`).join('')||`<tr><td colspan="${Q.length+2}" class="stat">還沒有人送出答案。</td></tr>`}
+    </tbody></table></div><p class="stat" style="margin-top:8px">黃底＝這題贏了。數字題算最接近的人（同樣接近都算贏）；小問答會自動比對，也可以自己勾。</p>`;
+    try{new QRCode($('qrc'),{text:url,width:120,height:120,correctLevel:QRCode.CorrectLevel.M})}catch(e){}
+    body.querySelectorAll('[data-k]').forEach(el=>el.onchange=()=>{H.key2[el.dataset.k]=el.value.trim();LS.set(LK+'-key',H.key2);hRender()});
+    body.querySelectorAll('[data-f6]').forEach(el=>el.onchange=()=>{H.f6[el.dataset.f6]=el.checked;LS.set(LK+'-f6',H.f6);hRender()});
+  } else if(v==='rank'){
+    const sc=scores(),list=H.recs.map(r=>({s:r.seat,p:sc[r.seat]||0})).sort((a,b)=>b.p-a.p),top=list.length?list[0].p:0;
+    body.innerHTML=`<div class="reveal" style="grid-template-columns:1fr;min-height:auto"><div><div class="ql">總排行</div>
+    <div class="qt h">${top?`猜中最多的是 ${list.filter(x=>x.p===top).map(x=>esc(nameOf(x.s))).join('、')}！`:'還沒填正確答案'}</div>
+    <div class="lb">${list.map(x=>`<div class="lbi h ${x.p===top&&top?'top':''}"><span>${esc(nameOf(x.s))}</span><span>${x.p} 題</span></div>`).join('')}</div></div></div>`;
+  } else {
+    const i=Number(v.slice(1)),q=Q[i],key=H.key2[q.id],w=winners(q);
+    const got=H.recs.map(r=>r.ans&&r.ans[q.id]).filter(a=>a!==undefined&&a!=='');
+    let dist='';
+    if(q.kind==='pick'){const c={};got.forEach(a=>c[a]=(c[a]||0)+1);const mx=Math.max(1,...Object.values(c));
+      dist=Object.entries(c).sort((a,b)=>b[1]-a[1]).map(([o,n])=>`<div class="dl"><span class="h">${esc(o)}${q.unit?' '+q.unit:''}</span><i class="${String(o)===String(key)?'hit':''}" style="width:${n/mx*100}%"></i><span>${n}</span></div>`).join('');}
+    else dist=H.recs.filter(r=>r.ans&&r.ans[q.id]!==undefined&&r.ans[q.id]!=='').map(r=>`<div class="dl" style="grid-template-columns:110px 1fr"><span class="h">${esc(nameOf(r.seat))}</span><b class="h" style="font-weight:400;font-size:22px;${w.includes(r.seat)?'color:var(--rose)':''}">${esc(r.ans[q.id])}${q.unit?' '+q.unit:''}${w.includes(r.seat)?' ★':''}</b></div>`).join('');
+    body.innerHTML=`<div class="reveal"><div><div class="ql">競猜第 ${i+1} 題・${q.t}</div><div class="qt h">${q.q}</div>
+    <div class="ans"><span>答案</span><b class="h">${key!==undefined&&key!==''?esc(key)+(q.unit?`<span style="font-size:30px"> ${q.unit}</span>`:''):'？'}</b></div>
+    <div class="wn h">${key!==undefined&&key!==''||q.rule==='host'?(w.length?`${w.map(s=>esc(nameOf(s))).join('、')} 猜中了！🎉`:'這題沒有人猜中！'):'在「全部答案」填好答案就會揭曉'}</div></div>
+    <div class="dist">${dist||'<span class="stat">還沒有人答這題</span>'}</div></div>`;
+  }
+}
+
+/* ============ 進入點 ============ */
+function route(){
+  if(location.hash==='#host'){let k=null;try{k=sessionStorage.getItem(LK+'-hk')}catch(_){}
+    if(k){H.key=k;document.body.classList.add('host');API.check(k).then(startPoll,hostLogin)}else hostLogin()}
+  else{clearInterval(poll);document.body.classList.remove('host');me&&LS.get(LK+'-for','')===me?form():pickWho()}
+}
+addEventListener('hashchange',route);route();
+</script>
+</body>
+</html>
