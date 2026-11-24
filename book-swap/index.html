@@ -1,0 +1,873 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="robots" content="noindex">
+<meta name="description" content="聖誕換書典禮：班級二手書交換的抽書典禮、聖誕樹點燈與一鍵列印學習單。">
+<meta name="copyright" content="© 2026 老師媽咪／范范老師">
+<style>:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}body{margin:0}img{max-width:100%}[hidden]{display:none!important}</style>
+<title>聖誕換書典禮</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=LXGW+WenKai+TC:wght@400;700&family=Noto+Sans+TC:wght@400;500;700&display=swap">
+<style>
+/* Layout: two rooms. 準備室 = a shelf of book cards (cover + name + title). 典禮舞台 = night sky stage on the left, a garland tree that lights one bulb per gift on the right. Single deliberate winter-night look. */
+:root{
+  --night:#0e1829; --night2:#14223a; --panel:#1a2a46; --panel2:#213456; --line:#30466e;
+  --snow:#f6f2e7; --mute:#a7b3c9; --dim:#6f7f9c;
+  --gold:#f2c45c; --gold2:#ffe7a3; --berry:#d84b5e; --berry2:#b8384b; --pine:#2e7a58; --pine2:#45a077;
+  --display:"LXGW WenKai TC","Kaiti TC","STKaiti","KaiTi",serif;
+  --body:"Noto Sans TC","PingFang TC","Microsoft JhengHei",system-ui,sans-serif;
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+html{background:var(--night)}
+body{background:var(--night);color:var(--snow);font-family:var(--body);font-size:16px;line-height:1.6;min-height:100vh;
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:0 40px;overflow-x:hidden}
+canvas.layer{position:fixed;inset:0;width:100%;height:100%;pointer-events:none}
+#snow{z-index:0}#fx{z-index:60}
+.wrap{position:relative;z-index:1;max-width:1240px;margin:0 auto}
+button{font-family:inherit;cursor:pointer}
+button:focus-visible,input:focus-visible,textarea:focus-visible,label:focus-visible,summary:focus-visible{outline:3px solid var(--gold2);outline-offset:2px}
+
+/* top bar */
+.top{display:flex;align-items:center;gap:12px;flex-wrap:wrap;padding-block:18px 10px}
+.brand{font-family:var(--display);font-size:clamp(24px,3.2vw,32px);font-weight:700;letter-spacing:.04em;margin:0;display:flex;align-items:center;gap:10px}
+.brand .dot{width:12px;height:12px;border-radius:50%;background:var(--gold);box-shadow:0 0 12px var(--gold)}
+.nav{display:flex;gap:6px;margin-left:auto;flex-wrap:wrap}
+.tab{background:transparent;border:1px solid var(--line);color:var(--mute);padding:7px 14px;border-radius:999px;font-size:15px}
+.tab[aria-current="page"]{background:var(--snow);color:var(--night);border-color:var(--snow);font-weight:700}
+.tab:disabled{opacity:.4;cursor:not-allowed}
+.sound{background:transparent;border:1px solid var(--line);color:var(--mute);padding:7px 12px;border-radius:999px;font-size:14px}
+.sound[aria-pressed="true"]{color:var(--snow);border-color:var(--gold)}
+.music{display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+.music select{background:var(--panel);color:var(--snow);border:1px solid var(--line);border-radius:999px;padding:6px 10px;font:inherit;font-size:14px;max-width:180px}
+.music input[type=range]{width:90px;accent-color:var(--gold)}
+
+/* buttons */
+.btn{border:0;border-radius:14px;padding:12px 20px;font-size:17px;font-weight:700}
+.btn-gold{background:var(--gold);color:#3a2604;box-shadow:0 4px 0 #b58a2b}
+.btn-gold:active{transform:translateY(2px);box-shadow:0 2px 0 #b58a2b}
+.btn-red{background:var(--berry);color:#fff;box-shadow:0 4px 0 #8f2737}
+.btn-red:active{transform:translateY(2px);box-shadow:0 2px 0 #8f2737}
+.btn-ghost{background:transparent;color:var(--snow);border:1px solid var(--line);font-weight:500}
+.btn-sm{padding:7px 12px;font-size:14px;border-radius:10px}
+.btn:disabled{opacity:.5;cursor:not-allowed}
+
+/* PREP */
+.prep-head{display:flex;align-items:center;gap:16px;margin-block:8px 16px}
+.ph-text{display:grid;gap:4px;min-width:0}
+.prep-head h1{font-family:var(--display);font-size:clamp(22px,2.6vw,28px);margin:0}
+.prep-head p{margin:0;color:var(--mute);max-width:62ch}
+.flag{display:inline-block;background:var(--berry2);color:#fff;font-size:13px;padding:2px 10px;border-radius:999px;margin-left:8px;vertical-align:middle;font-family:var(--body);font-weight:500}
+.resume{display:flex;flex-wrap:wrap;align-items:center;gap:10px;background:var(--panel2);border:1px solid var(--gold);border-radius:14px;padding:12px 16px;margin-bottom:16px}
+.resume p{margin:0;flex:1 1 220px}
+.bulk{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:12px 16px;margin-bottom:18px}
+.bulk summary{cursor:pointer;font-weight:700}
+.bulk textarea{width:100%;min-height:150px;margin-top:10px;background:var(--night);color:var(--snow);border:1px solid var(--line);border-radius:10px;padding:10px;font:inherit;font-size:15px;resize:vertical}
+.bulk .hint{color:var(--mute);font-size:14px;margin:6px 0 10px}
+.cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(168px,1fr));gap:14px}
+.pcard{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:10px;display:grid;gap:8px;min-width:0}
+.pcard .num{font-size:12px;color:var(--dim);font-variant-numeric:tabular-nums}
+.coverbtn{position:relative;display:block;cursor:pointer;border-radius:8px;overflow:hidden}
+.coverbtn .camtag{position:absolute;left:6px;right:6px;bottom:6px;background:rgba(14,24,41,.82);color:var(--snow);font-size:13px;text-align:center;border-radius:8px;padding:4px 0}
+.pcard input[type=text]{width:100%;min-width:0;background:var(--night);color:var(--snow);border:1px solid var(--line);border-radius:8px;padding:7px 9px;font:inherit;font-size:15px}
+.pcard .row{display:flex;gap:6px;justify-content:space-between}
+.pcard .row button{background:transparent;border:0;color:var(--dim);font-size:13px;padding:2px 4px}
+.pcard .row button:hover{color:var(--snow)}
+.vh{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+.addbtn{border:2px dashed var(--line);background:transparent;color:var(--mute);border-radius:14px;min-height:160px;font-size:16px}
+.actionbar{position:sticky;bottom:0;z-index:5;display:flex;flex-wrap:wrap;align-items:center;gap:10px;margin-top:20px;padding:14px 0 calc(14px + env(safe-area-inset-bottom,0px));background:linear-gradient(to top,var(--night) 70%,transparent)}
+.actionbar .count{color:var(--mute);margin-right:auto}
+.notice{display:grid;gap:2px;background:rgba(216,75,94,.14);border:1px solid var(--berry);border-radius:14px;padding:10px 16px;margin-bottom:16px}
+.notice b{color:#ffb3bd}.notice p{margin:0;font-size:15px}.notice strong{color:var(--gold2)}
+.cvbtns{display:flex;gap:6px}
+.cvbtns button,.cvbtns label{flex:1;text-align:center;background:var(--panel2);border:1px solid var(--line);color:var(--snow);border-radius:8px;padding:6px 4px;font-size:14px;cursor:pointer}
+.cvbtns button:hover,.cvbtns label:hover{border-color:var(--gold)}
+.finder .fq{display:flex;gap:8px;flex-wrap:wrap;padding:12px 16px 0}
+.finder .fq input{flex:1 1 220px;min-width:0;background:var(--night);color:var(--snow);border:1px solid var(--line);border-radius:10px;padding:9px 12px;font:inherit;font-size:16px}
+.finder .fhint{margin:6px 16px 0;color:var(--mute);font-size:14px}
+.finder .fstatus{margin:8px 16px 0;color:var(--gold2);font-size:14px;min-height:1.4em}
+.finder .fres{overflow:auto;padding:10px 16px;display:grid;grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:12px;align-content:start;min-height:120px;max-height:52vh}
+.finder .cand{background:var(--night2);border:2px solid var(--line);border-radius:10px;padding:6px;display:grid;gap:4px;text-align:left;color:var(--snow);font:inherit;cursor:pointer;min-width:0}
+.finder .cand:hover,.finder .cand:focus-visible{border-color:var(--gold)}
+.finder .cand img{width:100%;aspect-ratio:3/4;object-fit:cover;border-radius:6px;background:#22324f}
+.finder .cand b{font-size:13px;line-height:1.3;overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical}
+.finder .cand small{font-size:11px;color:var(--dim)}
+.finder .ffoot{display:flex;flex-wrap:wrap;gap:8px;align-items:center;padding:10px 16px 14px;border-top:1px solid var(--line)}
+.finder .ffoot span{color:var(--mute);font-size:14px;margin-right:auto}
+.finder .box{grid-template-rows:auto auto auto auto 1fr auto}
+.credit{text-align:center;color:var(--dim);font-size:13px;margin:28px 0 0}
+
+/* book covers (photo or generated) */
+.cv{width:100%;aspect-ratio:3/4;object-fit:cover;display:block;border-radius:6px;background:var(--night2)}
+.cv.ph{--h:200;display:flex;flex-direction:column;justify-content:space-between;padding:12% 10%;
+  background:linear-gradient(160deg,hsl(var(--h) 42% 40%),hsl(var(--h) 48% 22%));
+  box-shadow:inset 0 0 0 3px hsl(var(--h) 40% 55% / .5),inset 7px 0 0 hsl(var(--h) 40% 15% / .45);color:#fff8e6}
+.cv.ph span{font-family:var(--display);font-weight:700;font-size:clamp(15px,1.6vw,20px);line-height:1.3;word-break:break-all;text-wrap:balance}
+.cv.ph small{font-size:12px;opacity:.75}
+.cv.ph.empty span{opacity:.6;font-weight:400}
+
+/* STAGE */
+.stagegrid{display:grid;grid-template-columns:minmax(0,1fr) 330px;gap:18px;align-items:start}
+.sky{position:relative;background:linear-gradient(to bottom,rgba(14,24,41,.55),rgba(14,24,41,0) 30%),url("art/night.webp") 85% bottom/cover no-repeat,var(--night2);border:1px solid var(--line);border-radius:22px;padding:22px 18px 20px;overflow:hidden;min-width:0}
+.sky .ctrl{position:relative;z-index:4}
+.turn{margin:0;text-align:center;color:var(--gold2);letter-spacing:.2em;font-size:14px}
+.prompt{margin:4px 0 0;text-align:center;font-family:var(--display);font-size:clamp(22px,3vw,34px);text-wrap:balance}
+.prompt b{color:var(--gold)}
+.arena{position:relative;height:clamp(330px,52vh,520px);margin-top:6px;container-type:inline-size}
+.gift{position:absolute;left:50%;top:50%;width:110px;height:110px;margin:-55px 0 0 -55px;opacity:0;will-change:transform}
+.gift img{width:100%;height:100%;object-fit:contain;display:block;filter:drop-shadow(0 10px 14px rgba(0,0,0,.35))}
+.gift .box{position:absolute;inset:18px 4px 0;border-radius:6px;background:
+  linear-gradient(90deg,transparent 42%,var(--rib) 42% 58%,transparent 58%),var(--paper);box-shadow:inset 0 -8px 0 rgba(0,0,0,.18)}
+.gift .lid{position:absolute;left:0;right:0;top:8px;height:16px;border-radius:5px;background:
+  linear-gradient(90deg,transparent 41%,var(--rib) 41% 59%,transparent 59%),var(--paper);filter:brightness(1.12)}
+.gift .bow{position:absolute;left:50%;top:-6px;width:44px;height:20px;margin-left:-22px}
+.gift .bow::before,.gift .bow::after{content:"";position:absolute;top:0;width:22px;height:18px;border:5px solid var(--rib);border-radius:50% 50% 10% 50%}
+.gift .bow::before{left:0;transform:rotate(-18deg)}
+.gift .bow::after{right:0;transform:rotate(18deg) scaleX(-1)}
+.g1{--paper:var(--berry);--rib:var(--gold)}
+.g2{--paper:var(--pine);--rib:var(--snow)}
+.gift.idle{opacity:1;animation:bob 2.6s ease-in-out infinite}
+.g2.idle{animation-delay:-1.3s}
+@keyframes bob{0%,100%{transform:translate(var(--x),0)}50%{transform:translate(var(--x),-10px)}}
+.flash{position:absolute;left:50%;top:50%;width:20px;height:20px;margin:-10px;border-radius:50%;background:radial-gradient(circle,#fff,rgba(255,231,163,.8) 30%,transparent 70%);opacity:0;pointer-events:none}
+.flash.go{animation:flash .7s ease-out}
+@keyframes flash{0%{opacity:1;transform:scale(1)}100%{opacity:0;transform:scale(30)}}
+
+.sleigh{position:absolute;left:0;top:4%;width:min(440px,78%);opacity:0;pointer-events:none;z-index:5}
+.sleigh img{display:block;width:100%;height:auto;filter:drop-shadow(0 0 18px rgba(255,231,163,.35))}
+.sleigh.fly{animation:fly 2.4s cubic-bezier(.45,.05,.55,.95) forwards}
+@keyframes fly{
+  0%{opacity:1;transform:translate(-110%,60px) rotate(-6deg)}
+  50%{transform:translate(calc(50cqw - 50%),-10px) rotate(0deg)}
+  100%{opacity:1;transform:translate(calc(100cqw + 10%),40px) rotate(6deg)}}
+.sleigh .trail{animation:tw .3s steps(2) infinite}
+@keyframes tw{50%{opacity:.4}}
+
+.reveal{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;gap:clamp(16px,3vw,34px);opacity:0;pointer-events:none;transition:opacity .35s}
+.reveal.show{opacity:1;pointer-events:auto}
+.rcover{width:clamp(130px,20vw,210px);flex:none;perspective:900px}
+.rcover .inner{transform:rotateY(90deg) scale(.6);transition:transform .8s cubic-bezier(.2,1.4,.4,1)}
+.reveal.show .rcover .inner{transform:rotateY(0) scale(1)}
+.rcover .cv{box-shadow:0 18px 40px rgba(0,0,0,.5),0 0 0 4px rgba(255,231,163,.35);border-radius:8px}
+.rtext{min-width:0;max-width:340px;display:grid;gap:6px}
+.rlabel{margin:0;color:var(--gold2);font-size:14px;letter-spacing:.18em}
+.rbook{margin:0;font-family:var(--display);font-weight:700;font-size:clamp(24px,3.4vw,40px);line-height:1.25;word-break:break-word;text-wrap:balance}
+.rfrom{margin:0;color:var(--mute);font-size:17px}
+.rfrom b{color:var(--snow)}
+.rto{margin-top:10px;display:grid;gap:2px;opacity:0;transform:translateY(16px) scale(.9);transition:all .6s cubic-bezier(.2,1.5,.4,1)}
+.rto.show{opacity:1;transform:none}
+.rto span{color:var(--gold2);letter-spacing:.18em;font-size:14px}
+.rto b{font-family:var(--display);font-size:clamp(34px,5vw,58px);line-height:1.1;color:var(--gold);text-shadow:0 0 24px rgba(242,196,92,.45)}
+.ctrl{display:flex;justify-content:center;gap:10px;flex-wrap:wrap;margin-top:8px}
+.swap{font-size:clamp(20px,2.4vw,26px);padding:14px 40px;border-radius:999px}
+
+.treebox{background:var(--panel);border:1px solid var(--line);border-radius:22px;padding:14px 14px 16px;display:grid;gap:8px}
+.treebox h3{margin:0;font-family:var(--display);font-size:20px;text-align:center}
+.treeart{position:relative;width:100%;max-width:280px;margin:0 auto;aspect-ratio:1001/1346}
+.treeart img{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;object-position:center bottom;display:block}
+.treeart .t-lit{opacity:0;transform:scale(.92);transition:opacity .9s,transform .9s cubic-bezier(.2,1.5,.4,1)}
+.treeart::before{content:"";position:absolute;left:50%;top:6%;width:70%;aspect-ratio:1;transform:translate(-50%,-50%) scale(.3);border-radius:50%;
+  background:radial-gradient(circle,rgba(255,231,163,.75),rgba(255,231,163,0) 65%);opacity:0;transition:opacity 1s,transform 1s}
+.treeart.lit::before{opacity:1;transform:translate(-50%,-50%) scale(1);animation:halo 2.4s ease-in-out infinite}
+.treeart.lit .t-lit{opacity:1;transform:none}
+.treeart.lit .t-unlit,.treeart.lit #tree{opacity:0;transition:opacity .5s}
+@keyframes halo{50%{opacity:.6}}
+#tree{position:absolute;inset:0;width:100%;height:100%;overflow:visible}
+.bulb{fill:#ffe7a3;opacity:.22;transform-box:fill-box;transform-origin:center}
+.bulb.on{fill:var(--c);opacity:1;filter:url(#glow);animation:twinkle 2.2s ease-in-out infinite}
+.bulb.pop{animation:pop .8s ease-out}
+@keyframes twinkle{50%{opacity:.65}}
+@keyframes pop{0%{transform:scale(.3)}40%{transform:scale(2.2)}100%{transform:scale(1)}}
+.mascot{width:clamp(80px,10vw,120px);height:auto;flex:none;animation:bob2 3s ease-in-out infinite}
+@keyframes bob2{50%{transform:translateY(-6px) rotate(-3deg)}}
+.litcount{text-align:center;margin:0;color:var(--mute);font-variant-numeric:tabular-nums}
+.litcount b{color:var(--gold);font-size:20px}
+.log{list-style:none;margin:0;padding:0;max-height:220px;overflow:auto;display:grid;gap:4px;font-size:14px}
+.log li{display:flex;gap:6px;align-items:baseline;padding:4px 8px;border-radius:8px;background:var(--night2);min-width:0}
+.log li .n{color:var(--dim);font-variant-numeric:tabular-nums;flex:none;width:2.2em}
+.log li .t{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+
+/* FINALE */
+.finale-head{text-align:center;margin-block:10px 18px;display:grid;gap:4px}
+.finale-head h2{font-family:var(--display);font-size:clamp(26px,3.6vw,40px);margin:0;text-wrap:balance}
+.finale-head p{margin:0;color:var(--mute)}
+.wall{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:14px}
+.wcard{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:10px;display:grid;gap:6px;min-width:0}
+.wcard .who{font-family:var(--display);font-size:22px;color:var(--gold);line-height:1.2}
+.wcard .bk{font-weight:700;font-size:15px;word-break:break-word}
+.wcard .fr{color:var(--mute);font-size:13px}
+.finale-actions{display:flex;flex-wrap:wrap;gap:10px;justify-content:center;margin-top:22px}
+
+/* modal + toast */
+.modal{position:fixed;inset:0;z-index:70;background:rgba(5,10,20,.78);display:flex;align-items:center;justify-content:center;padding:max(16px,env(safe-area-inset-top,0px)) max(16px,env(safe-area-inset-right,0px)) max(16px,env(safe-area-inset-bottom,0px)) max(16px,env(safe-area-inset-left,0px))}
+.modal .box{background:var(--panel);border:1px solid var(--line);border-radius:18px;width:min(900px,100%);max-height:100%;display:grid;grid-template-rows:auto 1fr;overflow:hidden}
+.modal .mh{display:flex;flex-wrap:wrap;gap:10px;align-items:center;padding:12px 16px;border-bottom:1px solid var(--line)}
+.modal .mh p{margin:0;flex:1 1 260px;color:var(--mute);font-size:14px}
+.modal .mh b{color:var(--snow);font-size:16px;display:block}
+.modal iframe{width:100%;height:70vh;border:0;background:#e9e5dc}
+.toast{position:fixed;left:50%;bottom:calc(24px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);z-index:80;background:var(--snow);color:var(--night);padding:10px 18px;border-radius:999px;font-weight:500;box-shadow:0 8px 30px rgba(0,0,0,.4);max-width:calc(100% - 32px);text-align:center}
+
+@media (max-width:900px){
+  .stagegrid{grid-template-columns:1fr}
+  .treebox{grid-template-columns:minmax(0,180px) minmax(0,1fr);align-items:center}
+  .treebox h3,.treebox .litcount{grid-column:1/-1}
+  .log{max-height:180px}
+}
+@media (max-width:560px){
+  .reveal{flex-direction:column;gap:10px;text-align:center}
+  .rcover{width:110px}
+  .rtext{justify-items:center}
+  .arena{height:430px}
+  .treebox{grid-template-columns:1fr}
+  .cards{grid-template-columns:repeat(2,minmax(0,1fr))}
+}
+@media (prefers-reduced-motion:reduce){
+  .gift.idle,.bulb.on,.treeart.lit::before,.mascot{animation:none}
+}
+</style>
+
+</head>
+<body>
+<canvas class="layer" id="snow"></canvas>
+<canvas class="layer" id="fx"></canvas>
+
+<div class="wrap">
+  <header class="top">
+    <p class="brand"><span class="dot" aria-hidden="true"></span>聖誕換書典禮</p>
+    <nav class="nav" aria-label="切換畫面">
+      <button class="tab" id="tabPrep" type="button" aria-current="page">準備室</button>
+      <button class="tab" id="tabStage" type="button" disabled>典禮舞台</button>
+      <button class="tab" id="tabWall" type="button" disabled>配對結果</button>
+    </nav>
+    <button class="sound" id="soundBtn" type="button" aria-pressed="true">音效：開</button>
+    <div class="music">
+      <button class="sound" id="musicBtn" type="button" aria-pressed="false">♪ 音樂：關</button>
+      <label class="vh" for="songSel">選擇背景音樂</label>
+      <select id="songSel">
+        <option value="jingle">Jingle Bells</option>
+        <option value="wish">We Wish You a Merry Christmas</option>
+        <option value="silent">平安夜</option>
+      </select>
+      <label class="vh" for="vol">音樂音量</label>
+      <input type="range" id="vol" min="0" max="100" value="45">
+    </div>
+  </header>
+
+  <!-- PREP -->
+  <section id="prep">
+    <div class="prep-head">
+      <img class="mascot" src="art/book.webp" alt="">
+      <div class="ph-text">
+        <h1>準備室<span class="flag" id="sampleFlag">範例名單</span></h1>
+        <p>每張卡片是一位同學和他要送出的書。按「找封面」輸入 ISBN 或書名，網頁會去書目資料庫找封面；找不到或不對，就拍照或上傳圖片。沒放封面的，會自動做一張寫著書名的封面。</p>
+      </div>
+    </div>
+
+    <div class="notice">
+      <b>老師請注意</b>
+      <p>名單和封面照片只存在<strong>這台電腦的這個瀏覽器</strong>裡，不會上傳到網路。換一個瀏覽器、換一台電腦，或清除瀏覽紀錄，照片就不見了，要重放一次。建議準備和典禮都用同一台電腦、同一個瀏覽器。</p>
+    </div>
+
+    <div class="resume" id="resume" hidden>
+      <p id="resumeText"></p>
+      <button class="btn btn-gold btn-sm" id="resumeBtn" type="button">繼續典禮</button>
+    </div>
+
+    <details class="bulk" id="bulkBox">
+      <summary>一次貼上全班名單</summary>
+      <label class="vh" for="bulk">全班名單</label>
+      <textarea id="bulk" placeholder="1號，神奇樹屋&#10;2號，屁屁偵探&#10;3號"></textarea>
+      <p class="hint">一行一位。名字後面加逗號再寫書名，例如「5號，小狐狸電器行」。書名可以之後再補。會換掉下面全部的卡片和照片。</p>
+      <button class="btn btn-gold btn-sm" id="bulkBtn" type="button">用這份名單</button>
+    </details>
+
+    <div class="cards" id="cards"></div>
+
+    <div class="actionbar">
+      <span class="count" id="count"></span>
+      <button class="btn btn-ghost" id="wsBtn" type="button">下載學習單</button>
+      <button class="btn btn-red" id="startBtn" type="button">開始交換典禮</button>
+    </div>
+  </section>
+
+  <!-- STAGE -->
+  <section id="stage" hidden>
+    <div class="stagegrid">
+      <div class="sky">
+        <p class="turn" id="turn">第 1 份禮物</p>
+        <h2 class="prompt" id="prompt">請老師按下「交換」</h2>
+        <div class="arena" id="arena">
+          <div class="gift g1 idle" id="g1" style="--x:-80px" aria-hidden="true"><img src="art/gift-red.webp" alt=""></div>
+          <div class="gift g2 idle" id="g2" style="--x:80px" aria-hidden="true"><img src="art/gift-green.webp" alt=""></div>
+          <div class="flash" id="flash"></div>
+          <div class="sleigh" id="sleigh" aria-hidden="true"><img src="art/sleigh.webp" alt=""></div>
+          <div class="reveal" id="reveal" aria-live="polite">
+            <div class="rcover"><div class="inner" id="rCover"></div></div>
+            <div class="rtext">
+              <p class="rlabel">這份禮物是</p>
+              <p class="rbook" id="rBook"></p>
+              <p class="rfrom">來自 <b id="rGiver"></b> 的書</p>
+              <div class="rto" id="rTo"><span>送給</span><b id="rRecv"></b></div>
+            </div>
+          </div>
+        </div>
+        <div class="ctrl">
+          <button class="btn btn-gold swap" id="swapBtn" type="button">交換！</button>
+        </div>
+      </div>
+
+      <aside class="treebox">
+        <h3>全班的聖誕樹</h3>
+        <div class="treeart" id="treeart" role="img" aria-label="聖誕樹，每送出一本書就點亮一顆燈"><img class="t-unlit" src="art/tree-unlit.webp" alt=""><img class="t-lit" src="art/tree-lit.webp" alt=""><svg id="tree" viewBox="0 0 1001 1346" aria-hidden="true"></svg></div>
+        <p class="litcount">已點亮 <b id="litN">0</b> / <span id="litT">0</span> 顆燈</p>
+        <ol class="log" id="log"></ol>
+      </aside>
+    </div>
+  </section>
+
+  <!-- FINALE -->
+  <section id="finale" hidden>
+    <div class="finale-head">
+      <img class="mascot" src="art/book.webp" alt="" style="margin:0 auto">
+      <h2>聖誕快樂！全班的書都找到新主人了</h2>
+      <p>照座號排好，找到自己的名字，看看你收到誰的書。</p>
+    </div>
+    <div class="wall" id="wall"></div>
+    <div class="finale-actions">
+      <button class="btn btn-gold" id="wsBtn2" type="button">下載學習單</button>
+      <button class="btn btn-ghost" id="toStage" type="button">回到聖誕樹</button>
+      <button class="btn btn-ghost" id="again" type="button">重新配對</button>
+    </div>
+  </section>
+  <p class="credit">© 2026 老師媽咪／范范老師　聖誕換書典禮</p>
+</div>
+
+<div class="modal" id="modal" hidden>
+  <div class="box" role="dialog" aria-modal="true" aria-labelledby="mTitle">
+    <div class="mh">
+      <p><b id="mTitle">學習單預覽</b><span id="mNote"></span></p>
+      <button class="btn btn-gold btn-sm" id="mSave" type="button">列印</button>
+      <button class="btn btn-ghost btn-sm" id="mFile" type="button">下載檔案</button>
+      <button class="btn btn-ghost btn-sm" id="mClose" type="button">關閉</button>
+    </div>
+    <iframe id="mFrame" title="學習單預覽"></iframe>
+  </div>
+</div>
+<div class="modal finder" id="finder" hidden>
+  <div class="box" role="dialog" aria-modal="true" aria-labelledby="fTitle">
+    <div class="mh"><p><b id="fTitle">找封面</b></p><button class="btn btn-ghost btn-sm" id="fClose" type="button">關閉</button></div>
+    <div class="fq"><label class="vh" for="fInput">ISBN 或書名</label><input id="fInput" type="text" placeholder="ISBN（例如 9789861234567）或書名" autocomplete="off"><button class="btn btn-gold btn-sm" id="fGo" type="button">搜尋</button></div>
+    <p class="fhint">打 ISBN 最準，就是書背條碼下面 978 開頭的那串數字。打書名會列出幾張可能的封面讓你挑。</p>
+    <p class="fstatus" id="fStatus" aria-live="polite"></p>
+    <div class="fres" id="fRes"></div>
+    <div class="ffoot"><span>都不對，或找不到？</span><button class="btn btn-red btn-sm" id="fPhoto" type="button">改用拍照或上傳</button></div>
+  </div>
+</div>
+<div class="toast" id="toast" hidden></div>
+
+<script>
+(()=>{
+const $=id=>document.getElementById(id);
+const KEY='xmas-book-swap-v2';
+const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const wait=ms=>new Promise(r=>setTimeout(r,ms));
+const reduce=matchMedia('(prefers-reduced-motion: reduce)').matches;
+let seq=1;
+const mk=(name,book)=>({id:'p'+Date.now().toString(36)+(seq++),name:name||'',book:book||'',cover:''});
+const SAMPLE=['神奇樹屋','屁屁偵探','小狐狸電器行','好餓的毛毛蟲','怪傑佐羅力','我是霸王龍'];
+function sampleState(){const people=[];for(let i=1;i<=24;i++)people.push(mk(i+'號',SAMPLE[i-1]||''));return {people,order:[],step:0,star:false,sample:true}}
+
+let S=load()||sampleState();
+let sound=true,busy=false,toastT;
+
+function load(){try{const d=JSON.parse(localStorage.getItem(KEY)||'null');if(!d||!Array.isArray(d.people)||!d.people.length)return null;
+  d.people.forEach(p=>{p.name=String(p.name||'');p.book=String(p.book||'');if(typeof p.cover!=='string'||!(p.cover.startsWith('data:image/')||p.cover.startsWith('https://')))p.cover='';});
+  if(!Array.isArray(d.order)||d.order.length!==d.people.length){d.order=[];d.step=0;d.star=false}
+  return d}catch(e){return null}}
+let warned=false;
+function save(){try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){if(!warned&&/quota/i.test(e&&e.name||'')){warned=true;toast('這台電腦的空間存不下這麼多照片，重新整理後部分照片可能要重放')}}}
+let saveT;function saveSoon(){clearTimeout(saveT);saveT=setTimeout(save,400)}
+function toast(msg){const t=$('toast');t.textContent=msg;t.hidden=false;clearTimeout(toastT);toastT=setTimeout(()=>t.hidden=true,3200)}
+
+const n=()=>S.people.length;
+const paired=()=>S.order.length===n()&&n()>=3;
+function pair(i){const N=S.order.length;return {give:S.people[S.order[i]],recv:S.people[S.order[(i+1)%N]]}}
+const label=p=>p.name.trim()||'（沒有名字）';
+const bookOf=p=>p.book.trim();
+function hue(s){let h=0;for(const c of String(s))h=(h*31+c.codePointAt(0))%360;return h}
+function coverHTML(p){
+  if(p.cover)return `<img class="cv" src="${esc(p.cover)}" referrerpolicy="no-referrer" alt="《${esc(bookOf(p))}》的封面">`;
+  const b=bookOf(p);
+  return `<div class="cv ph${b?'':' empty'}" style="--h:${hue(b||p.name)}"><span>${esc(b||'還沒寫書名')}</span><small>${esc(label(p))}</small></div>`;
+}
+
+/* ---------- views ---------- */
+function show(view){
+  for(const v of ['prep','stage','finale'])$(v).hidden=v!==view;
+  $('tabPrep').setAttribute('aria-current',view==='prep'?'page':'false');
+  $('tabStage').setAttribute('aria-current',view==='stage'?'page':'false');
+  $('tabWall').setAttribute('aria-current',view==='finale'?'page':'false');
+  scrollTo({top:0,behavior:reduce?'auto':'smooth'});
+}
+function refreshTabs(){
+  $('tabStage').disabled=!paired();
+  $('tabWall').disabled=!(paired()&&S.step>=n());
+}
+
+/* ---------- prep ---------- */
+function renderPrep(){
+  $('sampleFlag').hidden=!S.sample;
+  const c=$('cards');
+  c.innerHTML=S.people.map((p,i)=>`
+    <article class="pcard" data-id="${p.id}">
+      <span class="num">第 ${i+1} 位</span>
+      <label class="coverbtn" for="f-${p.id}" tabindex="0">${coverHTML(p)}</label>
+      <div class="cvbtns"><button type="button" data-act="find">找封面</button><label for="f-${p.id}">拍照／上傳</label></div>
+      <input class="vh" type="file" id="f-${p.id}" accept="image/*" data-act="file">
+      <label class="vh" for="n-${p.id}">名字</label>
+      <input type="text" id="n-${p.id}" data-k="name" value="${esc(p.name)}" placeholder="名字">
+      <label class="vh" for="b-${p.id}">書名</label>
+      <input type="text" id="b-${p.id}" data-k="book" value="${esc(p.book)}" placeholder="書名">
+      <div class="row">
+        <button type="button" data-act="rmphoto" ${p.cover?'':'hidden'}>拿掉封面</button>
+        <button type="button" data-act="del">刪除這位</button>
+      </div>
+    </article>`).join('')+`<button class="addbtn" id="addBtn" type="button">＋ 新增一位</button>`;
+  $('count').textContent=`${n()} 位同學・${S.people.filter(p=>p.cover).length} 張封面`;
+  $('bulk').value=S.people.map(p=>p.book?`${p.name}，${p.book}`:p.name).join('\n');
+  const r=$('resume');
+  if(paired()&&S.step>0){
+    r.hidden=false;
+    $('resumeText').textContent=S.step>=n()?`上次的典禮已經完成，全班 ${n()} 本書都送出去了。`:`上次的典禮進行到第 ${S.step} / ${n()} 份禮物。`;
+    $('resumeBtn').textContent=S.step>=n()?'看配對結果':'繼續典禮';
+    $('startBtn').textContent='重新配對並開始';
+  }else{r.hidden=true;$('startBtn').textContent='開始交換典禮'}
+  refreshTabs();
+}
+function structural(){S.order=[];S.step=0;S.star=false;S.sample=false}
+$('cards').addEventListener('input',e=>{
+  const k=e.target.dataset.k;if(!k)return;
+  const card=e.target.closest('.pcard');const p=S.people.find(x=>x.id===card.dataset.id);if(!p)return;
+  p[k]=e.target.value;S.sample=false;$('sampleFlag').hidden=true;
+  if(!p.cover){card.querySelector('.coverbtn').innerHTML=coverHTML(p)}
+  saveSoon();
+});
+$('cards').addEventListener('change',async e=>{
+  if(e.target.dataset.act!=='file')return;
+  const f=e.target.files&&e.target.files[0];if(!f)return;
+  const p=S.people.find(x=>x.id===e.target.closest('.pcard').dataset.id);
+  try{p.cover=await shrink(f);S.sample=false;save();renderPrep();toast(`已放上 ${label(p)} 的封面`)}catch(err){toast('這張圖片讀不出來，換一張試試')}
+});
+$('cards').addEventListener('click',e=>{
+  if(e.target.id==='addBtn'){S.people.push(mk('',''));structural();save();renderPrep();
+    const last=$('cards').querySelectorAll('.pcard');last[last.length-1].querySelector('[data-k=name]').focus();return}
+  const act=e.target.dataset.act;if(!act||act==='file')return;
+  const card=e.target.closest('.pcard');const i=S.people.findIndex(x=>x.id===card.dataset.id);
+  if(act==='rmphoto'){S.people[i].cover='';save();renderPrep()}
+  if(act==='find'){openFinder(S.people[i].id)}
+  if(act==='del'){S.people.splice(i,1);structural();save();renderPrep()}
+});
+$('cards').addEventListener('keydown',e=>{if(e.target.classList.contains('coverbtn')&&(e.key==='Enter'||e.key===' ')){e.preventDefault();e.target.click()}});
+function shrink(file){return new Promise((res,rej)=>{
+  const url=URL.createObjectURL(file);const img=new Image();
+  img.onload=()=>{const max=560;let w=img.naturalWidth,h=img.naturalHeight;const sc=Math.min(1,max/Math.max(w,h));w=Math.round(w*sc);h=Math.round(h*sc);
+    const c=document.createElement('canvas');c.width=w;c.height=h;c.getContext('2d').drawImage(img,0,0,w,h);URL.revokeObjectURL(url);res(c.toDataURL('image/jpeg',.8))};
+  img.onerror=()=>{URL.revokeObjectURL(url);rej()};img.src=url})}
+$('bulkBtn').onclick=()=>{
+  const rows=$('bulk').value.split(/\n/).map(l=>l.trim()).filter(Boolean).map(l=>{const m=l.split(/[,，、｜|\t]/);return {name:m[0].trim(),book:m.slice(1).join(' ').trim().replace(/^《|》$/g,'')}}).filter(r=>r.name);
+  if(rows.length<3){toast('至少要有 3 位同學才能交換喔');return}
+  const old=new Map(S.people.map(p=>[p.name.trim(),p]));
+  S.people=rows.map(r=>{const o=old.get(r.name);const p=mk(r.name,r.book);if(o&&o.cover&&(!r.book||r.book===o.book))p.cover=o.cover;return p});
+  structural();save();renderPrep();$('bulkBox').open=false;toast(`名單已更新，共 ${rows.length} 位`);
+};
+
+/* ---------- pairing ---------- */
+function shuffle(a){a=a.slice();for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a}
+$('startBtn').onclick=()=>{
+  if(n()<3){toast('至少要有 3 位同學才能交換喔');return}
+  const noName=S.people.filter(p=>!p.name.trim()).length;
+  if(noName){toast(`還有 ${noName} 張卡片沒寫名字`);return}
+  ensureAudio();
+  S.order=shuffle(S.people.map((_,i)=>i));S.step=0;S.star=false;save();
+  buildTree();renderStage();renderPrep();show('stage');
+};
+$('resumeBtn').onclick=()=>{buildTree();renderStage();if(S.step>=n()){renderWall();show('finale')}else show('stage')};
+$('tabPrep').onclick=()=>{renderPrep();show('prep')};
+$('tabStage').onclick=()=>{buildTree();renderStage();show('stage')};
+$('tabWall').onclick=()=>{renderWall();show('finale')};
+$('toStage').onclick=()=>{buildTree();renderStage();show('stage')};
+$('again').onclick=()=>{S.order=shuffle(S.people.map((_,i)=>i));S.step=0;S.star=false;save();buildTree();renderStage();refreshTabs();show('stage')};
+
+/* ---------- tree: little lights along the three garlands of the tree picture ---------- */
+const COLORS=['#f2c45c','#ff6b7d','#fff6dc','#7fd3a8','#ffa24c','#8fc4ff'];
+const GARLAND=[[[.3646,.2618],[.4386,.2967],[.5126,.3222],[.5865,.3374],[.6605,.341],[.7283,.3334]],
+  [[.2018,.5054],[.3014,.5223],[.4009,.5258],[.5005,.5158],[.6,.4925],[.6913,.4595]],
+  [[.1489,.6536],[.2935,.7024],[.4382,.727],[.5829,.7291],[.7275,.7105],[.8601,.6766]]];
+function buildTree(){
+  const N=n(),TW=1001,TH=1346;
+  const segs=[];let total=0;
+  for(const st of GARLAND)for(let k=0;k<st.length-1;k++){const a=[st[k][0]*TW,st[k][1]*TH],b=[st[k+1][0]*TW,st[k+1][1]*TH];const L=Math.hypot(b[0]-a[0],b[1]-a[1]);segs.push({a,b,L,s:total});total+=L}
+  const pos=[];
+  for(let i=0;i<N;i++){const d=(i+.5)/N*total;const g=segs.find(q=>d>=q.s&&d<=q.s+q.L)||segs[segs.length-1];const t=(d-g.s)/g.L;pos.push([g.a[0]+(g.b[0]-g.a[0])*t,g.a[1]+(g.b[1]-g.a[1])*t])}
+  const r=Math.max(15,Math.min(26,440/N));
+  $('tree').innerHTML=`<defs><filter id="glow" x="-200%" y="-200%" width="500%" height="500%"><feGaussianBlur stdDeviation="${(r*.7).toFixed(1)}" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter></defs>`+
+    pos.map(([x,y],i)=>`<circle class="bulb" id="bulb${i}" cx="${x.toFixed(1)}" cy="${(y+r*.6).toFixed(1)}" r="${r.toFixed(1)}" style="--c:${COLORS[i%COLORS.length]}"/>`).join('');
+  $('litT').textContent=N;
+}
+function paintTree(){
+  for(let i=0;i<n();i++){const b=$('bulb'+i);if(b)b.classList.toggle('on',i<S.step)}
+  $('treeart').classList.toggle('lit',!!S.star);
+  $('litN').textContent=Math.min(S.step,n());
+}
+
+/* ---------- stage ---------- */
+function renderStage(){
+  paintTree();
+  $('log').innerHTML=Array.from({length:Math.min(S.step,n())},(_,i)=>{const {give,recv}=pair(i);const b=bookOf(give);
+    return `<li><span class="n">${i+1}</span><span class="t">${esc(label(give))} → ${esc(label(recv))}${b?`《${esc(b)}》`:''}</span></li>`}).reverse().join('');
+  $('reveal').classList.remove('show');$('rTo').classList.remove('show');
+  setGiftsIdle(S.step<n());
+  if(S.step<n()){
+    const {give}=pair(S.step);
+    $('turn').textContent=`第 ${S.step+1} 份禮物・共 ${n()} 份`;
+    $('prompt').innerHTML=`請 <b>${esc(label(give))}</b> 帶著書上台`;
+    $('swapBtn').textContent='交換！';
+  }else{
+    $('turn').textContent=`${n()} 份禮物全部送出`;
+    if(S.star){$('prompt').textContent='星星亮了！聖誕快樂';$('swapBtn').textContent='看全班配對結果'}
+    else{$('prompt').textContent='全班的書都送出去了，一起點亮星星吧！';$('swapBtn').textContent='點亮星星 ★'}
+  }
+  $('swapBtn').disabled=false;
+}
+function setGiftsIdle(on){
+  for(const g of [$('g1'),$('g2')]){g.style.transform='';g.style.opacity='';g.style.zIndex='';g.classList.toggle('idle',on)}
+}
+$('swapBtn').onclick=async()=>{
+  if(busy)return;
+  if(S.step>=n()){
+    if(!S.star){await lightStar()}else{renderWall();show('finale')}
+    return;
+  }
+  busy=true;$('swapBtn').disabled=true;ensureAudio();
+  const {give,recv}=pair(S.step);
+  $('reveal').classList.remove('show');$('rTo').classList.remove('show');
+  $('rCover').innerHTML=coverHTML(give);
+  $('rBook').textContent=bookOf(give)?`《${bookOf(give)}》`:'一本神祕的書';
+  $('rGiver').textContent=label(give);
+  $('rRecv').textContent=label(recv);
+  $('prompt').textContent='禮物飛起來了……';
+  duck(.35);
+  await flight();
+  $('reveal').classList.add('show');chord([784,988,1175],.0);sparkle();burst(70);
+  $('prompt').textContent='聖誕老人送來的是……';
+  await wait(reduce?600:1700);
+  drum();await wait(reduce?200:900);
+  $('rTo').classList.add('show');chord([1047,1319,1568,2093],0);applause(2);burst(140);
+  const i=S.step;S.step++;save();
+  const b=$('bulb'+i);if(b){setTimeout(()=>{b.classList.add('on','pop');dingBulb(i);setTimeout(()=>b.classList.remove('pop'),900)},700)}
+  setTimeout(()=>duck(1),2200);
+  $('litN').textContent=S.step;
+  $('prompt').innerHTML=`恭喜 <b>${esc(label(recv))}</b>！請上台領書`;
+  $('log').insertAdjacentHTML('afterbegin',`<li><span class="n">${i+1}</span><span class="t">${esc(label(give))} → ${esc(label(recv))}${bookOf(give)?`《${esc(bookOf(give))}》`:''}</span></li>`);
+  $('turn').textContent=S.step<n()?`第 ${S.step} 份禮物・共 ${n()} 份`:`${n()} 份禮物全部送出`;
+  $('swapBtn').textContent=S.step<n()?'下一份禮物':'點亮星星 ★';
+  $('swapBtn').disabled=false;busy=false;refreshTabs();
+};
+// after a reveal, the next press first resets the stage, then runs
+const origSwap=$('swapBtn').onclick;
+$('swapBtn').onclick=async e=>{
+  if(busy)return;
+  if($('reveal').classList.contains('show')&&S.step<n()){renderStage();await wait(reduce?0:350)}
+  origSwap(e);
+};
+async function lightStar(){
+  busy=true;$('swapBtn').disabled=true;ensureAudio();
+  $('reveal').classList.remove('show');setGiftsIdle(false);
+  $('prompt').textContent='3、2、1……';
+  for(let i=0;i<n();i++){const b=$('bulb'+i);if(b){b.classList.remove('on');}}
+  await wait(500);
+  for(let i=0;i<n();i++){const b=$('bulb'+i);if(b)b.classList.add('on');if(!reduce)await wait(Math.max(25,900/n()));if(i%3===0)tink(2000+i*40,0)}
+  S.star=true;save();paintTree();
+  duck(.4);fanfare();applause(4);burst(260);setTimeout(()=>burst(200),600);setTimeout(()=>duck(1),4500);
+  $('prompt').textContent='星星亮了！聖誕快樂';
+  $('swapBtn').textContent='看全班配對結果';$('swapBtn').disabled=false;busy=false;refreshTabs();
+}
+
+/* flight: two gifts rise, whirl around each other, the sleigh crosses, they merge into a flash */
+function flight(){
+  const g1=$('g1'),g2=$('g2');g1.classList.remove('idle');g2.classList.remove('idle');
+  rise();
+  if(reduce){g1.style.opacity=0;g2.style.opacity=0;return wait(300)}
+  return new Promise(res=>{
+    const A=$('arena').getBoundingClientRect();const R=Math.min(A.width*.32,A.height*.36,240);
+    const T1=.7,T2=3.0,T3=3.35;const start=performance.now();let lastHalf=0;let sleighGone=false;
+    function place(g,x,y,s,o,z){g.style.transform=`translate(${x}px,${y}px) scale(${s})`;g.style.opacity=o;g.style.zIndex=z}
+    function f(now){
+      const t=(now-start)/1000;
+      if(!sleighGone&&t>1.0){sleighGone=true;const sl=$('sleigh');sl.classList.remove('fly');void sl.offsetWidth;sl.classList.add('fly');jingle(2.2)}
+      if(t<T1){const e=1-Math.pow(1-t/T1,3);const y=A.height*.5*(1-e);place(g1,-R*.55,y,.8+.2*e,e,2);place(g2,R*.55,y,.8+.2*e,e,2)}
+      else if(t<T2){const u=(t-T1)/(T2-T1);const ang=Math.PI*2*3*Math.pow(u,1.35);const r=R*(.55+.45*Math.sin(Math.PI*Math.min(1,u*1.4)))*(1-.35*u);
+        const x=Math.cos(ang)*r,y=Math.sin(ang)*r*.42-u*20;const d=Math.sin(ang);
+        place(g1,-x,-y,1+.22*d,1,d>0?3:1);place(g2,x,y,1-.22*d,1,d>0?1:3);
+        const half=Math.floor(ang/Math.PI);if(half>lastHalf){lastHalf=half;whoosh(.25+u*.15)}}
+      else if(t<T3){const u=(t-T2)/(T3-T2);const s=1-u;place(g1,-R*.2*s,-20*s,s,1-u*.6,2);place(g2,R*.2*s,-20*s,s,1-u*.6,2)}
+      else{g1.style.opacity=0;g2.style.opacity=0;const fl=$('flash');fl.classList.remove('go');void fl.offsetWidth;fl.classList.add('go');bell(1568,0,1.2);res();return}
+      requestAnimationFrame(f);
+    }
+    requestAnimationFrame(f);
+  });
+}
+
+/* ---------- wall ---------- */
+function renderWall(){
+  if(!paired())return;
+  const got=new Map();for(let i=0;i<n();i++){const {give,recv}=pair(i);got.set(recv.id,give)}
+  $('wall').innerHTML=S.people.map(p=>{const g=got.get(p.id);return `<article class="wcard">${coverHTML(g)}<div class="who">${esc(label(p))}</div><div class="bk">${bookOf(g)?`《${esc(bookOf(g))}》`:'（書名未填）'}</div><div class="fr">來自 ${esc(label(g))}</div></article>`}).join('');
+}
+
+/* ---------- worksheets ---------- */
+const WS_CSS=`
+@page{size:A4;margin:0}
+*{box-sizing:border-box}
+body{margin:0;background:#e9e5dc;font-family:"Noto Sans TC","PingFang TC","Microsoft JhengHei",sans-serif;color:#222;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+.bar{position:sticky;top:0;display:flex;flex-wrap:wrap;gap:12px;align-items:center;justify-content:center;background:#14223a;color:#f6f2e7;padding:12px 16px;font-size:15px;z-index:2}
+.bar button{font:inherit;font-weight:700;background:#f2c45c;color:#3a2604;border:0;border-radius:10px;padding:8px 22px;cursor:pointer}
+.sheet{width:210mm;height:297mm;overflow:hidden;margin:10mm auto;background:#fff;padding:10mm 13mm 9mm;box-shadow:0 4px 18px rgba(0,0,0,.15);break-after:page;page-break-after:always;font-size:10.5pt;line-height:1.5}
+.hd{display:flex;justify-content:space-between;align-items:flex-end;flex-wrap:wrap;gap:2mm;border-bottom:2.5px solid #b8384b;padding-bottom:2mm;margin-bottom:2mm}
+.ttl{font-family:"LXGW WenKai TC","Kaiti TC","KaiTi",serif;font-size:19pt;font-weight:700;color:#14223a;line-height:1.2}
+.ttl small{font-size:11pt;color:#b8384b;margin-left:3mm;font-weight:400}
+.who{font-size:11pt}
+.fill{display:inline-block;min-width:26mm;border-bottom:1px solid #444;text-align:center;font-weight:700;padding:0 2mm}
+.intro{margin:0 0 1mm;background:#f7f1e3;border-radius:2.5mm;padding:2mm 4mm;font-size:10pt}
+h2{font-family:"LXGW WenKai TC","Kaiti TC","KaiTi",serif;font-size:13.5pt;margin:3.2mm 0 1.2mm;color:#14223a;display:flex;align-items:baseline;gap:2.5mm;flex-wrap:wrap}
+h2 i{font-style:normal;font-size:9.5pt;background:#2e7a58;color:#fff;border-radius:99px;padding:.2mm 3mm;font-family:"Noto Sans TC",sans-serif;align-self:center}
+h2 small{font-family:"Noto Sans TC",sans-serif;font-size:9pt;color:#666;font-weight:400}
+h3{font-size:10.5pt;margin:0 0 .8mm}
+.tip{margin:1mm 0 0;color:#666;font-size:9pt}
+.cols{display:grid;grid-template-columns:1fr 1fr;gap:5mm}
+ul.chk{list-style:none;margin:0;padding:0}
+ul.chk li{display:flex;gap:2mm;align-items:flex-start;margin-bottom:.6mm;font-size:10pt}
+ul.chk li::before{content:"";flex:none;width:3.6mm;height:3.6mm;border:1.3px solid #333;border-radius:.8mm;margin-top:.9mm}
+.note{margin:.8mm 0 0;font-size:9pt;color:#b8384b}
+table{width:100%;border-collapse:collapse;font-size:10pt}
+th,td{border:1px solid #9a9a9a;padding:1.5mm 2.5mm;text-align:left;height:9mm}
+th{width:24mm;background:#f3f0e8;font-weight:500;white-space:nowrap}
+.wl{display:flex;align-items:flex-end;gap:1mm;height:9.5mm;white-space:nowrap}
+.wl i{flex:1;border-bottom:1px solid #8a8a8a;height:1px;min-width:12mm;margin-bottom:1.2mm}
+.wl span{padding-bottom:.6mm}
+.card{border:2px dashed #2e7a58;border-radius:4mm;padding:2.5mm 6mm 3mm;position:relative;background:#fbfdf9}
+.card::before{content:"✂";position:absolute;top:-3.6mm;right:6mm;background:#fff;padding:0 1mm;color:#2e7a58;font-size:11pt}
+.dear{margin:0;font-family:"LXGW WenKai TC","Kaiti TC","KaiTi",serif;font-size:12pt;font-weight:700}
+.rate{align-items:center}
+.stars{font-size:18pt;letter-spacing:3mm;color:#b8a35a;font-weight:400}
+.sign{text-align:right;margin-top:1.5mm;line-height:1.9}
+@media print{body{background:#fff}.bar{display:none}.sheet{margin:0;box-shadow:none}}
+@media screen and (max-width:820px){.sheet{zoom:.45}}
+`;
+function sheetPair(p){
+  const name=esc(label(p)),book=esc(bookOf(p));
+  const L=(t)=>`<div class="wl"><span>${t}</span><i></i></div>`;
+  const Lm=(a,b)=>`<div class="wl"><span>${a}</span><i></i><span>${b}</span><i></i></div>`;
+  return `
+<section class="sheet">
+  <div class="hd"><div class="ttl">聖誕交換二手書<small>學習單</small></div><div class="who">三年＿＿班　座號：＿＿＿　姓名：<span class="fill">${name}</span></div></div>
+  <p class="intro">聖誕節快到了！把自己讀過、喜歡的書送給一位同學，再收到另一位同學送來的書。一本書換了新主人，就能再被讀一次。完成下面四關，讓你的書漂漂亮亮地出發！</p>
+  <h2><i>第一關</i>我的書檢查站<small>每一項都做到了，才打勾。</small></h2>
+  <div class="cols">
+    <div><h3>書有沒有完整？</h3><ul class="chk">
+      <li>封面和封底都在，沒有掉下來</li><li>一頁一頁翻過，沒有缺頁、沒有撕破</li><li>書裡沒有亂畫、亂寫，也沒有髒污或發霉</li><li>書沒有濕掉、皺掉，聞起來乾乾淨淨</li></ul></div>
+    <div><h3>書適不適合三年級？</h3><ul class="chk">
+      <li>裡面的字我大部分都看得懂</li><li>內容沒有可怕、暴力或不適合小朋友的地方</li><li>這本書我自己已經讀完了</li><li>這本書是我自己的，家長同意我送出去</li></ul></div>
+  </div>
+  <p class="note">如果有一項沒辦法打勾，請先找老師或家長討論，可以換一本書喔！</p>
+  <h2><i>第二關</i>書的基本資料</h2>
+  <table>
+    <tr><th>書名</th><td>《 ${book||'<span style="display:inline-block;width:52mm"></span>'} 》</td><th>作者</th><td></td></tr>
+    <tr><th>哪一種書？</th><td>（圈起來）故事書　繪本　知識書　漫畫　其他</td><th>讀完要幾天？</th><td>＿＿＿ 天</td></tr>
+  </table>
+  <h2><i>第三關</i>這本書在說什麼？<small>用自己的話寫，不用抄書。</small></h2>
+  ${Lm('1. 這本書的主角是','，他（她、牠）是')}
+  ${L('2. 故事一開始，')}
+  ${L('3. 後來，')}
+  ${L('4. 最後，')}
+  <p class="tip">如果是知識書，可以改寫：這本書教我們關於什麼，我學到最有趣的一件事是什麼。</p>
+  <h2><i>第四關</i>寫信推薦給新主人<small>寫好後沿著虛線剪下，夾在書裡送出去。</small></h2>
+  <div class="card">
+    <p class="dear">親愛的新主人：</p>
+    <div class="wl"><span>　　我要送你的書是《${book?`<b>${book}</b>`:''}</span>${book?'':'<i></i>'}<span>》。</span></div>
+    ${L('我選這本書送給你，是因為')}
+    <div class="wl"><i></i></div>
+    ${Lm('我最喜歡的一段是','，因為')}
+    <div class="wl"><i></i></div>
+    ${L('讀完以後，我覺得')}
+    <div class="wl"><span>如果你喜歡</span><i></i><span>，你一定也會喜歡這本書！</span></div>
+    <div class="wl rate"><span>我給這本書的星星（塗滿）：</span><b class="stars">☆☆☆☆☆</b></div>
+    <div class="sign">祝你　聖誕快樂！<br>送書的人：<span class="fill">${name}</span></div>
+  </div>
+</section>`;
+}
+function worksheetDoc(withRecv,autoprint){
+  const got=new Map();
+  if(withRecv&&paired()&&S.step>=n()){for(let i=0;i<n();i++){const {give,recv}=pair(i);got.set(recv.id,give)}}
+  const body=S.people.map(p=>sheetPair(p)).join('');
+  const ap=autoprint?`<script>addEventListener('load',()=>{(document.fonts?document.fonts.ready:Promise.resolve()).then(()=>setTimeout(()=>print(),400))})<\/script>`:'';
+  return `<!doctype html><html lang="zh-Hant"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>聖誕交換二手書學習單</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=LXGW+WenKai+TC:wght@400;700&family=Noto+Sans+TC:wght@400;500;700&display=swap"><style>${WS_CSS}</style></head><body>
+<div class="bar"><span>聖誕交換二手書學習單・${n()} 位同學、每人一頁</span><button type="button" onclick="print()">列印</button></div>${body}${ap}</body></html>`;
+}
+let pendingRecv=false;
+function openWs(withRecv){
+  pendingRecv=withRecv;
+  $('mTitle').textContent='學習單';
+  $('mNote').textContent=` 共 ${n()} 位，每人一頁。按「列印」會開新分頁並跳出列印視窗，選 A4、單面列印。`;
+  $('mFrame').srcdoc=worksheetDoc(withRecv,false);
+  $('modal').hidden=false;$('mSave').focus();
+}
+$('wsBtn').onclick=()=>openWs(false);
+$('wsBtn2').onclick=()=>openWs(true);
+$('mClose').onclick=()=>{$('modal').hidden=true};
+$('modal').addEventListener('click',e=>{if(e.target.id==='modal')$('modal').hidden=true});
+addEventListener('keydown',e=>{if(e.key==='Escape'){$('modal').hidden=true;$('finder').hidden=true}});
+function wsBlobUrl(){return URL.createObjectURL(new Blob([worksheetDoc(pendingRecv,true)],{type:'text/html;charset=utf-8'}))}
+function saveWs(url){const a=document.createElement('a');a.href=url||wsBlobUrl();a.download='聖誕交換二手書學習單.html';document.body.appendChild(a);a.click();a.remove();toast('已下載，打開檔案就會跳出列印視窗')}
+$('mSave').onclick=()=>{const url=wsBlobUrl();const w=window.open(url,'_blank');if(!w){saveWs(url)}};
+$('mFile').onclick=()=>saveWs();
+
+/* ---------- cover finder: Google Books + Open Library ---------- */
+let findId=null,findSeq=0;
+function openFinder(id){
+  findId=id;const p=S.people.find(x=>x.id===id);if(!p)return;
+  $('fTitle').textContent=`幫 ${label(p)} 找封面`;
+  $('fInput').value=bookOf(p);$('fRes').innerHTML='';$('fStatus').textContent='';
+  $('finder').hidden=false;$('fInput').focus();
+  if(bookOf(p))runFind();
+}
+function isbnOf(q){const d=q.replace(/[\s-]/g,'');return /^(97[89]\d{10}|\d{9}[\dXx])$/.test(d)?d.toUpperCase():''}
+function gbImg(u){return u.replace(/^http:/,'https:').replace('&edge=curl','')}
+function loadOk(src){return new Promise(r=>{const i=new Image();i.referrerPolicy='no-referrer';i.onload=()=>r(i.naturalWidth>20);i.onerror=()=>r(false);i.src=src;setTimeout(()=>r(false),8000)})}
+async function runFind(){
+  const q=$('fInput').value.trim();if(!q){$('fStatus').textContent='請輸入 ISBN 或書名';return}
+  const my=++findSeq;const isbn=isbnOf(q);const out=[];const seen=new Set();
+  const add=c=>{if(!c.src||seen.has(c.src))return;seen.add(c.src);out.push(c)};
+  $('fStatus').textContent='搜尋中……';$('fRes').innerHTML='';
+  const jobs=[];
+  jobs.push(fetch('https://www.googleapis.com/books/v1/volumes?maxResults=12&printType=books&q='+(isbn?'isbn:'+isbn:encodeURIComponent(q)))
+    .then(r=>r.ok?r.json():{}).then(d=>{(d.items||[]).forEach(it=>{const v=it.volumeInfo||{},im=v.imageLinks||{};const u=im.thumbnail||im.smallThumbnail;if(u)add({src:gbImg(u),title:v.title||'',sub:(v.authors||[]).join('、'),from:'Google Books'})})}).catch(()=>{}));
+  if(isbn){
+    const u=`https://covers.openlibrary.org/b/isbn/${isbn}-L.jpg?default=false`;
+    jobs.push(loadOk(u).then(ok=>{if(ok)add({src:u,title:'',sub:'',from:'Open Library'})}));
+  }else{
+    jobs.push(fetch('https://openlibrary.org/search.json?limit=12&fields=title,author_name,cover_i&q='+encodeURIComponent(q))
+      .then(r=>r.ok?r.json():{}).then(d=>{(d.docs||[]).forEach(x=>{if(x.cover_i)add({src:`https://covers.openlibrary.org/b/id/${x.cover_i}-M.jpg`,title:x.title||'',sub:(x.author_name||[]).slice(0,2).join('、'),from:'Open Library'})})}).catch(()=>{}));
+  }
+  await Promise.all(jobs);
+  if(my!==findSeq)return;
+  if(!out.length){$('fStatus').textContent=isbn?'這個 ISBN 在資料庫裡找不到封面。可以改打書名試試，或直接拍照、上傳。':'找不到相符的封面。台灣出版的童書常常沒有收錄，請直接拍照或上傳。';return}
+  $('fStatus').textContent=`找到 ${out.length} 張，點正確的那一張。${isbn?'':'同名的書很多，請看清楚封面再選。'}`;
+  $('fRes').innerHTML=out.map((c,i)=>`<button type="button" class="cand" data-i="${i}"><img src="${esc(c.src)}" referrerpolicy="no-referrer" alt="" loading="lazy"><b>${esc(c.title||'（ISBN 封面）')}</b><small>${esc(c.sub?c.sub+'・':'')}${esc(c.from)}</small></button>`).join('');
+  $('fRes').querySelectorAll('img').forEach(im=>im.onerror=()=>{const b=im.closest('.cand');if(b)b.remove()});
+  $('fRes').onclick=e=>{const b=e.target.closest('.cand');if(!b)return;const c=out[+b.dataset.i];const p=S.people.find(x=>x.id===findId);if(!p||!c)return;
+    p.cover=c.src;if(!bookOf(p)&&c.title)p.book=c.title;S.sample=false;save();$('finder').hidden=true;renderPrep();toast(`已放上 ${label(p)} 的封面`)};
+}
+$('fGo').onclick=runFind;
+$('fInput').addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();runFind()}});
+$('fClose').onclick=()=>{$('finder').hidden=true};
+$('finder').addEventListener('click',e=>{if(e.target.id==='finder')$('finder').hidden=true});
+$('fPhoto').onclick=()=>{$('finder').hidden=true;const f=$('f-'+findId);if(f)f.click()};
+
+/* ---------- sound ---------- */
+let AC=null;
+function ctx(){try{if(!AC)AC=new (window.AudioContext||window.webkitAudioContext)();if(AC.state==='suspended')AC.resume()}catch(e){AC=null}return AC}
+function ensureAudio(){return sound?ctx():null}
+function getNoise(a){if(!noiseBuf){noiseBuf=a.createBuffer(1,a.sampleRate,a.sampleRate);const d=noiseBuf.getChannelData(0);for(let i=0;i<d.length;i++)d[i]=Math.random()*2-1}return noiseBuf}
+function pop(){const a=ensureAudio();if(!a)return;const t=a.currentTime;const o=a.createOscillator(),g=a.createGain();o.type='sine';o.frequency.setValueAtTime(520,t);o.frequency.exponentialRampToValueAtTime(1150,t+.06);g.gain.setValueAtTime(.12,t);g.gain.exponentialRampToValueAtTime(.0001,t+.11);o.connect(g).connect(a.destination);o.start(t);o.stop(t+.13)}
+function rise(){const a=ensureAudio();if(!a)return;const t=a.currentTime;
+  const s=a.createBufferSource(),f=a.createBiquadFilter(),g=a.createGain();s.buffer=getNoise(a);f.type='bandpass';f.Q.value=2;f.frequency.setValueAtTime(220,t);f.frequency.exponentialRampToValueAtTime(3200,t+.7);g.gain.setValueAtTime(0,t);g.gain.linearRampToValueAtTime(.22,t+.5);g.gain.exponentialRampToValueAtTime(.0001,t+.8);s.connect(f).connect(g).connect(a.destination);s.start(t);s.stop(t+.85);
+  const o=a.createOscillator(),og=a.createGain();o.type='triangle';o.frequency.setValueAtTime(300,t);o.frequency.exponentialRampToValueAtTime(1200,t+.7);og.gain.setValueAtTime(.05,t);og.gain.exponentialRampToValueAtTime(.0001,t+.75);o.connect(og).connect(a.destination);o.start(t);o.stop(t+.8)}
+function sparkle(){for(let i=0;i<16;i++)tink(1700+i*170+Math.random()*80,i*.035)}
+function dingBulb(i){bell(784*Math.pow(2,[0,2,4,7,9,12][i%6]/12),0,1.1)}
+function applause(sec){const a=ensureAudio();if(!a)return;const nb=getNoise(a),t0=a.currentTime;
+  for(let x=0;x<sec;x+=.012){const dens=x<.3?x/.3:x>sec-.6?(sec-x)/.6:1;if(Math.random()>.55*dens)continue;
+    const t=t0+x+Math.random()*.01,s=a.createBufferSource(),f=a.createBiquadFilter(),g=a.createGain();s.buffer=nb;f.type='bandpass';f.frequency.value=900+Math.random()*1800;f.Q.value=.9;
+    g.gain.setValueAtTime(.06+Math.random()*.06,t);g.gain.exponentialRampToValueAtTime(.0001,t+.035);s.connect(f).connect(g).connect(a.destination);s.start(t,Math.random()*.9);s.stop(t+.05)}}
+
+/* ---------- background music: public-domain carols on a synthesized music box ---------- */
+const SONGS={
+  jingle:{bpm:138,bells:true,notes:'G3:1 E4:1 D4:1 C4:1 G3:3 G3:.5 G3:.5 G3:1 E4:1 D4:1 C4:1 A3:4 A3:1 F4:1 E4:1 D4:1 B3:4 G4:1 G4:1 F4:1 D4:1 E4:4 G3:1 E4:1 D4:1 C4:1 G3:4 G3:1 E4:1 D4:1 C4:1 A3:3 A3:1 A3:1 F4:1 E4:1 D4:1 G4:1 G4:1 G4:1 G4:1 A4:1 G4:1 F4:1 D4:1 C4:2 G4:2 E4:1 E4:1 E4:2 E4:1 E4:1 E4:2 E4:1 G4:1 C4:1.5 D4:.5 E4:4 F4:1 F4:1 F4:1.5 F4:.5 F4:1 E4:1 E4:1 E4:.5 E4:.5 E4:1 D4:1 D4:1 E4:1 D4:2 G4:2 E4:1 E4:1 E4:2 E4:1 E4:1 E4:2 E4:1 G4:1 C4:1.5 D4:.5 E4:4 F4:1 F4:1 F4:1.5 F4:.5 F4:1 E4:1 E4:1 E4:.5 E4:.5 G4:1 G4:1 F4:1 D4:1 C4:4 R:4'},
+  wish:{bpm:150,notes:'D4:1 G4:1 G4:.5 A4:.5 G4:.5 F#4:.5 E4:1 E4:1 E4:1 A4:1 A4:.5 B4:.5 A4:.5 G4:.5 F#4:1 D4:1 D4:1 B4:1 B4:.5 C5:.5 B4:.5 A4:.5 G4:1 E4:1 D4:.5 D4:.5 E4:1 A4:1 F#4:1 G4:2 D4:1 G4:1 G4:1 G4:1 F#4:2 F#4:1 G4:1 F#4:1 E4:1 D4:2 A4:1 B4:1 A4:1 G4:1 D5:1 D4:1 D4:.5 D4:.5 E4:1 A4:1 F#4:1 G4:3 R:3'},
+  silent:{bpm:150,notes:'G4:1.5 A4:.5 G4:1 E4:3 G4:1.5 A4:.5 G4:1 E4:3 D5:2 D5:1 B4:3 C5:2 C5:1 G4:3 A4:2 A4:1 C5:1.5 B4:.5 A4:1 G4:1.5 A4:.5 G4:1 E4:3 A4:2 A4:1 C5:1.5 B4:.5 A4:1 G4:1.5 A4:.5 G4:1 E4:3 D5:2 D5:1 F5:1.5 D5:.5 B4:1 C5:3 E5:3 C5:1.5 G4:.5 E4:1 G4:1.5 F4:.5 D4:1 C4:6 R:3'}
+};
+const SEMI={C:0,D:2,E:4,F:5,G:7,A:9,B:11};
+for(const k in SONGS)SONGS[k].seq=SONGS[k].notes.split(' ').map(t=>{const [nm,d]=t.split(':');let f=0;
+  if(nm!=='R'){const m=nm.match(/^([A-G])(#|b)?(\d)$/);const midi=12*(+m[3]+1)+SEMI[m[1]]+(m[2]==='#'?1:m[2]==='b'?-1:0)+12;f=440*Math.pow(2,(midi-69)/12)}
+  return [f,+d]});
+const mus={on:false,want:false,song:'jingle',vol:.45,gain:null,timer:null,idx:0,next:0,bnext:0,duck:1};
+function musLevel(){return mus.vol*.55*mus.duck}
+function box(f,t,dur){const a=AC,out=mus.gain;
+  [[f,'sine',.22,Math.min(2.2,dur+.9)],[f*2,'triangle',.035,.35],[f/2,'sine',.07,Math.min(1.6,dur+.4)]].forEach(([fr,ty,v,len])=>{
+    const o=a.createOscillator(),g=a.createGain();o.type=ty;o.frequency.value=fr;g.gain.setValueAtTime(0,t);g.gain.linearRampToValueAtTime(v,t+.006);g.gain.exponentialRampToValueAtTime(.0001,t+len);o.connect(g).connect(out);o.start(t);o.stop(t+len+.05)})}
+function shaker(t,acc){const a=AC,s=a.createBufferSource(),f=a.createBiquadFilter(),g=a.createGain();s.buffer=getNoise(a);f.type='highpass';f.frequency.value=6500;
+  g.gain.setValueAtTime(acc?.09:.045,t);g.gain.exponentialRampToValueAtTime(.0001,t+.07);s.connect(f).connect(g).connect(mus.gain);s.start(t,Math.random()*.9);s.stop(t+.08)}
+function musTick(){const a=AC;if(!a||!mus.on)return;const song=SONGS[mus.song],spb=60/song.bpm,ahead=a.currentTime+.3;
+  while(mus.next<ahead){const [f,d]=song.seq[mus.idx];if(f)box(f,mus.next,d*spb);mus.next+=d*spb;mus.idx=(mus.idx+1)%song.seq.length}
+  if(song.bells)while(mus.bnext<ahead){shaker(mus.bnext,Math.round((mus.bnext-mus.t0)/spb)%2===0);mus.bnext+=spb}}
+function musStart(){const a=ctx();if(!a)return;
+  if(!mus.gain){mus.gain=a.createGain();mus.gain.connect(a.destination)}
+  mus.gain.gain.cancelScheduledValues(a.currentTime);mus.gain.gain.setValueAtTime(musLevel(),a.currentTime);
+  mus.on=true;mus.idx=0;mus.t0=mus.next=mus.bnext=a.currentTime+.08;clearInterval(mus.timer);mus.timer=setInterval(musTick,90);musTick();musUI()}
+function musStop(){mus.on=false;clearInterval(mus.timer);if(AC&&mus.gain){const t=AC.currentTime;mus.gain.gain.setTargetAtTime(0,t,.15);
+  const old=mus.gain;setTimeout(()=>{try{old.disconnect()}catch(e){}},900);mus.gain=null}musUI()}
+function duck(k){mus.duck=k;if(AC&&mus.gain)mus.gain.gain.setTargetAtTime(musLevel(),AC.currentTime,.25)}
+function musUI(){$('musicBtn').textContent='♪ 音樂：'+(mus.on?'開':'關');$('musicBtn').setAttribute('aria-pressed',mus.on)}
+function musSave(){try{localStorage.setItem(KEY+'-music',JSON.stringify({want:mus.want,song:mus.song,vol:mus.vol}))}catch(e){}}
+$('musicBtn').onclick=()=>{mus.want=!mus.on;mus.want?musStart():musStop();musSave()};
+$('songSel').onchange=e=>{mus.song=e.target.value;musSave();if(mus.on){musStop();setTimeout(musStart,350)}};
+$('vol').oninput=e=>{mus.vol=e.target.value/100;musSave();if(AC&&mus.gain)mus.gain.gain.setTargetAtTime(musLevel(),AC.currentTime,.05)};
+try{const m=JSON.parse(localStorage.getItem(KEY+'-music')||'null');if(m){mus.want=!!m.want;if(SONGS[m.song])mus.song=m.song;if(typeof m.vol==='number')mus.vol=m.vol}}catch(e){}
+$('songSel').value=mus.song;$('vol').value=Math.round(mus.vol*100);
+// browsers only allow sound after a tap: resume the music the teacher had on, at the first tap
+addEventListener('pointerdown',e=>{if(mus.want&&!mus.on&&!e.target.closest('#musicBtn'))musStart();if(e.target.closest('.btn,.tab'))pop()},true);
+function bell(f,at,dur){const a=ensureAudio();if(!a)return;const t=a.currentTime+at;
+  [[1,.5],[2.76,.18],[5.4,.08]].forEach(([m,v])=>{const o=a.createOscillator(),g=a.createGain();o.type='sine';o.frequency.value=f*m;g.gain.setValueAtTime(0,t);g.gain.linearRampToValueAtTime(v*.5,t+.008);g.gain.exponentialRampToValueAtTime(.0001,t+dur/m**.3);o.connect(g).connect(a.destination);o.start(t);o.stop(t+dur+.1)})}
+function tink(f,at){const a=ensureAudio();if(!a)return;const t=a.currentTime+at;const o=a.createOscillator(),g=a.createGain();o.type='triangle';o.frequency.value=f;g.gain.setValueAtTime(.12,t);g.gain.exponentialRampToValueAtTime(.0001,t+.12);o.connect(g).connect(a.destination);o.start(t);o.stop(t+.15)}
+function jingle(sec){const a=ensureAudio();if(!a)return;for(let x=0;x<sec;x+=.09){const k=Math.random();tink(2600+k*1800,x);if(k>.5)tink(3400+k*900,x+.025)}}
+let noiseBuf=null;
+function whoosh(dur){const a=ensureAudio();if(!a)return;
+  if(!noiseBuf){noiseBuf=a.createBuffer(1,a.sampleRate,a.sampleRate);const d=noiseBuf.getChannelData(0);for(let i=0;i<d.length;i++)d[i]=Math.random()*2-1}
+  const s=a.createBufferSource(),f=a.createBiquadFilter(),g=a.createGain(),t=a.currentTime;s.buffer=noiseBuf;f.type='bandpass';f.Q.value=1.2;
+  f.frequency.setValueAtTime(350,t);f.frequency.exponentialRampToValueAtTime(2200,t+dur);
+  g.gain.setValueAtTime(0,t);g.gain.linearRampToValueAtTime(.28,t+dur*.45);g.gain.exponentialRampToValueAtTime(.0001,t+dur);
+  s.connect(f).connect(g).connect(a.destination);s.start(t);s.stop(t+dur+.05)}
+function chord(fs,at){fs.forEach((f,i)=>bell(f,at+i*.07,1.6))}
+function drum(){const a=ensureAudio();if(!a)return;for(let i=0;i<10;i++){const t=a.currentTime+i*.08;const o=a.createOscillator(),g=a.createGain();o.type='sine';o.frequency.setValueAtTime(140,t);o.frequency.exponentialRampToValueAtTime(60,t+.07);g.gain.setValueAtTime(.08+i*.025,t);g.gain.exponentialRampToValueAtTime(.0001,t+.08);o.connect(g).connect(a.destination);o.start(t);o.stop(t+.1)}}
+function fanfare(){[523,659,784,1047,1319,1568,2093].forEach((f,i)=>bell(f,i*.11,1.8));setTimeout(()=>jingle(1.6),700)}
+$('soundBtn').onclick=()=>{sound=!sound;$('soundBtn').textContent='音效：'+(sound?'開':'關');$('soundBtn').setAttribute('aria-pressed',sound);try{localStorage.setItem(KEY+'-sound',sound?'1':'0')}catch(e){}if(sound)bell(1318,0,.6)};
+try{if(localStorage.getItem(KEY+'-sound')==='0'){sound=false;$('soundBtn').textContent='音效：關';$('soundBtn').setAttribute('aria-pressed','false')}}catch(e){}
+
+/* ---------- snow + confetti ---------- */
+const sc=$('snow'),sx=sc.getContext('2d'),cf=$('fx'),cx=cf.getContext('2d');
+function rs(){const d=devicePixelRatio||1;sc.width=cf.width=innerWidth*d;sc.height=cf.height=innerHeight*d}
+addEventListener('resize',rs);rs();
+const flakes=Array.from({length:90},()=>({x:Math.random(),y:Math.random(),r:Math.random()*2.2+.6,s:Math.random()*.0010+.0003,w:Math.random()*6.28}));
+let bits=[];const cols=['#f2c45c','#d84b5e','#f6f2e7','#7fd3a8','#ffe7a3','#8fc4ff'];
+function burst(k){if(reduce)return;const d=devicePixelRatio||1,W=cf.width,H=cf.height;
+  for(let i=0;i<k;i++)bits.push({x:W/2+(Math.random()-.5)*W*.25,y:H*.45,vx:(Math.random()-.5)*18*d,vy:(-Math.random()*17-5)*d,s:(Math.random()*7+5)*d,a:Math.random()*6,va:(Math.random()-.5)*.3,c:cols[i%cols.length],life:0})}
+(function loop(){
+  const d=devicePixelRatio||1,W=sc.width,H=sc.height;sx.clearRect(0,0,W,H);sx.fillStyle='rgba(246,242,231,.8)';
+  for(const f of flakes){if(!reduce){f.y+=f.s;f.w+=.01;if(f.y>1.02){f.y=-.02;f.x=Math.random()}}sx.beginPath();sx.arc((f.x+Math.sin(f.w)*.01)*W,f.y*H,f.r*d,0,7);sx.fill()}
+  cx.clearRect(0,0,cf.width,cf.height);
+  if(bits.length){bits=bits.filter(b=>b.y<cf.height+40&&b.life<360);
+    for(const b of bits){b.vy+=.42*d;b.vx*=.985;b.x+=b.vx;b.y+=b.vy;b.a+=b.va;b.life++;cx.save();cx.translate(b.x,b.y);cx.rotate(b.a);cx.fillStyle=b.c;cx.fillRect(-b.s/2,-b.s/4,b.s,b.s/2);cx.restore()}}
+  requestAnimationFrame(loop)})();
+
+renderPrep();
+})();
+</script>
+
+</body>
+</html>
