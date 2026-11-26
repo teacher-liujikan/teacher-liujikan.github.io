@@ -47,7 +47,16 @@ button.cell{cursor:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/
  font:400 clamp(30px,5vw,46px)/1 "Iansui","Iansui",serif;color:var(--pencil);display:grid;place-items:center;padding:0;cursor:pointer;-webkit-tap-highlight-color:transparent}
 .cell>span:not(.fix):not(.tag){display:block;transform:rotate(var(--r)) translate(var(--x),var(--y)) scale(var(--s,1),var(--t,1));-webkit-text-stroke:var(--w,.6px) #4a4950;filter:var(--f);opacity:var(--o,1)}
 .cell.p{cursor:default}
-.cmp{position:relative;display:inline-block;line-height:1;font-family:"Iansui",serif}.hk{position:absolute;inset:0;width:100%;height:100%;overflow:visible}.hk path{fill:none;stroke:currentColor;stroke-width:5.5;stroke-linecap:round}.cmp i{font-style:normal;display:inline-block;clip-path:inset(-20% 56% -20% -20%)}.cmp i+i{position:absolute;left:0;top:0;clip-path:inset(-20% -20% -20% 44%)}
+.cmp{position:relative;display:inline-block;line-height:1;font-family:"Iansui",serif}.bank{display:flex;flex-wrap:wrap;gap:8px 14px;border:1.5px solid var(--grid);border-radius:10px;padding:8px 12px;margin:4px 0 6px;background:#f7fbf5;font-size:17px;color:#222}
+.bank b{color:#355e43;margin-right:3px}
+.fill{margin:0;padding-left:1.5em;font-size:17px;line-height:1.7;color:#222}.fill li{margin:0 0 30px;padding-top:6px}
+.ans{position:relative;display:inline-grid;place-items:center;width:40px;height:40px;vertical-align:middle;border:0;background:none;padding:0;cursor:pointer;font:400 30px/1 "Iansui",serif;color:var(--pencil)}
+.ans>span:not(.tag){display:block;transform:rotate(var(--r)) translate(var(--x),var(--y)) scale(var(--s,1),var(--t,1));-webkit-text-stroke:var(--w,.6px) #4a4950;filter:var(--f);opacity:var(--o,1)}
+.ans:focus-visible{outline:3px solid var(--gold)}
+.ov path.mk2{stroke-width:3.6}
+.fix2{font:400 28px/1 "Iansui",serif;color:var(--red);-webkit-text-stroke:.7px var(--red);margin-left:2px;display:inline-block;transform:rotate(-6deg);vertical-align:middle}
+.opt.optw{width:auto;height:auto;min-height:52px;padding:8px 14px;font:700 19px/1.2 "Noto Sans TC",sans-serif}
+.hk{position:absolute;inset:0;width:100%;height:100%;overflow:visible}.hk path{fill:none;stroke:currentColor;stroke-width:5.5;stroke-linecap:round}.cmp i{font-style:normal;display:inline-block;clip-path:inset(-20% 56% -20% -20%)}.cmp i+i{position:absolute;left:0;top:0;clip-path:inset(-20% -20% -20% 44%)}
 .cell:focus-visible{outline:3px solid var(--gold);z-index:2}
 .cell svg.mk{position:absolute;inset:-14%;width:128%;height:128%;pointer-events:none;overflow:visible}
 .mk path{fill:none;stroke:var(--red);stroke-width:3.2;stroke-linecap:round;stroke-linejoin:round}
@@ -144,6 +153,8 @@ const BANK=[
  {L:7,s:"雖然這題很難，我還是努力把它弄懂了。",e:[]},
  {L:7,s:"姐姐把梳子藏在抽屜裡。",e:[]},
  {L:7,s:"我仔細地捏出一隻黏土小貓。",e:[]},
+ {L:8,s:"媽媽用菜力切菜。",e:[E("力","刀",["刃","方"],"「刀」沒有出頭；出頭的是「力」。")]},
+ {L:8,s:"天氣變冷了，媽媽幫我戴上圍斤。",e:[E("斤","巾",["今","金"],"「圍巾」的「巾」：毛巾、手巾都是它。")]},
  {L:8,s:"放學後，我去便利商點買牛奶。",e:[E("點","店",["電","典"],"「商店」的「店」是广字頭，裡面是「占」。")]},
  {L:8,s:"磨術師從帽子裡變出一隻兔子。",e:[E("磨","魔",["摩","麻"],"「魔」的下面是「鬼」。")]},
  {L:8,s:"大家為成一個圓圈坐下來。",e:[E("為","圍",["違","偉"],"「圍」的外面有一個大口，把東西圍起來。")]},
@@ -160,6 +171,7 @@ const BANK=[
  {L:8,s:"魔術師圍著紅色的圍巾，手上拿著一面鏡子。",e:[]},
  {L:8,s:"我曾經在電視上看過這個魔術。",e:[]},
  {L:8,s:"大家把水桶排得很整齊。",e:[]},
+ {L:9,s:"弟弟很⑬，會幫忙做家事。",e:[E("⑬","乖",["⑭","乘"],"「乖」右下最後一筆是豎彎，不勾；「北」的右邊才要勾。")]},
  {L:9,s:"老師說話的聲音很文柔。",e:[E("文","溫",["問","穩"],"「溫柔」的「溫」是水字旁。")]},
  {L:9,s:"我生病了，媽媽帶我去看衣生。",e:[E("衣","醫",["依","一"],"「醫生」的「醫」，下面是「酉」。")]},
  {L:9,s:"天冷了，記得多川一件外套。",e:[E("川","穿",["串","船"],"「穿」上面是「穴」，下面是「牙」。")]},
@@ -211,6 +223,7 @@ const BANK=[
  {L:11,s:"臺灣黑熊是臺灣獨有的動物。",e:[]},
  {L:11,s:"祖母養了一隻貓和兩隻雞。",e:[]},
  {L:11,s:"青蛙最會捉蚊子。",e:[]},
+ {L:12,s:"椿象遇到危險會放臭皮來保命。",e:[E("皮","屁",["匹","庇"],"「屁」的上面是「尸」。")]},
  {L:12,s:"不小心犯錯是難兔的，改過來就好。",e:[E("兔","免",["勉","晚"],"「免」比「兔」少一點。")]},
  {L:12,s:"螞蟻和蝴蝶都是混蟲。",e:[E("混","昆",["困","棍"],"「昆蟲」的「昆」：日加比。")]},
  {L:12,s:"蜜蜂不會隨便工擊人。",e:[E("工","攻",["功","公"],"「攻擊」的「攻」右邊是「攵」。")]},
@@ -244,6 +257,8 @@ const $=id=>document.getElementById(id);
 const book=$("book"),act=$("act"),hint=$("hint"),fb=$("fb"),panel=$("panel");
 const rnd=(a,b)=>(a+Math.random()*(b-a)).toFixed(2);
 const shuf=a=>{a=a.slice();for(let i=a.length-1;i>0;i--){const j=Math.random()*(i+1)|0;[a[i],a[j]]=[a[j],a[i]]}return a};
+const IDI=[{"L": 7, "it": [["離鄉背井", "叔叔為了工作，＿到很遠的城市生活。", "離開家鄉，到外地生活。"], ["淺顯易懂", "這本書用＿的圖畫，教我們認識昆蟲。", "很簡單，一看就明白。"], ["多才多藝", "姐姐會彈琴、會畫畫，還會跳舞，真是＿。", "會很多種才能和技藝。"], ["扭扭捏捏", "上臺說話要大方一點，不要＿的。", "不大方、不自然的樣子。"]]}, {"L": 7, "it": [["自命不凡", "他總是＿，覺得自己比別人都厲害。", "自以為了不起、很驕傲。"], ["不學無術", "他整天只想玩，什麼都不肯學，難怪被說＿。", "沒有學問，也沒有本領。"], ["笑裡藏刀", "那個壞人表面上很親切，其實＿，大家要小心。", "外表和氣，心裡卻想害人。"], ["創業維艱", "爺爺說＿，他剛開店的那幾年每天都很辛苦。", "開創事業是很辛苦的。"]]}, {"L": 8, "it": [["一視同仁", "老師對每個同學都＿，不會偏心。", "對每個人都一樣，不偏心。"], ["牛刀小試", "這場小比賽對得過冠軍的哥哥來說，只是＿。", "很有本領的人，先在小事上露一手。"], ["似曾相識", "這個地方讓我覺得＿，好像以前來過。", "好像以前見過、很熟悉。"], ["參差不齊", "大家的隊伍排得＿，老師請我們重新排好。", "長短高低不整齊。"]]}, {"L": 8, "it": [["走火入魔", "哥哥迷上電動，玩到不吃飯也不睡覺，簡直＿。", "太過沉迷，傷害了自己。"], ["誤入歧途", "交朋友要小心，才不會跟著別人＿、做壞事。", "不小心走上錯誤的路。"], ["當機立斷", "看到鍋子冒出火，媽媽＿，馬上關掉瓦斯。", "抓住時機，立刻做決定。"], ["巾幗英雄", "花木蘭代替爸爸去打仗，是有名的＿。", "女英雄。"]]}, {"L": 9, "it": [["望穿秋水", "小狗每天在門口等主人回家，等得＿。", "非常盼望、等了又等。"], ["披星戴月", "爸爸為了全家的生活，每天＿地工作，很晚才回家。", "早出晚歸，非常辛苦。"], ["有備無患", "出門多帶一把雨傘，＿，下雨也不怕。", "先準備好，就不用擔心。"], ["埋頭苦幹", "他不愛說話，總是＿，把工作一件一件做好。", "專心、努力地做事。"]]}, {"L": 9, "it": [["溫故知新", "把學過的課文再讀一次，常常能＿，發現新的想法。", "複習學過的，得到新的體會。"], ["對症下藥", "要先找出成績退步的原因，才能＿，把問題解決。", "針對問題，用對的方法解決。"], ["旁敲側擊", "媽媽不直接問我，而是＿，想知道我準備了什麼禮物。", "不直接問，從旁邊打聽。"], ["以毒攻毒", "醫生說，有些藥是用＿的方法，拿毒來治病。", "用厲害的手段對付厲害的東西。"]]}, {"L": 10, "it": [["樂極生悲", "弟弟贏了比賽，高興得亂跳，結果＿，跌倒受傷了。", "太高興了，反而發生難過的事。"], ["雪中送炭", "我忘了帶便當，好朋友分我一半，真是＿。", "在別人有困難時幫助他。"], ["絞盡腦汁", "這題數學好難，我＿才想出答案。", "用盡腦力拚命想。"], ["目瞪口呆", "魔術師把鴿子變不見了，大家都看得＿。", "驚訝得說不出話來。"]]}, {"L": 10, "it": [["腳踏實地", "學習要＿，一步一步來，不能想偷懶。", "做事踏實、認真。"], ["舉一反三", "老師教了一個方法，他就能＿，解出好幾種題目。", "學會一件事，就能想到其他相關的事。"], ["滾瓜爛熟", "這首詩我每天念，早就背得＿了。", "背得非常熟。"], ["虎背熊腰", "那位舉重選手長得＿，力氣好大。", "身體又高又壯。"]]}, {"L": 11, "it": [["虎視眈眈", "小貓＿地盯著桌上的魚。", "緊緊盯著，等機會下手。"], ["獨當一面", "姐姐長大了，已經可以＿，自己照顧整家店。", "能自己負責一件重要的事。"], ["萬紫千紅", "春天到了，花園裡＿，好漂亮。", "各種顏色的花一起開。"], ["井底之蛙", "多看書、多出去走走，才不會變成＿。", "見識很少的人。"]]}, {"L": 11, "it": [["焦頭爛額", "校慶快到了，老師們忙得＿。", "事情太多，又忙又累。"], ["觸類旁通", "學會這個道理，就能＿，了解其他相關的事。", "懂了一件事，就能懂同類的事。"], ["呆若木雞", "聽到這個壞消息，他嚇得＿，一句話也說不出來。", "嚇得發呆，一動也不動。"], ["威風凜凜", "警察叔叔穿著制服、騎著機車，看起來＿。", "很有氣勢、很神氣。"]]}, {"L": 12, "it": [["攻其不備", "趁對手還沒準備好，我們＿，馬上進了一球。", "趁別人沒有防備的時候進攻。"], ["無懈可擊", "她的表演＿，找不到任何缺點。", "非常完美，沒有缺點。"], ["勢均力敵", "兩隊的實力＿，比到最後還分不出輸贏。", "雙方力量差不多。"], ["胸有成竹", "他準備得很充分，上臺前一副＿的樣子。", "事前準備好了，很有把握。"]]}, {"L": 12, "it": [["插翅難飛", "小蟲被蜘蛛網黏住，就＿了。", "怎麼樣都逃不掉。"], ["眾所周知", "多運動對身體好，這是＿的事。", "大家都知道。"], ["在所難免", "第一次學騎腳踏車，跌倒是＿的。", "很難避免。"], ["打退堂鼓", "才練習兩天，他就覺得太累，想＿了。", "做到一半就想放棄。"]]}];
+const CIRC="①②③④";
 const CN={7:"七",8:"八",9:"九",10:"十",11:"十一",12:"十二"};
 const RM=matchMedia("(prefers-reduced-motion: reduce)").matches;
 const NS="http://www.w3.org/2000/svg";
@@ -254,7 +269,7 @@ const HAND=`<svg class="hand" viewBox="0 0 160 160" aria-hidden="true"><path d="
 <path d="M38 118 C40 104 56 102 62 112 C66 122 54 130 44 128Z" fill="#f6cba8" stroke="#d99c76" stroke-width="2.5"/>
 <path d="M60 128 C70 126 80 130 86 138" fill="none" stroke="#d99c76" stroke-width="2.5" stroke-linecap="round"/><path d="M66 116 C76 114 86 118 92 126" fill="none" stroke="#d99c76" stroke-width="2.5" stroke-linecap="round"/></svg>`;
 let Q=[],n=0,score=0,maxScore=0,circ=new Set(),phase="",timer=null,left=0,missed=[],cur=null,snd=true,ac=null,noise=null,handTok=0;
-const T=25;
+const T=25;let Tc=T;
 let lesson=0,blanks=[],blank=null,bmark=new Set();
 const wait=ms=>new Promise(r=>setTimeout(r,ms));
 
@@ -326,11 +341,14 @@ function start(L){
   const err=shuf(pool.filter(b=>b.e.length)),ok=shuf(pool.filter(b=>!b.e.length));
   const key=e=>"①②③④⑤⑥㉗".includes(e.w)?"礻衤":"⑮⑰".includes(e.w)?"少一橫":"⑲㉑".includes(e.w)?"入人":"㉓㉕".includes(e.w)?"腦窗":[e.w,e.c].sort().join(""),used=new Set(),pick=[];
   for(const q of err){const ks=q.e.map(key);if(ks.some(k=>used.has(k)))continue;ks.forEach(k=>used.add(k));pick.push(q);if(pick.length===8)break}
-  Q=shuf(pick.concat(ok.slice(0,2)));n=0;score=0;maxScore=0;missed=[];
+  const ig=shuf(IDI.filter(g=>!lesson||g.L===lesson)).slice(0,2).map(mkIdiom);
+  Q=shuf(pick.slice(0,6).concat(ig,ok.slice(0,2)));n=0;score=0;maxScore=0;missed=[];
   blanks=Q.map(()=>null);blanks[Q.indexOf(ok[0])]="name";
   $("hud").hidden=false;sheet();
 }
 function sheet(){
+  if(Q[n].g)return sheetI();
+  Tc=T;
   cur=Q[n];circ=new Set();blank=blanks[n];bmark=new Set();book.classList.remove("enter");void book.offsetWidth;book.classList.add("enter");phase="mark";fb.innerHTML="";
   cur.idx=cur.e.map(e=>[...cur.s].indexOf(e.w));
   $("hn").textContent=n+1;$("hs").textContent=score;
@@ -349,8 +367,81 @@ function sheet(){
   requestAnimationFrame(()=>{$("tb").style.transition="";});
   clearInterval(timer);timer=setInterval(()=>{left--;$("tb").style.width=(left/T*100)+"%";if(left<=0){clearInterval(timer);submit()}},1000);
 }
+function mkIdiom(g){
+  const order=shuf([0,1,2,3]),code=k=>order.indexOf(k);            // code(k): bank position of idiom k
+  let qs=shuf([0,1,2,3]);if(Math.random()<.5)qs=qs.slice(0,3);
+  const nw=Math.random()<.55?1:2,wrong=new Set(shuf(qs).slice(0,nw));
+  const stu=qs.map(k=>wrong.has(k)?shuf([0,1,2,3].filter(x=>x!==k))[0]:k);
+  return {g,order,qs,stu,e:[1],code};
+}
+function sheetI(){
+  cur=Q[n];circ=new Set();blank=null;bmark=new Set();book.classList.remove("enter");void book.offsetWidth;book.classList.add("enter");phase="mark";fb.innerHTML="";
+  $("hn").textContent=n+1;$("hs").textContent=score;
+  const seat=1+(Math.random()*28|0),nm=NAMES[Math.random()*NAMES.length|0],it=cur.g.it;
+  const pen=t=>`<span style="--r:${rnd(-6,6)}deg;--x:${rnd(-2,2)}px;--y:${rnd(-2,2)}px;--s:${rnd(.9,1.08)};--t:${rnd(.9,1.06)};--w:${rnd(.3,.9)}px;--o:${rnd(.85,1)};--f:url(#wob${Math.random()*4|0})">${t}</span>`;
+  book.innerHTML=`<div class="meta"><span>第${CN[cur.g.L]}課　第 ${n+1} 本</span><span>座號 <button class="blank" data-b="seat" aria-label="座號">${seat}</button>　姓名 <button class="blank" data-b="name" aria-label="姓名">${nm}</button></span></div>
+   <p class="q">成語填空：把正確的代號填進（　）裡</p>
+   <div class="bank">${cur.order.map((k,p)=>`<span><b>${CIRC[p]}</b>${it[k][0]}</span>`).join("")}</div>
+   <ol class="fill">${cur.qs.map((k,i)=>{const [a,b]=it[k][1].split("＿");return `<li>${a}（<button class="ans" data-i="${i}" aria-label="學生填的代號">${pen(CIRC[cur.code(cur.stu[i])])}</button>）${b}</li>`}).join("")}</ol>
+   <div class="stamp" id="stamp"></div><svg class="ov" aria-hidden="true"></svg>${HAND}`;
+  book.querySelectorAll(".ans").forEach(b=>b.onclick=()=>toggleX(b));
+  book.querySelectorAll(".blank").forEach(b=>b.onclick=()=>toggleB(b));
+  setAct();hint.textContent="學生填的代號對不對？點一下填錯的代號，打個叉。";
+  Tc=50;left=Tc;$("tb").style.transition="none";$("tb").style.width="100%";
+  requestAnimationFrame(()=>{$("tb").style.transition="";});
+  clearInterval(timer);timer=setInterval(()=>{left--;$("tb").style.width=(left/Tc*100)+"%";if(left<=0){clearInterval(timer);submit()}},1000);
+}
+function mark(btn,kind,cls){
+  const ov=ovFit(),[x,y]=off(btn),w=btn.offsetWidth,hh=btn.offsetHeight;
+  if(kind==="x")return draw(ov,seg([[x+2,y+2],[x+w-2,y+hh-2]],10),q=>q,150,"mk2 "+cls).then(()=>draw(ov,seg([[x+w-2,y+2],[x+2,y+hh-2]],10),q=>q,150,"mk2 "+cls));
+  return draw(ov,seg([[x+w+6,y+hh*.45],[x+w+13,y+hh*.85],[x+w+30,y-2]],14),q=>q,240,"mk2 "+cls);
+}
+function toggleX(b){
+  if(phase!=="mark")return;const i=+b.dataset.i;
+  if(circ.has(i)){circ.delete(i);book.querySelectorAll(".xk"+i).forEach(e=>e.remove())}else{circ.add(i);mark(b,"x","xk"+i)}
+  setAct();
+}
+function ansAt(i){return book.querySelector(`.ans[data-i="${i}"]`)}
+async function submitI(){
+  phase="fix";clearInterval(timer);act.innerHTML="";hint.textContent="";
+  const it=cur.g.it,bad=cur.qs.map((k,i)=>cur.stu[i]!==k);cur.res=[];cur.bonus=Math.ceil(Math.max(left,0)/8);
+  maxScore+=bad.filter(Boolean).length*10+5;
+  bmark.forEach(k=>{book.querySelectorAll(".qm-"+k).forEach(e=>e.classList.add("qx"))});
+  const tag=(i,c,t)=>ansAt(i).insertAdjacentHTML("beforeend",`<span class="tag ${c}">${t}</span>`);
+  const fix=(i,p)=>ansAt(i).insertAdjacentHTML("afterend",`<span class="fix2">${CIRC[p]}</span>`);
+  let perfect=true;
+  for(let i=0;i<cur.qs.length;i++){
+    const k=cur.qs[i],name=it[k][0],right=cur.code(k);
+    if(circ.has(i)&&!bad[i]){book.querySelectorAll(".xk"+i).forEach(e=>e.classList.add("qx"));tag(i,"x","沒填錯 −5");score-=5;perfect=false;cur.res.push({t:"x",i})}
+    else if(circ.has(i)&&bad[i]){
+      score+=5;$("hs").textContent=score;
+      const pick=await new Promise(res=>{
+        $("ph").innerHTML=`打叉打對了 +5！第 ${i+1} 題應該填哪一個？`;
+        $("po").innerHTML=cur.order.map((kk,p)=>`<button class="opt optw" data-v="${p}">${CIRC[p]} ${it[kk][0]}</button>`).join("");
+        panel.classList.add("on");$("po").querySelectorAll(".opt").forEach(b=>b.onclick=()=>res(+b.dataset.v));$("po").querySelector(".opt").focus();
+      });
+      panel.classList.remove("on");scratch(260);fix(i,pick);
+      if(pick===right){score+=5;tag(i,"ok","改對 +5");cur.res.push({t:"ok",i})}else{tag(i,"no",`應是 ${CIRC[right]}`);perfect=false;missed.push({w:"填空",c:name,tip:it[k][2]});cur.res.push({t:"bad",i,p:pick})}
+      $("hs").textContent=score;
+    }
+    else if(bad[i]){await wait(150);await mark(ansAt(i),"x","xk"+i);scratch(220);fix(i,right);tag(i,"no","漏掉了");perfect=false;missed.push({w:"填空",c:name,tip:it[k][2]});cur.res.push({t:"miss",i})}
+    else{await wait(120);await mark(ansAt(i),"v","vk"+i)}
+  }
+  if(perfect)score+=cur.bonus;$("hs").textContent=score;
+  await wait(150);const st=$("stamp");st.innerHTML="請訂正";st.classList.add("sm","on");thump();
+  let h="";
+  cur.res.forEach(r=>{const k=cur.qs[r.i],nm2=it[k][0],p=CIRC[cur.code(k)];
+    if(r.t==="ok")h+=`<div>第 ${r.i+1} 題填 <b>${p} ${nm2}</b>　${it[k][2]}</div>`;
+    if(r.t==="bad")h+=`<div class="no">第 ${r.i+1} 題你改成 ${CIRC[r.p]}，正確是 <b>${p} ${nm2}</b>　${it[k][2]}</div>`;
+    if(r.t==="miss")h+=`<div class="no">第 ${r.i+1} 題學生填錯了，應該是 <b>${p} ${nm2}</b>　${it[k][2]}</div>`;
+    if(r.t==="x")h+=`<div class="x">第 ${r.i+1} 題學生其實填對了：<b>${p} ${nm2}</b>　${it[k][2]}</div>`});
+  if(perfect&&cur.bonus)h+=`<div>速度加分 <b>+${cur.bonus}</b></div>`;
+  fb.innerHTML=h;
+  act.innerHTML=`<button class="big" id="nx">${n<Q.length-1?"改下一本 →":"看我的國字腦等級"}</button>`;
+  $("nx").onclick=()=>{n++;n<Q.length?sheet():end()};$("nx").focus();
+}
 function setAct(){
-  act.innerHTML=`<button class="big" id="go">${circ.size+bmark.size?`改好了（${circ.size+bmark.size} 處）`:"全部寫對了！"}</button>`;
+  act.innerHTML=`<button class="big" id="go">${circ.size+bmark.size?`改好了（${circ.size+bmark.size} 處）`:cur.g?"全部填對了！":"全部寫對了！"}</button>`;
   $("go").onclick=submit;
 }
 function toggle(b){
@@ -373,7 +464,8 @@ function bTag(k,cls,t){book.querySelector(`.blank[data-b="${k}"]`).insertAdjacen
 function cellAt(i){return book.querySelector(`button.cell[data-i="${i}"]`)}
 function tagAt(i,cls,t){cellAt(i).insertAdjacentHTML("beforeend",`<span class="tag ${cls}">${t}</span>`)}
 function submit(){
-  if(phase!=="mark")return;phase="fix";clearInterval(timer);act.innerHTML="";hint.textContent="";
+  if(phase!=="mark")return;if(cur.g)return submitI();
+ phase="fix";clearInterval(timer);act.innerHTML="";hint.textContent="";
   cur.res=[];cur.bonus=Math.ceil(Math.max(left,0)/5);maxScore+=(cur.e.length?cur.e.length*10:10)+5;
   [...circ].forEach(i=>{if(!cur.idx.includes(i)){cellAt(i).classList.add("false");tagAt(i,"x","沒寫錯 −5");score-=5;cur.res.push({t:"x",i})}});
   const todo=cur.idx.map((ix,k)=>({ix,k})).filter(o=>circ.has(o.ix));
@@ -440,6 +532,7 @@ function intro(){
    <div class="rules"><div><b>① 圈錯字</b>點一下寫錯的字，紅筆就會圈起來。座號或姓名沒寫，點空格打個問號。</div>
    <div><b>② 改正確</b>按「圈好了」，再選出正確的字。</div>
    <div><b>③ 小心陷阱</b>有些作業完全沒錯，亂圈會扣分！</div>
+   <div><b>⑤ 成語填空</b>有兩本是成語填空：學生填錯的代號打叉，再選出正確的代號。</div>
    <div><b>④ 算分方式</b>圈對 +5、改對 +5、圈錯 −5，全對又快還有加分。</div></div></div>`;
   act.innerHTML=[7,8,9,10,11,12].map(L=>`<button class="big alt" data-l="${L}">第${CN[L]}課</button>`).join("")+`<button class="big" data-l="0">第七～十二課 總複習</button>`;act.querySelectorAll("button").forEach(b=>b.onclick=()=>start(+b.dataset.l));
 }
