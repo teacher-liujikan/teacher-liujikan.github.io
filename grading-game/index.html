@@ -303,9 +303,9 @@ function circle(cell,dur,cls){
 }
 function bigCheck(){
   const ov=book.querySelector(".ov"),W=book.clientWidth,H=book.clientHeight;ov.setAttribute("viewBox",`0 0 ${W} ${H}`);
-  const cells=book.querySelectorAll(".line .cell"),last=cells[cells.length-1],[lx,ly]=off(last),w=last.offsetWidth;
-  let x0=lx+w+18,y0=ly+w*.3;if(x0+120>W){x0=Math.max(20,W-340);y0=ly+w+50}
-  return draw(ov,seg([[x0,y0],[x0+30,y0+42],[x0+112,y0-56]],40),q=>q,650,"ck");
+  const st=$("stamp"),[sx,sy]=off(st),sw=st.offsetWidth,s=sw/92;
+  const x0=Math.max(8,sx-128*s),y0=sy+sw*.55;
+  return draw(ov,seg([[x0,y0],[x0+30*s,y0+38*s],[x0+108*s,y0-52*s]],40),q=>q,650,"ck");
 }
 
 function start(hd){
