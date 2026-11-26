@@ -93,6 +93,9 @@ button.big:focus-visible,.opt:focus-visible{outline:3px solid var(--gold);outlin
 .end .score{font:900 clamp(56px,10vw,88px)/1 "Noto Sans TC";color:var(--red)}
 .end .rank{font:700 clamp(24px,4vw,34px)/1.2 "Iansui",serif;margin:10px 0 6px;color:#2a1d12}
 .end p{color:#555;margin:4px 0}
+.hud[hidden]{display:none}
+.scene{display:block;width:100%;max-width:560px;margin:0 auto 12px;border-radius:12px}
+.end p.story{font-size:18px;line-height:1.9;color:#2a1d12;margin:8px 0 4px}.end p.story b{color:var(--red)}
 .rules{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(220px,100%),1fr));gap:12px;margin:18px 0 6px;text-align:left}
 .rules div{background:#f5f9f2;border-radius:12px;padding:12px 14px;font-size:15px;color:#333}
 .rules b{display:block;color:var(--red);font-size:17px;margin-bottom:2px}
@@ -434,13 +437,34 @@ function end(){
    ${seen.length?`<div class="review"><strong>這些字要再記一下：</strong>${seen.map(e=>`<div><b>${G(e.w)}→${e.c}</b>　${e.tip}</div>`).join("")}</div>`:`<p>一個都沒錯過，太強了！</p>`}</div>`;
   act.innerHTML=`<button class="big" id="again">再改一疊作業</button>`;$("again").onclick=()=>start();
 }
+function chime(){
+  const a=audio();if(!a)return;
+  try{[659.3,523.3,587.3,392].forEach((f,k)=>{const t=a.currentTime+k*.55,o=a.createOscillator(),o2=a.createOscillator(),g=a.createGain();o.type="sine";o.frequency.value=f;o2.type="sine";o2.frequency.value=f*2.01;
+    g.gain.setValueAtTime(0,t);g.gain.linearRampToValueAtTime(.32,t+.02);g.gain.exponentialRampToValueAtTime(.001,t+1.3);o.connect(g);o2.connect(g);g.connect(a.destination);o.start(t);o2.start(t);o.stop(t+1.35);o2.stop(t+1.35)})}catch(e){}
+}
 function intro(){
-  book.innerHTML=`<div class="end"><div class="rank">今天有 10 本作業要改！</div>
+  $("hud").hidden=true;fb.innerHTML="";hint.textContent="";
+  book.innerHTML=`<div class="end"><svg class="scene" viewBox="0 0 600 230" aria-hidden="true">
+<rect width="600" height="150" fill="#f3ead6"/><rect y="150" width="600" height="80" fill="#c99f72"/><rect y="146" width="600" height="8" fill="#a97c50"/>
+<rect x="36" y="24" width="330" height="96" rx="6" fill="#2f5d46" stroke="#8a6238" stroke-width="8"/>
+<text x="58" y="68" font-family="Iansui,serif" font-size="30" fill="#fdfbf2">三年甲班</text>
+
+<circle cx="470" cy="66" r="40" fill="#fffdf6" stroke="#8a6238" stroke-width="7"/><path d="M470 66 L470 40 M470 66 L488 76" stroke="#2a1d12" stroke-width="5" stroke-linecap="round"/><circle cx="470" cy="66" r="4" fill="#d7263d"/>
+<path d="M530 30 q10 -12 20 0 M536 20 q14 -16 28 0" stroke="#d7263d" stroke-width="4" fill="none" stroke-linecap="round"/>
+<g><rect x="191" y="196" width="210" height="12" rx="3" fill="#fffdf6" stroke="#b9a688"/><rect x="198" y="185" width="210" height="12" rx="3" fill="#f6efdc" stroke="#b9a688"/><rect x="194" y="174" width="210" height="12" rx="3" fill="#fffdf6" stroke="#b9a688"/><rect x="201" y="163" width="210" height="12" rx="3" fill="#fbe9e9" stroke="#b9a688"/><rect x="197" y="152" width="210" height="12" rx="3" fill="#fffdf6" stroke="#b9a688"/><rect x="193" y="141" width="210" height="12" rx="3" fill="#eef5ea" stroke="#b9a688"/><rect x="200" y="130" width="210" height="12" rx="3" fill="#fffdf6" stroke="#b9a688"/><rect x="196" y="119" width="210" height="12" rx="3" fill="#f6efdc" stroke="#b9a688"/><rect x="192" y="108" width="210" height="12" rx="3" fill="#fffdf6" stroke="#b9a688"/><rect x="199" y="97" width="210" height="12" rx="3" fill="#fffdf6" stroke="#b9a688"/></g>
+<text x="300" y="82" text-anchor="middle" font-family="Noto Sans TC,sans-serif" font-weight="900" font-size="0"> </text>
+<g transform="translate(430 196) rotate(-18)"><rect x="0" y="-6" width="120" height="12" rx="4" fill="#d7263d"/><path d="M0 -6 L-18 0 L0 6Z" fill="#efe6d0"/><path d="M-18 0 L-10 -3 L-10 3Z" fill="#8f1424"/></g>
+</svg><div class="rank">噹──噹──噹──噹──</div>
+   <p class="story">上課鐘響了，小朋友都去上科任課了。<br>今天，你是<b>三年甲班</b>的老師。<br>桌上有 <b>10 本國語作業</b>，要趕在下一節課前改完！</p></div>`;
+  act.innerHTML=`<button class="big" id="st">坐下來，拿起紅筆</button>`;$("st").onclick=()=>{chime();rules()};
+}
+function rules(){
+  book.innerHTML=`<div class="end"><div class="rank">老師怎麼改作業？</div>
    <div class="rules"><div><b>① 圈錯字</b>點一下寫錯的字，紅筆就會圈起來。座號或姓名沒寫，點空格打個問號。</div>
-   <div><b>② 改正確</b>按「圈好了」，再選出正確的字。</div>
+   <div><b>② 改正確</b>按「改好了」，再選出正確的字。</div>
    <div><b>③ 小心陷阱</b>有些作業完全沒錯，亂圈會扣分！忘了寫句號，就圈句子後面的空格。</div>
    <div><b>④ 算分方式</b>圈對 +5、改對 +5、圈錯 −5，全對又快還有加分。</div></div></div>`;
-  act.innerHTML=`<button class="big" id="st">拿起紅筆，開始改作業</button>`;$("st").onclick=()=>start();
+  act.innerHTML=`<button class="big" id="st">開始改第一本</button>`;$("st").onclick=()=>start();
 }
 $("snd").onclick=()=>{snd=!snd;$("snd").textContent="聲音："+(snd?"開":"關");if(snd)audio()};
 intro();
