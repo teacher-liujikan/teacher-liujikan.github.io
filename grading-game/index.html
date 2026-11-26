@@ -94,6 +94,13 @@ button.big:focus-visible,.opt:focus-visible{outline:3px solid var(--gold);outlin
 .end .rank{font:700 clamp(24px,4vw,34px)/1.2 "Iansui",serif;margin:10px 0 6px;color:#2a1d12}
 .end p{color:#555;margin:4px 0}
 .hud[hidden]{display:none}
+.line{position:relative}.dirt{position:absolute;inset:0;pointer-events:none;z-index:4}
+.cr{position:absolute;height:4px;border-radius:3px;transform:rotate(var(--r));transition:transform .5s ease-out,opacity .5s;box-shadow:0 1px 1px rgba(0,0,0,.25)}
+.rc{position:absolute;width:17px;height:9px;border-radius:50%;background:radial-gradient(circle at 35% 30%,#fff,#efe9d6);border:1px solid #cfc7ae;transform:rotate(var(--r));box-shadow:1px 2px 2px rgba(0,0,0,.3);transition:opacity .15s}
+.tissue{position:absolute;left:0;top:0;width:60px;height:56px;border-radius:8px 14px 10px 16px;background:linear-gradient(135deg,#fff,#eef1f4);border:1px solid #d5dae0;box-shadow:3px 6px 8px rgba(0,0,0,.25);opacity:0;transition:transform .3s ease-in-out,opacity .2s;z-index:6;pointer-events:none}
+.stamp2{position:absolute;right:clamp(14px,4vw,44px);bottom:calc(clamp(14px,3vw,26px) + 104px);padding:6px 10px;border:3px solid var(--red);border-radius:8px;color:var(--red);font:900 17px/1.25 "Iansui",serif;text-align:center;transform:rotate(7deg) scale(1.6);opacity:0;transition:.35s cubic-bezier(.2,1.6,.4,1);z-index:3}
+.stamp2.on{opacity:.9;transform:rotate(7deg) scale(1)}
+@media(max-width:600px){.stamp2{bottom:calc(clamp(14px,3vw,26px) + 80px);font-size:14px;padding:4px 8px}}
 .scene{display:block;width:100%;max-width:560px;margin:0 auto 12px;border-radius:12px}
 .end p.story{font-size:18px;line-height:1.9;color:#2a1d12;margin:8px 0 4px}.end p.story b{color:var(--red)}
 .rules{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(220px,100%),1fr));gap:12px;margin:18px 0 6px;text-align:left}
@@ -257,7 +264,7 @@ const HAND=`<svg class="hand" viewBox="0 0 160 160" aria-hidden="true"><path d="
 <path d="M60 128 C70 126 80 130 86 138" fill="none" stroke="#d99c76" stroke-width="2.5" stroke-linecap="round"/><path d="M66 116 C76 114 86 118 92 126" fill="none" stroke="#d99c76" stroke-width="2.5" stroke-linecap="round"/></svg>`;
 let Q=[],n=0,score=0,maxScore=0,circ=new Set(),phase="",timer=null,left=0,missed=[],cur=null,snd=true,ac=null,noise=null,handTok=0;
 const T=25;
-let hard=false,blanks=[],blank=null,bmark=new Set();
+let dirt=[],hard=false,blanks=[],blank=null,bmark=new Set();
 const wait=ms=>new Promise(r=>setTimeout(r,ms));
 
 function audio(){
@@ -330,6 +337,7 @@ function start(hd){
   for(const q of err){const ks=q.e.map(key);if(ks.some(k=>used.has(k)))continue;ks.forEach(k=>used.add(k));pick.push(q);if(pick.length===8)break}
   Q=shuf(pick.concat(ok.slice(0,2)));n=0;score=0;maxScore=0;missed=[];
   blanks=Q.map(()=>null);blanks[Q.indexOf(ok[0])]="name";
+  dirt=Q.map(()=>null);const di=shuf([...Q.keys()]);dirt[di[0]]="crumb";dirt[di[1]]="rice";
   $("hud").hidden=false;sheet();
 }
 function sheet(){
@@ -346,10 +354,39 @@ function sheet(){
    <div class="stamp" id="stamp"></div><svg class="ov" aria-hidden="true"></svg>${HAND}`;
   book.querySelectorAll("button.cell").forEach(b=>b.onclick=()=>toggle(b));
   book.querySelectorAll(".blank").forEach(b=>b.onclick=()=>toggleB(b));
-  setAct();hint.textContent="點一下寫錯的字就會圈起來，再點一次取消。座號、姓名有沒有寫也要檢查喔！";
   left=T;$("tb").style.transition="none";$("tb").style.width="100%";
   requestAnimationFrame(()=>{$("tb").style.transition="";});
+  clearInterval(timer);
+  if(dirt[n]){mess(dirt[n]);return}
+  ready();
+}
+function ready(){
+  phase="mark";setAct();hint.textContent="點一下寫錯的字就會圈起來，再點一次取消。座號、姓名有沒有寫也要檢查喔！";
   clearInterval(timer);timer=setInterval(()=>{left--;$("tb").style.width=(left/T*100)+"%";if(left<=0){clearInterval(timer);submit()}},1000);
+}
+function mess(kind){
+  phase="clean";const line=book.querySelector(".line"),R=(a,b)=>a+Math.random()*(b-a);
+  const bits=kind==="crumb"?Array.from({length:22},()=>`<i class="cr" style="left:${R(3,92)}%;top:${R(22,88)}%;width:${R(7,16)}px;--r:${R(0,180)}deg;background:${["#8d8a86","#b9b4ad","#e3a9a9","#6f6c69"][Math.random()*4|0]}"></i>`)
+   :Array.from({length:4},()=>`<i class="rc" style="left:${R(8,85)}%;top:${R(30,75)}%;--r:${R(-50,50)}deg"></i>`);
+  line.insertAdjacentHTML("beforeend",`<div class="dirt">${bits.join("")}</div>`);
+  hint.textContent=kind==="crumb"?"唉呀！這本作業上都是橡皮擦屑，先撥乾淨才能改。":"咦？這本作業上黏著飯粒！先用衛生紙撿起來。";
+  act.innerHTML=`<button class="big alt" id="cl">${kind==="crumb"?"用手撥開橡皮擦屑":"拿衛生紙撿起飯粒"}</button>`;
+  $("cl").onclick=()=>clean(kind);
+}
+async function clean(kind){
+  if(phase!=="clean")return;phase="cleaning";act.innerHTML="";
+  const d=book.querySelector(".dirt"),line=book.querySelector(".line"),[lx,ly]=off(line),w=line.offsetWidth,hh=line.offsetHeight;
+  if(kind==="crumb"){
+    const hand=book.querySelector(".hand");scratch(650);
+    if(hand&&!RM){hand.classList.add("on");hand.style.transition="transform .65s ease-in-out,opacity .25s";hand.style.transform=`translate(${lx-20}px,${ly+hh*.55-136}px)`;void hand.offsetWidth;hand.style.transform=`translate(${lx+w-10}px,${ly+hh*.35-136}px)`}
+    d.querySelectorAll(".cr").forEach((c,k)=>{c.style.transitionDelay=(parseFloat(c.style.left)*5)+"ms";c.style.transform=`translate(${120+Math.random()*160}px,${-60+Math.random()*160}px) rotate(${Math.random()*360}deg)`;c.style.opacity=0});
+    await wait(950);if(hand){hand.classList.remove("on");hand.style.transition=""}
+  }else{
+    book.insertAdjacentHTML("beforeend",`<div class="tissue"></div>`);const t=book.querySelector(".tissue");
+    for(const c of d.querySelectorAll(".rc")){t.style.transform=`translate(${lx+c.offsetLeft-22}px,${ly+c.offsetTop-22}px) rotate(${Math.random()*20-10}deg)`;t.style.opacity=1;await wait(RM?60:330);scratch(120);c.style.opacity=0}
+    t.style.transform+=" translate(0,-60px)";t.style.opacity=0;await wait(300);t.remove();
+  }
+  d.remove();cur.cleaned=true;score+=5;$("hs").textContent=score;ready();
 }
 function setAct(){
   act.innerHTML=`<button class="big" id="go">${circ.size+bmark.size?`改好了（${circ.size+bmark.size} 處）`:"全部寫對了！"}</button>`;
@@ -376,7 +413,7 @@ function cellAt(i){return book.querySelector(`button.cell[data-i="${i}"]`)}
 function tagAt(i,cls,t){cellAt(i).insertAdjacentHTML("beforeend",`<span class="tag ${cls}">${t}</span>`)}
 function submit(){
   if(phase!=="mark")return;phase="fix";clearInterval(timer);act.innerHTML="";hint.textContent="";
-  cur.res=[];cur.bonus=Math.ceil(Math.max(left,0)/5);maxScore+=(cur.e.length?cur.e.length*10:10)+5;
+  cur.res=[];cur.bonus=Math.ceil(Math.max(left,0)/5);maxScore+=(cur.e.length?cur.e.length*10:10)+5;if(dirt[n])maxScore+=5;
   [...circ].forEach(i=>{if(!cur.idx.includes(i)){cellAt(i).classList.add("false");tagAt(i,"x","沒寫錯 −5");score-=5;cur.res.push({t:"x",i})}});
   const todo=cur.idx.map((ix,k)=>({ix,k})).filter(o=>circ.has(o.ix));
   cur.missK=cur.idx.map((ix,k)=>k).filter(k=>!circ.has(cur.idx[k]));
@@ -422,6 +459,7 @@ async function finish(){
     if(r.t==="bmiss")h+=`<div class="no">這本沒寫<b>${BN[blank]}</b>，老師幫你打了問號。沒發現不扣分，下次記得看一下喔！</div>`;
     if(r.t==="bx")h+=`<div class="x">這本有寫${BN[r.k]}，不用打問號（不扣分）。</div>`});
   if(good&&cur.bonus)h+=`<div>速度加分 <b>+${cur.bonus}</b></div>`;
+  if(dirt[n]){await wait(350);book.insertAdjacentHTML("beforeend",`<div class="stamp2">請保持<br>簿本乾淨</div>`);void book.offsetWidth;book.querySelector(".stamp2").classList.add("on");thump();h+=`<div>這本作業上有${dirt[n]==="crumb"?"橡皮擦屑":"飯粒"}，你先清乾淨才改，<b>+5</b>。蓋上「請保持簿本乾淨」提醒他。</div>`}
   fb.innerHTML=h;
   act.innerHTML=`<button class="big" id="nx">${n<Q.length-1?"改下一本 →":"看我的國字腦等級"}</button>`;
   $("nx").onclick=()=>{n++;n<Q.length?sheet():end()};$("nx").focus();
@@ -463,7 +501,8 @@ function rules(){
    <div class="rules"><div><b>① 圈錯字</b>點一下寫錯的字，紅筆就會圈起來。座號或姓名沒寫，點空格打個問號。</div>
    <div><b>② 改正確</b>按「改好了」，再選出正確的字。</div>
    <div><b>③ 小心陷阱</b>有些作業完全沒錯，亂圈會扣分！忘了寫句號，就圈句子後面的空格。</div>
-   <div><b>④ 算分方式</b>圈對 +5、改對 +5、圈錯 −5，全對又快還有加分。</div></div></div>`;
+   <div><b>④ 簿本髒髒的</b>有時作業上有橡皮擦屑或飯粒，要先清乾淨才能改，改完會多蓋一個「請保持簿本乾淨」的章。</div>
+   <div><b>⑤ 算分方式</b>圈對 +5、改對 +5、圈錯 −5，全對又快還有加分。</div></div></div>`;
   act.innerHTML=`<button class="big" id="st">開始改第一本</button>`;$("st").onclick=()=>start();
 }
 $("snd").onclick=()=>{snd=!snd;$("snd").textContent="聲音："+(snd?"開":"關");if(snd)audio()};
