@@ -1,0 +1,397 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>改作業大挑戰</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Iansui&family=Noto+Sans+TC:wght@400;700;900&display=swap" rel="stylesheet">
+<style>
+/* VOICE: playful classroom, teacher at the desk with a red pen
+   IDEA: a real 國語作業簿 on a wooden desk; you circle the wrong characters in red
+   PICTURE: the notebook page itself, 田字格 with pencil handwriting, red ink marks
+   COLOUR/TYPE: desk wood, paper white, grid green, red-pen accent; LXGW WenKai for handwriting, Noto Sans TC for UI
+   LAYOUT: modest top bar (score, notebook count, timer), notebook in the middle, action button under it */
+:root{color-scheme:light dark;--bg:light-dark(#d9b48a,#2b1f16);--bg2:light-dark(#c99f72,#22180f);--ink:light-dark(#2a1d12,#f3e7d8);--paper:#fffdf6;--grid:#7fb38f;--gridl:#cfe5d4;--pencil:#3b3a3f;--red:#d7263d;--gold:#f2b134;--muted:light-dark(#6a4e35,#c9b39a)}
+:root[data-theme=light]{color-scheme:light}:root[data-theme=dark]{color-scheme:dark}
+*{box-sizing:border-box;min-width:0}
+body{margin:0;min-height:100vh;color:var(--ink);font:16px/1.55 "Noto Sans TC",system-ui,sans-serif;overflow-x:clip;
+ background:repeating-linear-gradient(92deg,transparent 0 38px,rgba(0,0,0,.035) 38px 40px),linear-gradient(var(--bg),var(--bg2))}
+.wrap{max-width:1100px;margin:0 auto;padding:clamp(14px,3vw,32px) max(4vw,12px) 40px}
+h1{font:900 clamp(26px,4vw,40px)/1.1 "Noto Sans TC",sans-serif;margin:0 0 4px;text-wrap:balance}
+h1 span{color:var(--red)}
+.sub{margin:0 0 16px;color:var(--muted)}
+.hud{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin-bottom:12px}
+.chip{background:rgba(255,253,246,.85);color:#2a1d12;border-radius:999px;padding:6px 14px;font-weight:700;white-space:nowrap;box-shadow:0 2px 0 rgba(0,0,0,.15)}
+.chip b{color:var(--red)}
+.timer{flex:1 1 160px;height:14px;background:rgba(255,253,246,.6);border-radius:999px;overflow:hidden}
+.timer i{display:block;height:100%;width:100%;background:linear-gradient(90deg,var(--red),var(--gold));transition:width 1s linear}
+.book{position:relative;background:var(--paper);color:#222;border-radius:6px 14px 14px 6px;padding:clamp(18px,3vw,34px) clamp(16px,3vw,40px) clamp(20px,3vw,34px) clamp(36px,5vw,62px);
+ box-shadow:0 1px 0 #e9e2cf,0 3px 0 #efe8d6,0 5px 0 #e3dbc6,0 7px 0 #ece4cf,0 9px 0 #ddd3bb,0 30px 40px rgba(0,0,0,.35);min-height:330px}
+.desk{position:relative;perspective:1300px;perspective-origin:50% -10%;padding:6px 0 34px}
+.book{transform:rotateX(22deg) rotateZ(-1.5deg);transform-origin:50% 100%}
+.book.enter{animation:slide .55s cubic-bezier(.2,.9,.3,1.1)}
+@keyframes slide{from{transform:translate(-70%,-40px) rotateX(22deg) rotateZ(-16deg);opacity:0}}
+.pen{position:absolute;right:-2%;bottom:-4px;width:min(34vw,300px);transform:rotate(-28deg);pointer-events:none;filter:drop-shadow(0 6px 4px rgba(0,0,0,.25))}
+button.cell{cursor:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='32' height='32'%3E%3Cpath d='M2 30 L6 22 L26 2 L30 6 L10 26 Z' fill='%23d7263d' stroke='%238f1424'/%3E%3Cpath d='M2 30 L6 22 L10 26Z' fill='%23fff'/%3E%3C/svg%3E") 2 30, pointer}
+@media(max-width:700px){.book{transform:rotateX(12deg)}@keyframes slide{from{transform:translateX(-70%) rotateX(12deg);opacity:0}}.pen{width:42vw;right:-6%;bottom:-14px}}
+.book::before{content:"";position:absolute;left:clamp(14px,2.2vw,26px);top:0;bottom:0;border-left:3px double #e7a3a3}
+.meta{display:flex;flex-wrap:wrap;justify-content:space-between;gap:6px 18px;font-size:14px;color:#6b6b6b;border-bottom:1px solid #e7e1cf;padding-bottom:8px;margin-bottom:14px}
+.meta .nm{font-family:"Iansui",serif;font-size:19px;color:var(--pencil)}
+.q{font-weight:700;color:#355e43;margin:0 0 8px}
+.line{display:flex;flex-wrap:wrap;gap:0;padding-top:34px;row-gap:40px}
+.cell{position:relative;width:clamp(46px,7.2vw,66px);aspect-ratio:1;border:1.5px solid var(--grid);margin:0 -1.5px 0 0;background:
+ linear-gradient(var(--gridl),var(--gridl)) center/100% 1px no-repeat,linear-gradient(var(--gridl),var(--gridl)) center/1px 100% no-repeat,#fff;
+ font:400 clamp(30px,5vw,46px)/1 "Iansui","Iansui",serif;color:var(--pencil);display:grid;place-items:center;padding:0;cursor:pointer;-webkit-tap-highlight-color:transparent}
+.cell>span:not(.fix):not(.tag){display:block;transform:rotate(var(--r)) translate(var(--x),var(--y)) scale(var(--s,1),var(--t,1));-webkit-text-stroke:var(--w,.6px) #4a4950;filter:var(--f);opacity:var(--o,1)}
+.cell.p{cursor:default}
+.cmp{position:relative;display:inline-block;line-height:1;font-family:"Iansui",serif}.hk{position:absolute;inset:0;width:100%;height:100%;overflow:visible}.hk path{fill:none;stroke:currentColor;stroke-width:5.5;stroke-linecap:round}.cmp i{font-style:normal;display:inline-block;clip-path:inset(-20% 56% -20% -20%)}.cmp i+i{position:absolute;left:0;top:0;clip-path:inset(-20% -20% -20% 44%)}
+.cell:focus-visible{outline:3px solid var(--gold);z-index:2}
+.cell svg.mk{position:absolute;inset:-14%;width:128%;height:128%;pointer-events:none;overflow:visible}
+.mk path{fill:none;stroke:var(--red);stroke-width:3.2;stroke-linecap:round;stroke-linejoin:round}
+.cell.false .mk path{stroke:#9aa0a6}
+.blank{position:relative;display:inline-block;vertical-align:bottom;min-width:3.4em;height:1.7em;padding:0 4px;border:0;border-bottom:1.5px solid #b9b2a0;background:none;font:400 20px/1.7em "Iansui",serif;color:var(--pencil);cursor:pointer;text-align:center}
+.blank:focus-visible{outline:3px solid var(--gold)}
+.ov path.qm{stroke-width:4}.ov path.qx{stroke:#9aa0a6}
+.ov{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;overflow:visible;z-index:3}
+.ov path{fill:none;stroke:var(--red);stroke-width:7;stroke-linecap:round;stroke-linejoin:round}
+.hand{position:absolute;left:0;top:0;width:140px;height:140px;pointer-events:none;opacity:0;transition:opacity .25s;z-index:6;overflow:visible;filter:drop-shadow(6px 10px 6px rgba(0,0,0,.25))}
+.hand.on{opacity:1}
+.fix{animation:pop .3s ease-out}@keyframes pop{from{opacity:0;transform:translateX(-50%) rotate(-6deg) scale(1.5)}}
+.cell svg ellipse{fill:none;stroke:var(--red);stroke-width:3.2;stroke-linecap:round;stroke-dasharray:260;stroke-dashoffset:260;animation:draw .35s ease-out forwards}
+@keyframes draw{to{stroke-dashoffset:0}}
+.fix{position:absolute;left:50%;top:-38px;transform:translateX(-50%) rotate(-6deg);font:700 30px/1 "Iansui",serif;color:var(--red);white-space:nowrap;-webkit-text-stroke:.7px var(--red)}
+.fix.in{top:50%;transform:translate(-50%,-50%) rotate(-6deg);animation:none}
+.cell.miss{outline:3px dashed #e08a00;outline-offset:2px;z-index:1}
+.cell.false svg ellipse{stroke:#9aa0a6}
+.tag{position:absolute;bottom:-26px;left:50%;transform:translateX(-50%);font:700 13px/1 "Noto Sans TC";white-space:nowrap;padding:3px 6px;border-radius:6px;color:#fff}
+.tag.ok{background:#2f8f5b}.tag.no{background:#e08a00}.tag.x{background:#7b8087}
+.stamp{position:absolute;right:clamp(14px,4vw,44px);bottom:clamp(14px,3vw,26px);width:92px;height:92px;border:4px solid var(--red);border-radius:50%;color:var(--red);display:grid;place-items:center;
+ font:900 30px/1 "Iansui",serif;transform:rotate(-14deg) scale(1.6);opacity:0;transition:.35s cubic-bezier(.2,1.6,.4,1)}
+.stamp.on{opacity:.9;transform:rotate(-14deg) scale(1)}
+.actions{display:flex;flex-wrap:wrap;gap:12px;justify-content:center;margin-top:18px}
+button.big{font:900 19px/1 "Noto Sans TC",sans-serif;min-height:54px;padding:0 28px;border:0;border-radius:14px;background:var(--red);color:#fff;cursor:pointer;box-shadow:0 4px 0 #8f1424}
+button.big.alt{background:#fffdf6;color:#2a1d12;box-shadow:0 4px 0 #b9a688}
+button.big:active{transform:translateY(3px);box-shadow:0 1px 0 #8f1424}
+button.big:focus-visible,.opt:focus-visible{outline:3px solid var(--gold);outline-offset:3px}
+.hint{text-align:center;color:var(--muted);font-size:14px;margin-top:10px}
+.panel{position:fixed;left:0;right:0;bottom:0;z-index:20;background:#fffdf6;color:#2a1d12;border-top:4px solid var(--red);padding:16px max(4vw,14px) calc(18px + env(safe-area-inset-bottom));box-shadow:0 -10px 30px rgba(0,0,0,.25);transform:translateY(110%);transition:transform .25s}
+.panel.on{transform:none}
+.panel h3{margin:0 0 10px;font-size:18px;text-align:center}
+.panel h3 em{font:700 26px "Iansui";color:var(--red);font-style:normal}
+.opts{display:flex;gap:12px;justify-content:center;flex-wrap:wrap}
+.opt{width:76px;height:76px;border-radius:14px;border:2px solid #e3d6bf;background:#fff;font:700 40px/1 "Iansui",serif;color:var(--red);cursor:pointer}
+.opt:active{background:#ffe9ec}
+.fb{margin-top:16px;display:grid;gap:8px}
+.fb div{background:rgba(255,253,246,.9);color:#2a1d12;border-radius:10px;padding:10px 14px;border-left:6px solid #2f8f5b}
+.fb div.no{border-color:#e08a00}.fb div.x{border-color:#7b8087}
+.fb b{font-family:"Iansui",serif;font-size:19px}
+.end{text-align:center;padding:10px 0}
+.end .score{font:900 clamp(56px,10vw,88px)/1 "Noto Sans TC";color:var(--red)}
+.end .rank{font:700 clamp(24px,4vw,34px)/1.2 "Iansui",serif;margin:10px 0 6px;color:#2a1d12}
+.end p{color:#555;margin:4px 0}
+.rules{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(220px,100%),1fr));gap:12px;margin:18px 0 6px;text-align:left}
+.rules div{background:#f5f9f2;border-radius:12px;padding:12px 14px;font-size:15px;color:#333}
+.rules b{display:block;color:var(--red);font-size:17px;margin-bottom:2px}
+.review{text-align:left;margin-top:16px;display:grid;gap:6px;font-size:15px;color:#333}
+.review b{font-family:"Iansui",serif;color:var(--red);font-size:18px}
+footer{text-align:center;color:var(--muted);font-size:13px;margin-top:26px}
+@media(max-width:600px){.stamp{width:70px;height:70px;font-size:22px}.opt{width:64px;height:64px;font-size:34px}}
+@media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}.cell svg ellipse{stroke-dashoffset:0}}
+</style>
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs><filter id="wob0"><feTurbulence type="fractalNoise" baseFrequency="0.04" numOctaves="2" seed="2"/><feDisplacementMap in="SourceGraphic" scale="4"/></filter><filter id="wob1"><feTurbulence type="fractalNoise" baseFrequency="0.03" numOctaves="2" seed="7"/><feDisplacementMap in="SourceGraphic" scale="5"/></filter><filter id="wob2"><feTurbulence type="fractalNoise" baseFrequency="0.05" numOctaves="2" seed="11"/><feDisplacementMap in="SourceGraphic" scale="3.5"/></filter><filter id="wob3"><feTurbulence type="fractalNoise" baseFrequency="0.035" numOctaves="2" seed="19"/><feDisplacementMap in="SourceGraphic" scale="4.5"/></filter></defs></svg>
+<div class="wrap">
+  <h1>改作業大挑戰：<span>測測你的國字腦</span></h1>
+  <p class="sub">你是今天的國語老師！拿起紅筆，把學生寫錯的字圈出來，再幫他改正確。</p>
+  <div class="hud" id="hud" hidden>
+    <span class="chip">第 <b id="hn">1</b> / 10 本</span>
+    <span class="chip">得分 <b id="hs">0</b></span>
+    <button class="chip" id="snd" style="border:0;cursor:pointer;font:inherit;font-weight:700;min-height:36px">聲音：開</button>
+    <div class="timer" aria-label="剩餘時間"><i id="tb"></i></div>
+  </div>
+  <div class="desk"><div class="book" id="book"></div><svg class="pen" viewBox="0 0 320 40" aria-hidden="true"><defs><linearGradient id="pg" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#ff6b7d"/><stop offset=".45" stop-color="#d7263d"/><stop offset="1" stop-color="#8f1424"/></linearGradient><linearGradient id="pm" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fff"/><stop offset=".5" stop-color="#b8bcc4"/><stop offset="1" stop-color="#6e737c"/></linearGradient></defs>
+<ellipse cx="170" cy="36" rx="150" ry="4" fill="rgba(0,0,0,.25)"/><path d="M8 20 L34 13 L34 27 Z" fill="#e9e2cf"/><path d="M2 20 L12 17.5 L12 22.5Z" fill="#b0142a"/>
+<rect x="34" y="11" width="190" height="18" rx="3" fill="url(#pg)"/><rect x="34" y="11" width="34" height="18" fill="url(#pm)"/>
+<rect x="220" y="9" width="92" height="22" rx="6" fill="#a8172d"/><rect x="240" y="5" width="70" height="6" rx="3" fill="url(#pm)"/><rect x="40" y="13" width="180" height="3" rx="1.5" fill="rgba(255,255,255,.35)"/></svg></div>
+  <div class="actions" id="act"></div>
+  <div class="hint" id="hint"></div>
+  <div class="fb" id="fb"></div>
+  <footer>© 老師媽咪／范范老師 · 題目為常見錯別字練習</footer>
+</div>
+<div class="panel" id="panel" role="dialog" aria-live="polite"><h3 id="ph"></h3><div class="opts" id="po"></div></div>
+<script>
+{
+const E=(w,c,d,tip)=>({w,c,d,tip});
+const BANK=[
+ {s:"哥哥的動做好勵害。",e:[E("做","作",["坐","昨"],"「動作」用「作」；「做」多用在做事、做功課。"),E("勵","厲",["歷","萬"],"「厲害」的「厲」，裡面沒有「力」。")]},
+ {s:"我們再教室裡上課。",e:[E("再","在",["存","載"],"說地點用「在」；「再」是再一次。")]},
+ {s:"他跑的很快，大家都追不上。",e:[E("的","得",["地","德"],"動作後面說「怎麼樣」用「得」，像跑得快。")]},
+ {s:"因為下雨，所以我們不能出去完。",e:[E("完","玩",["丸","頑"],"玩耍的「玩」是玉字旁。")]},
+ {s:"我門一起去公園玩。",e:[E("門","們",["悶","問"],"我們的「們」有人字旁。")]},
+ {s:"今天的天氣很睛朗，我們去郊遊。",e:[E("睛","晴",["情","清"],"天氣晴朗和太陽有關，用日字旁。")]},
+ {s:"妹妹的眼晴又大又亮。",e:[E("晴","睛",["精","靖"],"眼睛和眼有關，用目字旁。")]},
+ {s:"他頭上帶著一頂紅帽子。",e:[E("帶","戴",["待","代"],"帽子、眼鏡穿戴在身上用「戴」；把東西帶在身邊才用「帶」。")]},
+ {s:"我們要愛護環竟。",e:[E("竟","境",["鏡","景"],"環境的「境」是土字旁。")]},
+ {s:"他每天都很早到校，從來不遲倒。",e:[E("倒","到",["道","刀"],"遲到、到達用「到」。")]},
+ {s:"我喜歡吃蘋果和香焦。",e:[E("焦","蕉",["礁","嬌"],"香蕉是植物，要有草字頭。")]},
+ {s:"妹妹哭了，因為她的汽球飛走了。",e:[E("汽","氣",["器","棄"],"氣球裡裝的是空氣，用「氣」。")]},
+ {s:"他是我最要好的朋有。",e:[E("有","友",["右","又"],"朋友的「友」。")]},
+ {s:"做事不可以馬呼。",e:[E("呼","虎",["乎","唬"],"馬虎的「虎」就是老虎的虎。")]},
+ {s:"颱風來了，大家要注意安權。",e:[E("權","全",["泉","拳"],"安全的「全」。")]},
+ {s:"他很有理貌，看到老師都會問好。",e:[E("理","禮",["李","里"],"禮貌的「禮」是示字旁。")]},
+ {s:"公園裡有很多人再散步。",e:[E("再","在",["存","載"],"說地點用「在」；「再」是再一次。")]},
+ {s:"我用水彩畫了一福畫。",e:[E("福","幅",["副","富"],"一幅畫的「幅」是巾字旁。")]},
+ {s:"他的成積進步了很多。",e:[E("積","績",["跡","級"],"成績的「績」是糸字旁。")]},
+ {s:"老師稱讚我寫字很工正。",e:[E("正","整",["證","政"],"工整的「整」。")]},
+ {s:"上課要傳心聽講。",e:[E("傳","專",["磚","轉"],"專心的「專」沒有人字旁。")]},
+ {s:"早上起床後，我會先刷芽洗臉。",e:[E("芽","牙",["呀","雅"],"刷牙的「牙」；「芽」是植物發芽。")]},
+ {s:"我和弟弟一起玩績木。",e:[E("績","積",["跡","機"],"積木的「積」是禾字旁。")]},
+ {s:"這件事情我已經知到了。",e:[E("到","道",["倒","導"],"知道的「道」。")]},
+ {s:"他把垃圾丟進垃圾桶，真是好習貫。",e:[E("貫","慣",["灌","罐"],"習慣的「慣」是豎心旁。")]},
+ {s:"這題太難了，我想了很久才想出答按。",e:[E("按","案",["岸","暗"],"答案的「案」下面是木。")]},
+ {s:"我門再教室裡看書。",e:[E("門","們",["悶","問"],"我們的「們」有人字旁。"),E("再","在",["存","載"],"說地點用「在」；「再」是再一次。")]},
+ {s:"今天天氣睛朗，我門去郊遊。",e:[E("睛","晴",["情","清"],"天氣晴朗和太陽有關，用日字旁。"),E("門","們",["悶","問"],"我們的「們」有人字旁。")]},
+ {s:"下雨了，大家不能出去完，只好玩績木。",e:[E("完","玩",["丸","頑"],"玩耍的「玩」是玉字旁。"),E("績","積",["跡","機"],"積木的「積」是禾字旁。")]},
+ {s:"他鼻子上帶著眼鏡，看起來很勵害。",e:[E("帶","戴",["待","代"],"帽子、眼鏡穿在身上用「戴」。"),E("勵","厲",["歷","萬"],"「厲害」的「厲」，裡面沒有「力」。")]},
+ {s:"我的鉛筆①弟弟拿走了。",e:[E("①","被",["⑦","破"],"棉被、被子和布有關，是衣字旁「衤」，比示字旁多一點。")]},
+ {s:"天氣好冷，我穿上厚厚的長②。",e:[E("②","褲",["⑧","庫"],"褲子是衣服，用衣字旁「衤」。")]},
+ {s:"③次上台的時候，我好緊張。",e:[E("③","初",["⑨","出"],"「初」是衣字旁：裁布做衣服是開始，所以有「刀」和「衤」。")]},
+ {s:"看電④太久，眼睛會很累。",e:[E("④","視",["⑩","試"],"「視」是示字旁「礻」，比衣字旁少一點。")]},
+ {s:"祝你生日快樂，天天都幸⑤。",e:[E("⑤","福",["⑪","幅"],"幸福的「福」是示字旁「礻」，和「祝」一樣。")]},
+ {s:"衣服破了，奶奶幫我⑥好。",e:[E("⑥","補",["⑫","捕"],"補衣服和布有關，用衣字旁「衤」。")]},
+ {s:"天冷了，記得穿上襪子和褲子。",e:[]},
+ {s:"我們一起去公園玩□",e:[E("□","。",["，","？"],"一句話說完了，最後要加上句號「。」。")]},
+ {s:"下課時，我和同學去操場跑步□",e:[E("□","。",["，","？"],"一句話說完了，最後要加上句號「。」。")]},
+ {s:"放學後，我先把功課寫完□",e:[E("□","。",["，","？"],"句子結束要記得加句號「。」，格子空著就是忘了。")]},
+ {s:"我門今天去動物園看長頸鹿□",e:[E("門","們",["悶","問"],"我們的「們」有人字旁。"),E("□","。",["，","？"],"一句話說完了，最後要加上句號「。」。")]},
+ {s:"弟弟很⑬，大家都喜歡他。",e:[E("⑬","乖",["⑭","乘"],"「乖」右下最後一筆是豎彎，不勾；「北」的右邊才要勾。")]},
+ {s:"上課時要乖⑬坐好，認真聽講。",e:[E("⑬","乖",["⑭","乘"],"同一個字寫兩次也要看仔細：「乖」最後一筆不勾。")]},
+ {s:"小狗很乖，會坐下也會握手。",e:[]},
+ {s:"奶奶在廚房煮飯，香味撲鼻而來。",e:[]},
+ {s:"弟弟把玩具藏起來，大家都找不到。",e:[]},
+ {s:"小鳥在樹上唱歌，聲音很清脆。",e:[]},
+ {s:"我把功課寫完，再去看電視。",e:[]},
+ {s:"妹妹在畫畫，畫得很像。",e:[]},
+ {s:"下雨了，記得帶雨傘出門。",e:[]},
+ {s:"我要做一個有用的人。",e:[]},
+ {s:"冬天到了，要多穿一件外套。",e:[]},
+ {s:"我們班的同學都很有禮貌。",e:[]},
+ {s:"他做事很認真，從來不馬虎。",e:[]},
+ {s:"放學後，我和同學一起回家。",e:[]},
+ {s:"老師說話的聲音很好聽，大家都很專心。",e:[]}
+];
+const NAMES=["小安","阿哲","小芸","大寶","小晴","阿凱","米米","小宇","豆豆","阿翔","小涵","阿傑"];
+const COMP={"①":["祖","被",44],"②":["祖","褲",46],"③":["祖","初",48],"④":{k:"視",d:"M37.5 42.5 L31.5 50.5",w:4.6},"⑤":{k:"福",d:"M37.5 42.5 L31.5 50.5",w:4.6},"⑥":["祖","補",48],
+ "⑦":["祖","被",44],"⑧":["祖","褲",46],"⑨":["祖","初",48],"⑩":{k:"視",d:"M37.5 42.5 L31.5 50.5",w:4.6},"⑪":{k:"福",d:"M37.5 42.5 L31.5 50.5",w:4.6},"⑫":["祖","補",48],"⑬":{k:"乖"},"⑭":{k:"乖"}};
+const LC={"祖":"polygon(-20% -20%,41% -20%,41% 80%,33% 80%,33% 120%,-20% 120%)","被":"polygon(-20% -20%,41% -20%,41% 78%,32% 78%,32% 120%,-20% 120%)"};
+const G=c=>{if(c==="□")return"空格";const x=COMP[c];if(!x)return c;
+  if(x.k)return `<span class="cmp">${x.k}<svg class="hk" viewBox="0 0 100 100"><path d="${x.d||"M80 72 Q84 71 86 58"}" style="stroke-width:${x.w||5.5}"/></svg></span>`;
+  return `<span class="cmp"><i style="clip-path:${LC[x[0]]}">${x[0]}</i><i style="clip-path:inset(-20% -20% -20% ${x[2]}%)">${x[1]}</i></span>`};
+const PUNC=/[，。！？、；：「」]/;
+const $=id=>document.getElementById(id);
+const book=$("book"),act=$("act"),hint=$("hint"),fb=$("fb"),panel=$("panel");
+const rnd=(a,b)=>(a+Math.random()*(b-a)).toFixed(2);
+const shuf=a=>{a=a.slice();for(let i=a.length-1;i>0;i--){const j=Math.random()*(i+1)|0;[a[i],a[j]]=[a[j],a[i]]}return a};
+const RM=matchMedia("(prefers-reduced-motion: reduce)").matches;
+const NS="http://www.w3.org/2000/svg";
+const HAND=`<svg class="hand" viewBox="0 0 160 160" aria-hidden="true"><path d="M4 156 L13 133 L26 146 Z" fill="#efe6d0" stroke="#b9ab8c" stroke-width="2"/><path d="M4 156 L9 145 L15 151Z" fill="#b0142a"/>
+<path d="M20 140 L120 40" stroke="#d7263d" stroke-width="15" stroke-linecap="round"/><path d="M22 134 L116 40" stroke="#ff8a98" stroke-width="3" stroke-linecap="round"/>
+<path d="M150 160 L160 160 L160 70 L104 104 Z" fill="#3f6ea8"/><path d="M104 104 L160 70 L160 82 L112 112Z" fill="#2f5688"/>
+<path d="M44 112 C50 86 84 78 108 96 C122 108 118 134 96 142 C76 150 52 140 44 112Z" fill="#f6cba8" stroke="#d99c76" stroke-width="2.5"/>
+<path d="M38 118 C40 104 56 102 62 112 C66 122 54 130 44 128Z" fill="#f6cba8" stroke="#d99c76" stroke-width="2.5"/>
+<path d="M60 128 C70 126 80 130 86 138" fill="none" stroke="#d99c76" stroke-width="2.5" stroke-linecap="round"/><path d="M66 116 C76 114 86 118 92 126" fill="none" stroke="#d99c76" stroke-width="2.5" stroke-linecap="round"/></svg>`;
+let Q=[],n=0,score=0,maxScore=0,circ=new Set(),phase="",timer=null,left=0,missed=[],cur=null,snd=true,ac=null,noise=null,handTok=0;
+const T=25;
+let blanks=[],blank=null,bmark=new Set();
+const wait=ms=>new Promise(r=>setTimeout(r,ms));
+
+function audio(){
+  if(!snd)return null;
+  try{if(!ac){ac=new(window.AudioContext||window.webkitAudioContext)();noise=ac.createBuffer(1,ac.sampleRate,ac.sampleRate);const d=noise.getChannelData(0);for(let i=0;i<d.length;i++)d[i]=Math.random()*2-1}
+   if(ac.state==="suspended")ac.resume()}catch(e){ac=null}
+  return ac;
+}
+function scratch(ms){
+  const a=audio();if(!a)return;
+  try{const t=a.currentTime,s=Math.max(ms,120)/1000,src=a.createBufferSource();src.buffer=noise;src.loop=true;src.playbackRate.value=.8+Math.random()*.4;
+  const bp=a.createBiquadFilter();bp.type="bandpass";bp.frequency.value=2800;bp.Q.value=.9;
+  const hp=a.createBiquadFilter();hp.type="highpass";hp.frequency.value=1000;
+  const g=a.createGain();g.gain.setValueAtTime(0,t);
+  for(let k=0;k*.03<s;k++){g.gain.linearRampToValueAtTime(k%3===2?.06:.18+Math.random()*.3,t+k*.03+.015);bp.frequency.setValueAtTime(2000+Math.random()*2600,t+k*.03)}
+  g.gain.linearRampToValueAtTime(0,t+s+.04);
+  src.connect(bp).connect(hp).connect(g).connect(a.destination);src.start(t,Math.random()*.5);src.stop(t+s+.1)}catch(e){}
+}
+function thump(){
+  const a=audio();if(!a)return;
+  try{const t=a.currentTime,o=a.createOscillator(),g=a.createGain();o.type="sine";o.frequency.setValueAtTime(150,t);o.frequency.exponentialRampToValueAtTime(60,t+.15);
+  g.gain.setValueAtTime(.5,t);g.gain.exponentialRampToValueAtTime(.001,t+.2);o.connect(g).connect(a.destination);o.start(t);o.stop(t+.22)}catch(e){}
+}
+const pathD=pts=>"M"+pts.map(p=>p[0].toFixed(1)+" "+p[1].toFixed(1)).join(" L");
+function circlePts(){
+  const a=[],ph=-.9+Math.random()*.5,c=Math.cos(-.14),s=Math.sin(-.14);
+  for(let k=0;k<=48;k++){const t=ph+k/48*(Math.PI*2+.55),x=46*Math.cos(t)*(1-k*.0015),y=42*Math.sin(t)*(1+k*.002);a.push([50+x*c-y*s,52+x*s+y*c])}
+  return a;
+}
+function seg(cs,n){
+  const L=[];let tot=0;for(let i=1;i<cs.length;i++){const d=Math.hypot(cs[i][0]-cs[i-1][0],cs[i][1]-cs[i-1][1]);L.push(d);tot+=d}
+  const out=[];for(let k=0;k<=n;k++){let d=k/n*tot,i=0;while(i<L.length-1&&d>L[i]){d-=L[i];i++}const r=Math.min(1,d/L[i]);out.push([cs[i][0]+(cs[i+1][0]-cs[i][0])*r,cs[i][1]+(cs[i+1][1]-cs[i][1])*r])}
+  return out;
+}
+function off(el){let x=0,y=0;while(el&&el!==book){x+=el.offsetLeft;y+=el.offsetTop;el=el.offsetParent}return[x,y]}
+function draw(svg,pts,map,dur,cls){
+  return new Promise(res=>{
+    const p=document.createElementNS(NS,"path");p.setAttribute("d",pathD(pts));if(cls)p.setAttribute("class",cls);svg.appendChild(p);
+    const L=p.getTotalLength();p.style.strokeDasharray=L;p.style.strokeDashoffset=L;scratch(dur);
+    const hand=book.querySelector(".hand");
+    if(RM||!hand){p.style.strokeDashoffset=0;res();return}
+    const tok=++handTok,t0=performance.now();hand.classList.add("on");
+    const step=now=>{
+      const k=Math.max(0,Math.min(1,(now-t0)/dur));p.style.strokeDashoffset=L*(1-k);
+      const f=k*(pts.length-1),i=Math.min(pts.length-2,Math.floor(f)),r=f-i;
+      const [x,y]=map([pts[i][0]+(pts[i+1][0]-pts[i][0])*r,pts[i][1]+(pts[i+1][1]-pts[i][1])*r]);
+      if(tok===handTok)hand.style.transform=`translate(${x-3.5}px,${y-136.5}px)`;
+      if(k<1)requestAnimationFrame(step);else{setTimeout(()=>{if(tok===handTok)hand.classList.remove("on")},380);res()}
+    };
+    requestAnimationFrame(step);
+  });
+}
+function circle(cell,dur,cls){
+  const svg=document.createElementNS(NS,"svg");svg.setAttribute("viewBox","0 0 100 100");svg.setAttribute("class","mk");cell.appendChild(svg);
+  const [cx,cy]=off(cell),w=cell.offsetWidth;
+  return draw(svg,circlePts(),u=>[cx-.14*w+u[0]/100*1.28*w,cy-.14*w+u[1]/100*1.28*w],dur,cls);
+}
+function bigCheck(){
+  const ov=book.querySelector(".ov"),W=book.clientWidth,H=book.clientHeight;ov.setAttribute("viewBox",`0 0 ${W} ${H}`);
+  const cells=book.querySelectorAll(".line .cell"),last=cells[cells.length-1],[lx,ly]=off(last),w=last.offsetWidth;
+  let x0=lx+w+18,y0=ly+w*.3;if(x0+120>W){x0=W-140;y0=ly+w+30}
+  return draw(ov,seg([[x0,y0],[x0+30,y0+42],[x0+112,y0-56]],40),q=>q,650,"ck");
+}
+
+function start(){
+  audio();
+  const err=shuf(BANK.filter(b=>b.e.length)),ok=shuf(BANK.filter(b=>!b.e.length));
+  Q=shuf(err.slice(0,7).concat(ok.slice(0,3)));n=0;score=0;maxScore=0;missed=[];
+  blanks=Q.map(()=>null);shuf([...Q.keys()]).slice(0,Math.random()<.5?1:2).forEach(i=>blanks[i]=Math.random()<.5?"name":"seat");
+  $("hud").hidden=false;sheet();
+}
+function sheet(){
+  cur=Q[n];circ=new Set();blank=blanks[n];bmark=new Set();book.classList.remove("enter");void book.offsetWidth;book.classList.add("enter");phase="mark";fb.innerHTML="";
+  cur.idx=cur.e.map(e=>[...cur.s].indexOf(e.w));
+  $("hn").textContent=n+1;$("hs").textContent=score;
+  const seat=1+(Math.random()*28|0),nm=NAMES[Math.random()*NAMES.length|0];
+  book.innerHTML=`<div class="meta"><span>國語作業　第 ${n+1} 本</span><span>座號 <button class="blank" data-b="seat" aria-label="座號">${blank==="seat"?"":seat}</button>　姓名 <button class="blank" data-b="name" aria-label="姓名">${blank==="name"?"":nm}</button></span></div>
+   <p class="q">造句：請檢查這個句子有沒有錯字</p>
+   <div class="line">${[...cur.s,...(cur.s.includes("□")?"　":"　　")].map((c,i)=>{const r=rnd(-8,8),x=rnd(-4,4),y=rnd(-4,4);
+    const st=`--r:${r}deg;--x:${x}px;--y:${y}px;--s:${rnd(.84,1.1)};--t:${rnd(.86,1.08)};--w:${rnd(.3,1.1)}px;--o:${rnd(.82,1)};--f:url(#wob${Math.random()*4|0})`;
+    return PUNC.test(c)?`<div class="cell p"><span style="${st}">${G(c)}</span></div>`
+    :`<button class="cell" data-i="${i}" aria-label="${COMP[c]?"字":c==="□"||c==="　"?"空格":c}"><span style="${st}">${c==="□"||c==="　"?"":G(c)}</span></button>`}).join("")}</div>
+   <div class="stamp" id="stamp"></div><svg class="ov" aria-hidden="true"></svg>${HAND}`;
+  book.querySelectorAll("button.cell").forEach(b=>b.onclick=()=>toggle(b));
+  book.querySelectorAll(".blank").forEach(b=>b.onclick=()=>toggleB(b));
+  setAct();hint.textContent="點一下寫錯的字就會圈起來，再點一次取消。座號、姓名有沒有寫也要檢查喔！";
+  left=T;$("tb").style.transition="none";$("tb").style.width="100%";
+  requestAnimationFrame(()=>{$("tb").style.transition="";});
+  clearInterval(timer);timer=setInterval(()=>{left--;$("tb").style.width=(left/T*100)+"%";if(left<=0){clearInterval(timer);submit()}},1000);
+}
+function setAct(){
+  act.innerHTML=`<button class="big" id="go">${circ.size+bmark.size?`改好了（${circ.size+bmark.size} 處）`:"全部寫對了！"}</button>`;
+  $("go").onclick=submit;
+}
+function toggle(b){
+  if(phase!=="mark")return;const i=+b.dataset.i;
+  if(circ.has(i)){circ.delete(i);b.querySelector("svg.mk")?.remove()}else{circ.add(i);circle(b,320)}
+  setAct();
+}
+function ovFit(){const ov=book.querySelector(".ov");ov.setAttribute("viewBox",`0 0 ${book.clientWidth} ${book.clientHeight}`);return ov}
+function qmark(btn,cls){
+  const ov=ovFit(),[bx,by]=off(btn),s=btn.offsetHeight/36,x=bx+btn.offsetWidth/2-10*s,y=by+4*s;
+  const P=a=>a.map(([u,v])=>[x+u*s,y+v*s]);
+  return draw(ov,seg(P([[0,8],[3,1],[11,-3],[19,2],[19,11],[11,17],[10,25]]),30),q=>q,380,"qm "+cls).then(()=>draw(ov,seg(P([[10,32],[10.6,34.5]]),4),q=>q,90,"qm "+cls));
+}
+function toggleB(b){
+  if(phase!=="mark")return;const k=b.dataset.b;
+  if(bmark.has(k)){bmark.delete(k);book.querySelectorAll(".qm-"+k).forEach(e=>e.remove())}else{bmark.add(k);qmark(b,"qm-"+k)}
+  setAct();
+}
+function bTag(k,cls,t){book.querySelector(`.blank[data-b="${k}"]`).insertAdjacentHTML("beforeend",`<span class="tag ${cls}">${t}</span>`)}
+function cellAt(i){return book.querySelector(`button.cell[data-i="${i}"]`)}
+function tagAt(i,cls,t){cellAt(i).insertAdjacentHTML("beforeend",`<span class="tag ${cls}">${t}</span>`)}
+function submit(){
+  if(phase!=="mark")return;phase="fix";clearInterval(timer);act.innerHTML="";hint.textContent="";
+  cur.res=[];cur.bonus=Math.ceil(Math.max(left,0)/5);maxScore+=(cur.e.length?cur.e.length*10:10)+5;
+  [...circ].forEach(i=>{if(!cur.idx.includes(i)){cellAt(i).classList.add("false");tagAt(i,"x","沒寫錯 −5");score-=5;cur.res.push({t:"x",i})}});
+  const todo=cur.idx.map((ix,k)=>({ix,k})).filter(o=>circ.has(o.ix));
+  cur.missK=cur.idx.map((ix,k)=>k).filter(k=>!circ.has(cur.idx[k]));
+  cur.missK.forEach(k=>{missed.push(cur.e[k]);cur.res.push({t:"miss",k})});
+  bmark.forEach(k=>{if(k===blank){score+=5;bTag(k,"ok","抓到了 +5");cur.res.push({t:"bok"})}else{book.querySelectorAll(".qm-"+k).forEach(e=>e.classList.add("qx"));bTag(k,"x","有寫喔");cur.res.push({t:"bx",k})}});
+  if(blank){maxScore+=5;if(!bmark.has(blank))cur.res.push({t:"bmiss"})}
+  $("hs").textContent=score;
+  const next=()=>{if(!todo.length){panel.classList.remove("on");finish();return}
+    const {ix,k}=todo.shift(),e=cur.e[k];score+=5;$("hs").textContent=score;
+    $("ph").innerHTML=e.w==="□"?"圈對了 +5！這個空格要補上什麼？":`圈對了 +5！把 <em>${G(e.w)}</em> 改成哪個字？`;
+    $("po").innerHTML=shuf([e.c,...e.d]).map(o=>`<button class="opt" data-v="${o}">${G(o)}</button>`).join("");
+    panel.classList.add("on");
+    $("po").querySelectorAll(".opt").forEach(b=>b.onclick=()=>{
+      const v=b.dataset.v,ok=v===e.c;scratch(320);cellAt(ix).insertAdjacentHTML("beforeend",`<span class="fix${e.w==="□"?" in":""}">${G(v)}</span>`);
+      if(ok){score+=5;tagAt(ix,"ok","改對 +5");cur.res.push({t:"ok",k})}else{tagAt(ix,"no",`應是「${e.c}」`);missed.push(e);cur.res.push({t:"bad",k,p:v})}
+      $("hs").textContent=score;next();
+    });
+    $("po").querySelector(".opt").focus();
+  };
+  next();
+}
+async function finish(){
+  phase="grade";
+  for(const k of cur.missK){const ix=cur.idx[k],c=cellAt(ix);await wait(200);await circle(c,480);scratch(260);
+    c.insertAdjacentHTML("beforeend",`<span class="fix${cur.e[k].w==="□"?" in":""}">${cur.e[k].c}</span>`);tagAt(ix,"no","漏掉了")}
+  if(blank&&!bmark.has(blank)){await wait(200);await qmark(book.querySelector(`.blank[data-b="${blank}"]`),"qm-"+blank);bTag(blank,"no","沒寫"+(blank==="name"?"姓名":"座號"))}
+  const cr=cur.res.filter(r=>["ok","bad","miss","x"].includes(r.t));
+  const allOk=!cur.e.length&&!circ.size,perfect=cur.e.length&&cr.length===cur.e.length&&cr.every(r=>r.t==="ok");
+  const good=cur.e.length?perfect:allOk;
+  if(allOk)score+=10;if(good)score+=cur.bonus;
+  $("hs").textContent=score;
+  if(good){await wait(200);await bigCheck()}
+  await wait(150);
+  const st=$("stamp");st.textContent=good?"甲上":cur.res.some(r=>r.t==="ok")?"甲":"再看";st.classList.add("on");thump();
+  let h="";
+  if(!cur.e.length)h+=allOk?`<div>句子完全沒錯，你沒有亂圈，<b>+10</b>！</div>`:`<div class="x">這個句子其實全對，沒有錯字喔！</div>`;
+  cur.res.forEach(r=>{const e=cur.e[r.k];
+    if(r.t==="ok")h+=`<div><b>${G(e.w)}→${e.c}</b>　${e.tip}</div>`;
+    if(r.t==="bad")h+=`<div class="no">你改成「${G(r.p)}」，正確是 <b>${G(e.w)}→${e.c}</b>　${e.tip}</div>`;
+    if(r.t==="miss")h+=`<div class="no">漏掉了 <b>${G(e.w)}→${e.c}</b>　${e.tip}</div>`;});
+  const BN={name:"姓名",seat:"座號"};
+  cur.res.forEach(r=>{if(r.t==="bok")h+=`<div>眼睛真利！這本沒寫<b>${BN[blank]}</b>，打個問號提醒他補上，<b>+5</b>。</div>`;
+    if(r.t==="bmiss")h+=`<div class="no">這本沒寫<b>${BN[blank]}</b>，老師幫你打了問號。沒發現不扣分，下次記得看一下喔！</div>`;
+    if(r.t==="bx")h+=`<div class="x">這本有寫${BN[r.k]}，不用打問號（不扣分）。</div>`});
+  if(good&&cur.bonus)h+=`<div>速度加分 <b>+${cur.bonus}</b></div>`;
+  fb.innerHTML=h;
+  act.innerHTML=`<button class="big" id="nx">${n<Q.length-1?"改下一本 →":"看我的國字腦等級"}</button>`;
+  $("nx").onclick=()=>{n++;n<Q.length?sheet():end()};$("nx").focus();
+}
+function end(){
+  $("hud").hidden=true;fb.innerHTML="";hint.textContent="";
+  const pct=Math.max(0,Math.round(score/maxScore*100));
+  const rank=pct>=90?"國字魔法校長":pct>=75?"金牌國語老師":pct>=55?"認真負責的老師":pct>=35?"實習老師，繼續加油":"新手老師，紅筆先別放下";
+  let best=0;try{best=+localStorage.getItem("gzBest")||0;if(score>best)localStorage.setItem("gzBest",score)}catch(e){}
+  const seen=[...new Map(missed.map(e=>[e.w+e.c,e])).values()];
+  book.innerHTML=`<div class="end"><div class="score">${score}</div><p>滿分 ${maxScore}（${pct}%）</p><div class="rank">${rank}</div>
+   <p>${score>best?"新紀錄！":"最高紀錄："+best+" 分"}</p>
+   ${seen.length?`<div class="review"><strong>這些字要再記一下：</strong>${seen.map(e=>`<div><b>${G(e.w)}→${e.c}</b>　${e.tip}</div>`).join("")}</div>`:`<p>一個都沒錯過，太強了！</p>`}</div>`;
+  act.innerHTML=`<button class="big" id="again">再改一疊作業</button>`;$("again").onclick=start;
+}
+function intro(){
+  book.innerHTML=`<div class="end"><div class="rank">今天有 10 本作業要改！</div>
+   <div class="rules"><div><b>① 圈錯字</b>點一下寫錯的字，紅筆就會圈起來。座號或姓名沒寫，點空格打個問號。</div>
+   <div><b>② 改正確</b>按「圈好了」，再選出正確的字。</div>
+   <div><b>③ 小心陷阱</b>有些作業完全沒錯，亂圈會扣分！忘了寫句號，就圈句子後面的空格。</div>
+   <div><b>④ 算分方式</b>圈對 +5、改對 +5、圈錯 −5，全對又快還有加分。</div></div></div>`;
+  act.innerHTML=`<button class="big" id="st">拿起紅筆，開始改作業</button>`;$("st").onclick=start;
+}
+$("snd").onclick=()=>{snd=!snd;$("snd").textContent="聲音："+(snd?"開":"關");if(snd)audio()};
+intro();
+}
+</script>
+</body>
+</html>
