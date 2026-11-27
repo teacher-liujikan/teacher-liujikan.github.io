@@ -269,7 +269,7 @@ function hRender(quiet){
 
 /* ============ 簡報（網址加 #show，用同一組密碼） ============ */
 const STAGES=[{t:'家人到齊',s:'準備開飯',time:'10:40'},{t:'開場致詞',s:'歡迎大家來到宸宸的一歲生日',time:'11:00'},{t:'成長影片',s:'一歲成長影片・配樂〈Pretty Little Baby〉',time:'11:05'},
-  {t:'抓周儀式',s:'看看宸宸會抓到什麼？',time:'11:10'},{t:'慶生切蛋糕',s:'一起唱生日快樂歌',time:'11:35'},{t:'合照與感謝',s:'全家福・大合照',time:'11:45'}];
+  {t:'抓周儀式',s:'看看宸宸會抓到什麼？',time:'11:12'},{t:'合照與感謝',s:'全家福・大合照',time:'11:35'}];
 const BLESS={'聽診器':'懸壺濟世','獎盃':'奪冠高手','放大鏡':'探索科學','手機':'科技達人','算盤':'精打細算','調色盤':'藝術天分','警槍':'守護正義','足球':'運動健將','印章':'當家作主','法官槌':'公正明理','書本':'好學多聞','金元寶':'財源滾滾','蔥':'聰明伶俐','蒜':'能寫會算','芹菜':'勤勞認真','虎頭鞋':'虎虎生風'};
 // 簡報順序：要調整就改這裡
 const SLIDES=[
@@ -280,8 +280,7 @@ const SLIDES=[
   {type:'reveal',q:3},{type:'reveal',q:4},{type:'reveal',q:5},
   {type:'next',stage:3},{type:'grab'},
   {type:'reveal',q:1},{type:'reveal',q:2},{type:'rank'},
-  {type:'next',stage:4},{type:'bg',stage:4},
-  {type:'next',stage:5},{type:'thanks'}
+  {type:'next',stage:4},{type:'thanks'}
 ];
 const slideName=x=>x.type==='bg'?`用餐背景（${STAGES[x.stage].t}）`:x.type==='next'?`下一個節目：${STAGES[x.stage].t}`:x.type==='reveal'?`揭曉 ${x.q+1}・${Q[x.q].t}`:x.type==='grab'?'抓周進行中（計時）':x.type==='rank'?'競猜總排行':'謝幕';
 const IDB={open(){return new Promise((res,rej)=>{const r=indexedDB.open(LK+'-media',1);r.onupgradeneeded=()=>r.result.createObjectStore('kv');r.onsuccess=()=>res(r.result);r.onerror=()=>rej(r.error)})},
@@ -292,6 +291,7 @@ const fileURL=f=>new Promise(res=>{const rd=new FileReader();rd.onerror=()=>res(
 const monthOf=n=>{const m=String(n||'').match(/(\d{1,2})\s*[Mm個]/);return m?m[1]+' 個月':''};
 async function startShow(){
   document.body.classList.remove('host');document.body.classList.add('show');
+  S.i=Math.max(0,Math.min(SLIDES.length-1,S.i|0));
   try{const m=await IDB.get('media');if(m)S.media=Object.assign(S.media,m)}catch(e){}
   app.innerHTML=`<div id="stage"></div><div class="ctl" id="ctl">
     <button id="sp">◀</button><span class="pg" id="pg"></span><button id="sn" class="main">下一張 ▶</button>
@@ -345,7 +345,7 @@ function draw(){
     </div></div>`;
   }
   else if(x.type==='next'){const s=STAGES[x.stage];
-    const bgc=['#f9c2d2','#f9c2d2','#bfe9e6','#ffe1a1','#dccbf3','#c9ecd9'][x.stage];
+    const bgc=['#f9c2d2','#f9c2d2','#bfe9e6','#ffe1a1','#c9ecd9'][x.stage];
     h=`<div class="sl" style="background:${bgc};display:flex;flex-direction:column;align-items:center;justify-content:center;gap:22px;text-align:center">
     <div class="blob" style="left:80px;top:70px;width:120px;height:120px;background:#fff;opacity:.5"></div><div class="blob" style="right:120px;bottom:90px;width:200px;height:200px;background:#fff;opacity:.4"></div><div class="blob" style="right:260px;top:110px;width:60px;height:60px;background:#ffe7a3"></div>
     <div style="font-size:26px;letter-spacing:8px;color:#5a3448;position:relative">下一個節目</div>
@@ -494,7 +494,7 @@ const MUS=(()=>{
 })();
 function musicFor(x){
   if(x.type==='bg')return 'twinkle';
-  if(x.type==='next')return x.stage===4?'bday':x.stage===5?'lullaby':'walk';
+  if(x.type==='next')return x.stage===4?'lullaby':'walk';
   if(x.type==='reveal')return S.rev[S.i]?'happy':'suspense';
   if(x.type==='grab')return S.pick?'happy':'grab';
   if(x.type==='rank')return 'happy';
