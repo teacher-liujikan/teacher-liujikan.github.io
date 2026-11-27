@@ -1062,8 +1062,8 @@ function intro(){
 <g transform="translate(430 196) rotate(-18)"><rect x="0" y="-6" width="120" height="12" rx="4" fill="#d7263d"/><path d="M0 -6 L-18 0 L0 6Z" fill="#efe6d0"/><path d="M-18 0 L-10 -3 L-10 3Z" fill="#8f1424"/></g>
 </svg><div class="rank">噹──噹──噹──噹──</div>
    <p class="story">上課鐘響了，小朋友都去上科任課了。<br>今天，你是<b>${GN()}</b>的老師。<br>桌上有 <b>10 本國語作業</b>，要趕在下一節課前改完！</p></div>`;
-  corner();if(locked)book.querySelector(".story").insertAdjacentHTML("beforeend",`<br>今天要改的是 <b>${sel.g} ${label()}</b>。`);
-  act.innerHTML=`<button class="big" id="st">坐下來，拿起紅筆</button>${locked?`<button class="big alt" id="tch">我是老師，要改範圍</button>`:""}`;$("st").onclick=()=>{chime();locked?start():pick()};if(locked)$("tch").onclick=pick;
+  corner();if(lessons.length)book.querySelector(".story").insertAdjacentHTML("beforeend",`<br>今天要改的是 <b>${sel.g} ${label()}</b>。`);
+  act.innerHTML=`<button class="big" id="st">坐下來，拿起紅筆</button><button class="big alt" id="tch">${locked?"我是老師，要改範圍":"重新選範圍"}</button>`;$("st").onclick=()=>{chime();start()};$("tch").onclick=pick;
 }
 function label(){const a=lessons.slice().sort((x,y)=>x-y);return a.length===1?"第"+CN2[a[0]]+"課":a.every((x,k)=>!k||x===a[k-1]+1)?"第"+CN2[a[0]]+"～"+CN2[a[a.length-1]]+"課":"第"+a.map(x=>CN2[x]).join("、")+"課"}
 const VC={"南一":"n","康軒":"k","翰林":"h"},GC={"三上":"3","四上":"4","五上":"5","六上":"6"};
@@ -1102,14 +1102,13 @@ function pick(){
   book.querySelectorAll("[data-l]").forEach(b=>b.onclick=()=>{const L=+b.dataset.l;lessons=lessons.includes(L)?lessons.filter(x=>x!==L):lessons.concat(L);pick()});
   book.querySelectorAll("[data-all]").forEach(b=>b.onclick=()=>{lessons=lessons.length===ready.length?[]:ready.slice();pick()});
   act.innerHTML=lessons.length?`<button class="big" id="st">開始改作業（${label()}）</button><button class="big alt" id="mk">產生學生練習網頁和 QR code</button>`:"";
-  if(lessons.length){$("st").onclick=()=>start();$("mk").onclick=()=>{locked=true;try{history.replaceState(null,"","#"+linkOf().split("#")[1])}catch(e){}corner();share();intro()}}
+  if(lessons.length){$("st").onclick=()=>intro();$("mk").onclick=()=>{locked=true;try{history.replaceState(null,"","#"+linkOf().split("#")[1])}catch(e){}corner();share();intro()}}
 }
 function save(){try{localStorage.setItem("gzSel",JSON.stringify(sel))}catch(e){}}
 $("snd").onclick=()=>{snd=!snd;$("snd").textContent="聲音："+(snd?"開":"關");if(snd)audio()};
 $("qrc").onclick=share;$("ovx").onclick=()=>$("ov").classList.remove("on");$("ov").onclick=e=>{if(e.target===$("ov"))$("ov").classList.remove("on")};
 $("ovc").onclick=async()=>{try{await navigator.clipboard.writeText(linkOf());$("ovc").textContent="已複製"}catch(e){$("ovc").textContent="請長按上面的連結複製"}setTimeout(()=>$("ovc").textContent="複製連結",1800)};
-fromHash();
-intro();
+fromHash()?intro():pick();
 }
 </script>
 </body>
