@@ -1,0 +1,354 @@
+<!DOCTYPE html>
+<html lang="zh-Hant-TW">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>讀報學習單檢討</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700;900&family=Noto+Serif+TC:wght@400;700;900&display=swap" rel="stylesheet">
+<style>
+/* VOICE: 老師上課用的檢討工具，安靜清楚
+   IDEA: 投影在黑板上的學習單，紅筆對答案
+   PICTURE: 學習單本身就是畫面，點空格出現紅色答案
+   COLOUR and TYPE: 深藍工具列＋白紙＋紅筆；Noto Sans TC / Noto Serif TC
+   LAYOUT: 上方工具列，下面兩張 A4 依序排列，自動縮放到螢幕寬 */
+:root{color-scheme:light;--blue:#1f4e79;--red:#d6261f;--desk:light-dark(#e9edf1,#1c2229)}
+:root[data-theme=dark]{color-scheme:dark}:root[data-theme=light]{color-scheme:light}
+*{box-sizing:border-box;min-width:0}
+body{margin:0;background:var(--desk);font:16px/1.5 'Noto Sans TC',sans-serif;color:#1a1a1a;overflow-x:clip}
+.bar{position:sticky;top:0;z-index:5;background:var(--blue);color:#fff;padding:10px max(3vw,12px);display:flex;flex-wrap:wrap;align-items:center;gap:8px 14px;box-shadow:0 2px 8px rgba(0,0,0,.2)}
+.bar h1{margin:0;font:900 22px/1.2 'Noto Serif TC',serif;letter-spacing:2px;margin-inline-end:auto}
+.bar h1 small{font:500 13px 'Noto Sans TC',sans-serif;opacity:.85;letter-spacing:0;margin-inline-start:10px}
+.btns{display:flex;flex-wrap:wrap;gap:8px}
+button,.back{min-height:44px;padding:0 16px;border-radius:10px;border:2px solid #fff;background:transparent;color:#fff;font:700 16px 'Noto Sans TC',sans-serif;cursor:pointer;display:inline-flex;align-items:center;text-decoration:none}
+button.solid{background:#fff;color:var(--blue)}
+button.red{background:var(--red);border-color:var(--red)}
+button:focus-visible,.back:focus-visible{outline:3px solid #ffd23f;outline-offset:2px}
+button:disabled{opacity:.6;cursor:wait}
+.msg{width:100%;font-size:14px;min-height:0}
+.msg:empty{display:none}
+.tabs{display:flex;gap:6px;justify-content:center;padding:14px 12px 0}
+.tabs a{padding:6px 16px;border-radius:999px;background:#fff;color:var(--blue);font-weight:700;text-decoration:none;border:2px solid var(--blue)}
+main{display:flex;flex-direction:column;align-items:center;gap:28px;padding:18px 12px 60px}
+.holder{width:100%;max-width:794px}
+.scaler{transform-origin:top left;width:794px}
+.sheet{width:794px;height:1123px;background:#fff;box-shadow:0 4px 18px rgba(0,0,0,.18);position:relative}
+.slot,.tap,.lrow{cursor:pointer}
+.a{visibility:hidden}
+#stage{position:fixed;left:-10000px;top:0}
+</style>
+</head>
+<body>
+<div class="bar">
+  <h1>讀報學習單檢討<small>點一下空格或左邊的名稱，就會出現答案</small></h1>
+  <div class="btns">
+    <button class="solid" id="all">全部顯示答案</button>
+    <button id="none">全部隱藏</button>
+    <button class="red" id="pdfS">匯出 PDF（學生版）</button>
+    <button class="red" id="pdfT">匯出 PDF（解答版）</button>
+    <a class="back" href="../">回讀報小學堂</a>
+  </div>
+  <div class="msg" id="msg" role="status"></div>
+</div>
+<nav class="tabs"><a href="#page1">第 1 頁</a><a href="#page2">第 2 頁</a></nav>
+<main>
+  <div class="holder" id="page1"><div class="scaler"><div class="sheet" data-name="第1頁"><div style="width: 794px; height: 1123px; box-sizing: border-box; padding: 40px 48px 32px; display: flex; flex-direction: column; gap: 18px; font-family: 'Noto Sans TC', sans-serif; color: #1a1a1a; background: #ffffff">
+
+  <!-- 標頭 -->
+  <div style="display: flex; flex-direction: column; gap: 12px">
+    <div style="display: flex; align-items: center; justify-content: space-between; gap: 16px">
+      <div style="display: flex; flex-direction: column; gap: 2px">
+        <div style="font-size: 15px; font-weight: 700; color: #1f4e79; letter-spacing: 2px">讀報小學堂．學習單</div>
+        <h1 style="margin: 0; font-family: 'Noto Serif TC', serif; font-size: 36px; font-weight: 900; letter-spacing: 3px">認識報紙的版面</h1>
+      </div>
+      <div style="display: flex; align-items: center; justify-content: center; padding: 0 18px; height: 60px; background: #1f4e79; border-radius: 14px; color: #ffffff; font-family: 'Noto Serif TC', serif; font-size: 24px; font-weight: 900; letter-spacing: 3px; flex-shrink: 0">環「報」世界</div>
+    </div>
+    <div style="display: flex; gap: 28px; font-size: 16px; font-weight: 500; padding-bottom: 12px; border-bottom: 2px solid #1a1a1a">
+      <div>班級：<span style="display: inline-block; width: 90px; border-bottom: 1.5px solid #1a1a1a"></span></div>
+      <div>座號：<span style="display: inline-block; width: 70px; border-bottom: 1.5px solid #1a1a1a"></span></div>
+      <div>姓名：<span style="display: inline-block; width: 160px; border-bottom: 1.5px solid #1a1a1a"></span></div>
+    </div>
+  </div>
+
+  <!-- 一、填代號 -->
+  <div style="display: flex; flex-direction: column; gap: 10px">
+    <div style="display: flex; align-items: baseline; gap: 10px">
+      <div style="font-size: 20px; font-weight: 900; color: #ffffff; background: #1f4e79; padding: 2px 12px; border-radius: 6px">一、填代號</div>
+      <div style="font-size: 17px">6 個元素在哪裡？把代號表的英文字母寫進（　）。</div>
+    </div>
+    <div style="display: flex; gap: 18px; align-items: flex-start">
+
+      <!-- 模擬報紙 -->
+      <div style="width: 456px; box-sizing: border-box; border: 2px solid #1a1a1a; padding: 12px 14px 14px; display: flex; flex-direction: column; gap: 10px; background: #fbfaf6">
+
+        <!-- 第一排：報頭／精選提要／廣告 -->
+        <div style="display: flex; gap: 8px; align-items: stretch; border-bottom: 4px double #1a1a1a; padding-bottom: 8px">
+          <div style="position: relative; width: 168px; display: flex; flex-direction: column; justify-content: center; gap: 2px; padding-right: 6px">
+            <span style="font-family: 'Noto Serif TC', serif; font-size: 36px; font-weight: 900; letter-spacing: 4px; line-height: 1.2; color: #1a1a1a">陽明小報</span>
+            <span style="font-size: 10px; line-height: 1.4; color: #333">中華民國115年11月27日 星期五<br>第1號　臺南市善化區</span>
+            <span style="position: absolute; top: -4px; right: 0; display: flex; align-items: center; gap: 2px; font-size: 13px; font-weight: 700">①<span class="slot" style="display: inline-flex; align-items: center; justify-content: center; width: 24px; height: 22px; border: 1.5px solid #1a1a1a; background: #fff; border-radius: 4px"><b class="a" style="color:#d6261f;font-family:'Noto Sans TC',sans-serif;font-weight:900;font-size:16px;line-height:1">C</b></span></span>
+          </div>
+          <div style="position: relative; flex: 1; border-left: 1px solid #555; padding: 0 8px; display: flex; flex-direction: column; gap: 2px; font-size: 11px; line-height: 1.45">
+            <span style="font-weight: 900; font-size: 12px">精選提要</span>
+            <span>跳繩比賽……2版</span>
+            <span>圖書室新書……3版</span>
+            <span>冬天保暖……4版</span>
+            <span style="position: absolute; bottom: -2px; right: 4px; display: flex; align-items: center; gap: 2px; font-size: 13px; font-weight: 700">②<span class="slot" style="display: inline-flex; align-items: center; justify-content: center; width: 24px; height: 22px; border: 1.5px solid #1a1a1a; background: #fff; border-radius: 4px"><b class="a" style="color:#d6261f;font-family:'Noto Sans TC',sans-serif;font-weight:900;font-size:16px;line-height:1">F</b></span></span>
+          </div>
+          <div style="position: relative; width: 92px; border: 2px solid #1a1a1a; background: #ffffff; padding: 6px; display: flex; flex-direction: column; justify-content: center; text-align: center; gap: 2px">
+            <span style="font-size: 14px; font-weight: 900; line-height: 1.3">冬季閱讀營</span>
+            <span style="font-size: 11px">熱烈報名中！</span>
+            <span style="position: absolute; bottom: -12px; right: -10px; display: flex; align-items: center; gap: 2px; font-size: 13px; font-weight: 700; background: #fbfaf6; padding: 0 2px">③<span class="slot" style="display: inline-flex; align-items: center; justify-content: center; width: 24px; height: 22px; border: 1.5px solid #1a1a1a; background: #fff; border-radius: 4px"><b class="a" style="color:#d6261f;font-family:'Noto Sans TC',sans-serif;font-weight:900;font-size:16px;line-height:1">B</b></span></span>
+          </div>
+        </div>
+
+        <!-- 新聞標題 -->
+        <div style="display: flex; align-items: center; justify-content: space-between">
+          <span style="font-family: 'Noto Serif TC', serif; font-size: 30px; font-weight: 900; letter-spacing: 1px">校園的胡麻開花了！</span>
+          <span style="display: flex; align-items: center; gap: 2px; font-size: 13px; font-weight: 700">④<span class="slot" style="display: inline-flex; align-items: center; justify-content: center; width: 24px; height: 22px; border: 1.5px solid #1a1a1a; background: #fff; border-radius: 4px"><b class="a" style="color:#d6261f;font-family:'Noto Sans TC',sans-serif;font-weight:900;font-size:16px;line-height:1">E</b></span></span>
+        </div>
+
+        <!-- 新聞圖片＋新聞報導 -->
+        <div style="display: flex; gap: 14px">
+          <div style="width: 170px; display: flex; flex-direction: column; gap: 5px">
+            <div style="position: relative; height: 156px; border: 1.5px solid #1a1a1a; background: #ffffff; display: flex; align-items: center; justify-content: center">
+              <svg width="84" height="84" viewBox="0 0 80 80" fill="none" stroke="#1a1a1a" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <path d="M40 78 V36"/>
+                <path d="M40 58 C30 54 24 46 24 40 C32 42 38 48 40 58"/>
+                <path d="M40 50 C50 46 56 38 56 32 C48 34 42 40 40 50"/>
+                <path d="M33 24 C33 14 36 8 40 6 C44 8 47 14 47 24 C47 30 44 36 40 36 C36 36 33 30 33 24 Z"/>
+                <path d="M40 18 V30"/>
+              </svg>
+              <span style="position: absolute; top: 4px; right: 4px; display: flex; align-items: center; gap: 2px; font-size: 13px; font-weight: 700">⑤<span class="slot" style="display: inline-flex; align-items: center; justify-content: center; width: 24px; height: 22px; border: 1.5px solid #1a1a1a; background: #fff; border-radius: 4px"><b class="a" style="color:#d6261f;font-family:'Noto Sans TC',sans-serif;font-weight:900;font-size:16px;line-height:1">D</b></span></span>
+            </div>
+            <span style="font-size: 12px; color: #333; line-height: 1.4">▲三年級小朋友在校園菜園觀察胡麻花。</span>
+          </div>
+          <div style="flex: 1; display: flex; flex-direction: column; gap: 6px">
+            <div style="display: flex; align-items: center; justify-content: space-between; gap: 4px">
+              <span style="font-size: 11px; font-weight: 700">【記者 林小華／陽明國小報導】</span>
+              <span style="display: flex; align-items: center; gap: 2px; font-size: 13px; font-weight: 700; flex-shrink: 0">⑥<span class="slot" style="display: inline-flex; align-items: center; justify-content: center; width: 24px; height: 22px; border: 1.5px solid #1a1a1a; background: #fff; border-radius: 4px"><b class="a" style="color:#d6261f;font-family:'Noto Sans TC',sans-serif;font-weight:900;font-size:16px;line-height:1">A</b></span></span>
+            </div>
+            <div style="height: 5px; background: #8a8a8a; border-radius: 2px"></div>
+            <div style="height: 5px; background: #8a8a8a; border-radius: 2px"></div>
+            <div style="height: 5px; background: #8a8a8a; border-radius: 2px"></div>
+            <div style="height: 5px; background: #8a8a8a; border-radius: 2px"></div>
+            <div style="height: 5px; background: #8a8a8a; border-radius: 2px"></div>
+            <div style="height: 5px; background: #8a8a8a; border-radius: 2px"></div>
+            <div style="height: 5px; background: #8a8a8a; border-radius: 2px"></div>
+            <div style="height: 5px; background: #8a8a8a; border-radius: 2px"></div>
+            <div style="height: 5px; background: #8a8a8a; border-radius: 2px"></div>
+            <div style="height: 5px; background: #8a8a8a; border-radius: 2px"></div>
+            <div style="height: 5px; background: #8a8a8a; border-radius: 2px"></div>
+            <div style="height: 5px; background: #8a8a8a; border-radius: 2px"></div>
+            <div style="height: 5px; background: #8a8a8a; border-radius: 2px"></div>
+            <div style="height: 5px; width: 60%; background: #8a8a8a; border-radius: 2px"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 代號表 -->
+      <div style="flex: 1; border: 2px solid #1f4e79; border-radius: 14px; padding: 12px 14px; display: flex; flex-direction: column; gap: 8px">
+        <div style="font-size: 18px; font-weight: 900; color: #1f4e79; text-align: center; padding-bottom: 6px; border-bottom: 1.5px solid #1f4e79">代號表</div>
+        <div style="display: flex; flex-direction: column; gap: 14px; padding-top: 6px">
+          <div style="display: flex; align-items: center; gap: 12px; font-size: 22px; font-weight: 700"><span style="width: 36px; height: 36px; border-radius: 50%; background: #1f4e79; color: #fff; display: flex; align-items: center; justify-content: center; font-size: 19px; flex-shrink: 0">A</span>新聞報導</div>
+          <div style="display: flex; align-items: center; gap: 12px; font-size: 22px; font-weight: 700"><span style="width: 36px; height: 36px; border-radius: 50%; background: #1f4e79; color: #fff; display: flex; align-items: center; justify-content: center; font-size: 19px; flex-shrink: 0">B</span>廣告</div>
+          <div style="display: flex; align-items: center; gap: 12px; font-size: 22px; font-weight: 700"><span style="width: 36px; height: 36px; border-radius: 50%; background: #1f4e79; color: #fff; display: flex; align-items: center; justify-content: center; font-size: 19px; flex-shrink: 0">C</span>報頭</div>
+          <div style="display: flex; align-items: center; gap: 12px; font-size: 22px; font-weight: 700"><span style="width: 36px; height: 36px; border-radius: 50%; background: #1f4e79; color: #fff; display: flex; align-items: center; justify-content: center; font-size: 19px; flex-shrink: 0">D</span>新聞圖片</div>
+          <div style="display: flex; align-items: center; gap: 12px; font-size: 22px; font-weight: 700"><span style="width: 36px; height: 36px; border-radius: 50%; background: #1f4e79; color: #fff; display: flex; align-items: center; justify-content: center; font-size: 19px; flex-shrink: 0">E</span>新聞標題</div>
+          <div style="display: flex; align-items: center; gap: 12px; font-size: 22px; font-weight: 700"><span style="width: 36px; height: 36px; border-radius: 50%; background: #1f4e79; color: #fff; display: flex; align-items: center; justify-content: center; font-size: 19px; flex-shrink: 0">F</span>精選提要</div>
+        </div>
+        <div style="font-size: 15px; color: #444; line-height: 1.5; padding-top: 8px; border-top: 1px dashed #1f4e79">小提示：看到「記者○○○報導」，就是新聞報導喔！</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 二、連連看 -->
+  <div style="display: flex; flex-direction: column; gap: 10px">
+    <div style="display: flex; align-items: baseline; gap: 10px">
+      <div style="font-size: 20px; font-weight: 900; color: #ffffff; background: #1f4e79; padding: 2px 12px; border-radius: 6px">二、連連看</div>
+      <div style="font-size: 17px">每個元素有什麼工作？用直線把「●」和「●」連起來。</div>
+    </div>
+    <div style="display: flex; align-items: stretch; padding: 4px 4px 0">
+      <div style="display: flex; flex-direction: column; gap: 12px; width: 180px">
+        <div class="lrow" data-i="0" style="cursor: pointer; height: 46px; display: flex; align-items: center; justify-content: space-between; font-size: 22px; font-weight: 700"><span style="border: 2px solid #1a1a1a; border-radius: 8px; padding: 0 14px; line-height: 40px">報頭</span><span style="width: 12px; height: 12px; border-radius: 50%; background: #1a1a1a"></span></div>
+        <div class="lrow" data-i="1" style="cursor: pointer; height: 46px; display: flex; align-items: center; justify-content: space-between; font-size: 22px; font-weight: 700"><span style="border: 2px solid #1a1a1a; border-radius: 8px; padding: 0 14px; line-height: 40px">精選提要</span><span style="width: 12px; height: 12px; border-radius: 50%; background: #1a1a1a"></span></div>
+        <div class="lrow" data-i="2" style="cursor: pointer; height: 46px; display: flex; align-items: center; justify-content: space-between; font-size: 22px; font-weight: 700"><span style="border: 2px solid #1a1a1a; border-radius: 8px; padding: 0 14px; line-height: 40px">新聞標題</span><span style="width: 12px; height: 12px; border-radius: 50%; background: #1a1a1a"></span></div>
+        <div class="lrow" data-i="3" style="cursor: pointer; height: 46px; display: flex; align-items: center; justify-content: space-between; font-size: 22px; font-weight: 700"><span style="border: 2px solid #1a1a1a; border-radius: 8px; padding: 0 14px; line-height: 40px">新聞報導</span><span style="width: 12px; height: 12px; border-radius: 50%; background: #1a1a1a"></span></div>
+        <div class="lrow" data-i="4" style="cursor: pointer; height: 46px; display: flex; align-items: center; justify-content: space-between; font-size: 22px; font-weight: 700"><span style="border: 2px solid #1a1a1a; border-radius: 8px; padding: 0 14px; line-height: 40px">新聞圖片</span><span style="width: 12px; height: 12px; border-radius: 50%; background: #1a1a1a"></span></div>
+        <div class="lrow" data-i="5" style="cursor: pointer; height: 46px; display: flex; align-items: center; justify-content: space-between; font-size: 22px; font-weight: 700"><span style="border: 2px solid #1a1a1a; border-radius: 8px; padding: 0 14px; line-height: 40px">廣告</span><span style="width: 12px; height: 12px; border-radius: 50%; background: #1a1a1a"></span></div>
+      </div>
+      <div style="width: 80px; position: relative"><svg width="80" height="336" viewBox="0 0 80 336" style="position:absolute;left:0;top:0;overflow:visible" aria-hidden="true"><line class="a ln" data-i="0" x1="-6" y1="23" x2="86" y2="139" stroke="#d6261f" stroke-width="3" stroke-linecap="round"/><line class="a ln" data-i="1" x1="-6" y1="81" x2="86" y2="313" stroke="#d6261f" stroke-width="3" stroke-linecap="round"/><line class="a ln" data-i="2" x1="-6" y1="139" x2="86" y2="255" stroke="#d6261f" stroke-width="3" stroke-linecap="round"/><line class="a ln" data-i="3" x1="-6" y1="197" x2="86" y2="81" stroke="#d6261f" stroke-width="3" stroke-linecap="round"/><line class="a ln" data-i="4" x1="-6" y1="255" x2="86" y2="23" stroke="#d6261f" stroke-width="3" stroke-linecap="round"/><line class="a ln" data-i="5" x1="-6" y1="313" x2="86" y2="197" stroke="#d6261f" stroke-width="3" stroke-linecap="round"/></svg></div>
+      <div style="flex: 1; display: flex; flex-direction: column; gap: 12px">
+        <div style="height: 46px; display: flex; align-items: center; gap: 12px; font-size: 19px"><span style="width: 12px; height: 12px; border-radius: 50%; background: #1a1a1a; flex-shrink: 0"></span>用照片讓大家看到新聞現場。</div>
+        <div style="height: 46px; display: flex; align-items: center; gap: 12px; font-size: 19px"><span style="width: 12px; height: 12px; border-radius: 50%; background: #1a1a1a; flex-shrink: 0"></span>只寫事情本身，開頭寫「記者○○○報導」。</div>
+        <div style="height: 46px; display: flex; align-items: center; gap: 12px; font-size: 19px"><span style="width: 12px; height: 12px; border-radius: 50%; background: #1a1a1a; flex-shrink: 0"></span>寫著報紙的名字，還有報號和發行資料。</div>
+        <div style="height: 46px; display: flex; align-items: center; gap: 12px; font-size: 19px"><span style="width: 12px; height: 12px; border-radius: 50%; background: #1a1a1a; flex-shrink: 0"></span>推廣商品、想法或服務，它不是新聞。</div>
+        <div style="height: 46px; display: flex; align-items: center; gap: 12px; font-size: 19px"><span style="width: 12px; height: 12px; border-radius: 50%; background: #1a1a1a; flex-shrink: 0"></span>用短短的字，說出新聞的主題和重點。</div>
+        <div style="height: 46px; display: flex; align-items: center; gap: 12px; font-size: 19px"><span style="width: 12px; height: 12px; border-radius: 50%; background: #1a1a1a; flex-shrink: 0"></span>推薦今天的重點新聞，告訴你在第幾版。</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 頁尾 -->
+  <div style="margin-top: auto; display: flex; justify-content: space-between; align-items: center; font-size: 13px; color: #444; border-top: 1px solid #999; padding-top: 8px">
+    <span>讀報學習單</span>
+    <span style="font-weight: 700; color: #1a1a1a">— 第 1 頁 —</span>
+    <span>老師媽咪／范范老師</span>
+  </div>
+</div></div></div></div>
+  <div class="holder" id="page2"><div class="scaler"><div class="sheet" data-name="第2頁"><div style="width: 794px; height: 1123px; box-sizing: border-box; padding: 40px 48px 32px; display: flex; flex-direction: column; gap: 14px; font-family: 'Noto Sans TC', sans-serif; color: #1a1a1a; background: #ffffff">
+
+  <!-- 標頭 -->
+  <div style="display: flex; flex-direction: column; gap: 12px">
+    <div style="display: flex; align-items: center; justify-content: space-between; gap: 16px">
+      <div style="display: flex; flex-direction: column; gap: 2px">
+        <div style="font-size: 15px; font-weight: 700; color: #1f4e79; letter-spacing: 2px">讀報小學堂．學習單</div>
+        <h1 style="margin: 0; font-family: 'Noto Serif TC', serif; font-size: 36px; font-weight: 900; letter-spacing: 3px">我是小小編輯</h1>
+      </div>
+      <div style="display: flex; align-items: center; justify-content: center; padding: 0 18px; height: 60px; background: #1f4e79; border-radius: 14px; color: #ffffff; font-family: 'Noto Serif TC', serif; font-size: 24px; font-weight: 900; letter-spacing: 3px; flex-shrink: 0">環「報」世界</div>
+    </div>
+    <div style="display: flex; gap: 28px; font-size: 16px; font-weight: 500; padding-bottom: 12px; border-bottom: 2px solid #1a1a1a">
+      <div>班級：<span style="display: inline-block; width: 90px; border-bottom: 1.5px solid #1a1a1a"></span></div>
+      <div>座號：<span style="display: inline-block; width: 70px; border-bottom: 1.5px solid #1a1a1a"></span></div>
+      <div>姓名：<span style="display: inline-block; width: 160px; border-bottom: 1.5px solid #1a1a1a"></span></div>
+    </div>
+  </div>
+
+  <!-- 任務說明 -->
+  <div style="display: flex; flex-direction: column; gap: 8px">
+    <div style="font-size: 16px">你是報社的小編輯！完成 <b>4 個任務</b>，這份報紙就出刊了。</div>
+    <div style="display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 8px">
+      <div style="display: flex; align-items: flex-start; gap: 8px; border: 2px solid #1f4e79; border-radius: 10px; padding: 6px 10px"><span style="width: 26px; height: 26px; border-radius: 50%; background: #1f4e79; color: #fff; display: flex; align-items: center; justify-content: center; font-weight: 900; flex-shrink: 0">1</span><span style="font-size: 14px; line-height: 1.45"><b style="font-size: 16px">取報紙名稱</b><br>大大的最醒目</span></div>
+      <div style="display: flex; align-items: flex-start; gap: 8px; border: 2px solid #1f4e79; border-radius: 10px; padding: 6px 10px"><span style="width: 26px; height: 26px; border-radius: 50%; background: #1f4e79; color: #fff; display: flex; align-items: center; justify-content: center; font-weight: 900; flex-shrink: 0">2</span><span style="font-size: 14px; line-height: 1.45"><b style="font-size: 16px">幫新聞下標題</b><br>10字內說出重點</span></div>
+      <div style="display: flex; align-items: flex-start; gap: 8px; border: 2px solid #1f4e79; border-radius: 10px; padding: 6px 10px"><span style="width: 26px; height: 26px; border-radius: 50%; background: #1f4e79; color: #fff; display: flex; align-items: center; justify-content: center; font-weight: 900; flex-shrink: 0">3</span><span style="font-size: 14px; line-height: 1.45"><b style="font-size: 16px">畫新聞圖片</b><br>畫出跳繩比賽</span></div>
+      <div style="display: flex; align-items: flex-start; gap: 8px; border: 2px solid #1f4e79; border-radius: 10px; padding: 6px 10px"><span style="width: 26px; height: 26px; border-radius: 50%; background: #1f4e79; color: #fff; display: flex; align-items: center; justify-content: center; font-weight: 900; flex-shrink: 0">4</span><span style="font-size: 14px; line-height: 1.45"><b style="font-size: 16px">畫一個廣告</b><br>賣什麼？好在哪？</span></div>
+    </div>
+  </div>
+
+  <!-- 報紙 -->
+  <div style="flex: 1; border: 1.5px solid #1a1a1a; padding: 12px 18px 14px; display: flex; flex-direction: column; gap: 10px; background: #fbfaf6; font-family: 'Noto Serif TC', serif">
+
+    <!-- 報頭 -->
+    <div style="display: flex; align-items: stretch; gap: 14px; border-bottom: 5px double #1a1a1a; padding-bottom: 8px">
+      <div style="flex: 1; position: relative; display: flex; align-items: center; justify-content: center; gap: 8px; width: 514px; height: 150px">
+        <span style="position: absolute; top: 0; left: 0; width: 24px; height: 24px; border-radius: 50%; background: #1a1a1a; color: #fff; display: flex; align-items: center; justify-content: center; font-family: 'Noto Sans TC', sans-serif; font-size: 13px; font-weight: 900">1</span>
+        <span style="font-size: 48px; font-weight: 900; line-height: 1">（</span>
+        <span style="width: 260px; height: 74px; border: 2px dashed #1a1a1a; border-radius: 6px; background: #ffffff; position: relative" class="tap"><b class="a slot2" style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;text-align:center;padding:6px 30px;color:#d6261f;font-family:'Noto Sans TC',sans-serif;font-weight:900;font-size:30px;line-height:1.35">例：陽光</b></span>
+        <span style="font-size: 48px; font-weight: 900; line-height: 1">）</span>
+        <span style="font-size: 54px; font-weight: 900; letter-spacing: 6px; line-height: 1">日報</span>
+      </div>
+      <div style="width: 150px; border-left: 1.5px solid #1a1a1a; padding-left: 12px; display: flex; flex-direction: column; justify-content: center; gap: 3px; font-family: 'Noto Sans TC', sans-serif; font-size: 12px; line-height: 1.4; color: #222">
+        <span style="font-size: 15px; font-weight: 900">第 1 版　頭版</span>
+        <span>中華民國115年11月27日</span>
+        <span>星期五　天氣：晴</span>
+        <span>創刊號　每份5元</span>
+      </div>
+    </div>
+
+    <!-- 頭條標題 -->
+    <div class="tap" style="position: relative; height: 66px; border: 2px dashed #1a1a1a; border-radius: 6px; background: #ffffff"><b class="a slot2" style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;text-align:center;padding:6px 30px;color:#d6261f;font-family:'Noto Sans TC',sans-serif;font-weight:900;font-size:28px;line-height:1.35">參考：三年三班跳繩奪冠</b>
+      <span style="position: absolute; top: 6px; left: 6px; width: 24px; height: 24px; border-radius: 50%; background: #1a1a1a; color: #fff; display: flex; align-items: center; justify-content: center; font-family: 'Noto Sans TC', sans-serif; font-size: 13px; font-weight: 900">2</span>
+      <span style="position: absolute; right: 10px; bottom: 6px; font-family: 'Noto Sans TC', sans-serif; font-size: 11px; color: #555">新聞標題</span>
+    </div>
+
+    <!-- 頭條新聞 -->
+    <div style="display: flex; gap: 16px; border-bottom: 1.5px solid #1a1a1a; padding-bottom: 10px">
+      <div style="flex: 1; column-count: 2; column-gap: 18px; column-rule: 1px solid #888; font-size: 15px; line-height: 1.75; text-align: justify">
+        <p style="margin: 0; font-weight: 700">【記者 林小華／陽明國小報導】本週三下午，三年級的小朋友在操場上舉行跳繩比賽。比賽分成個人賽和團體賽，大家一邊跳一邊數，加油聲響個不停。</p>
+        <p style="margin: 0">　　個人賽中，有一位同學一分鐘跳了一百多下，讓大家拍手叫好。團體賽時，每班派出十位同學一起跳大繩，只要有一個人絆到，就要重新開始。</p>
+        <p style="margin: 0">　　最後，三年三班一起跳了一百二十下，得到團體賽第一名。同學們開心的說：「只要大家一起練習，就能越來越進步！」</p>
+      </div>
+      <div style="width: 190px; display: flex; flex-direction: column; gap: 5px; border-left: 1px solid #888; padding-left: 14px">
+        <div class="tap" style="position: relative; height: 150px; border: 2px dashed #1a1a1a; border-radius: 6px; background: #ffffff"><b class="a slot2" style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;text-align:center;padding:6px 30px;color:#d6261f;font-family:'Noto Sans TC',sans-serif;font-weight:900;font-size:16px;line-height:1.35">畫出跳繩比賽的樣子</b>
+          <span style="position: absolute; top: 6px; left: 6px; width: 24px; height: 24px; border-radius: 50%; background: #1a1a1a; color: #fff; display: flex; align-items: center; justify-content: center; font-family: 'Noto Sans TC', sans-serif; font-size: 13px; font-weight: 900">3</span>
+          <span style="position: absolute; right: 8px; bottom: 6px; font-family: 'Noto Sans TC', sans-serif; font-size: 11px; color: #555">新聞圖片</span>
+        </div>
+        <div style="font-family: 'Noto Sans TC', sans-serif; font-size: 12px; line-height: 1.4; color: #222">▲三年級同學參加跳繩比賽，每個人都很認真。</div>
+      </div>
+    </div>
+
+    <!-- 下半版：簡訊＋廣告 -->
+    <div style="flex: 1; display: flex; gap: 16px; min-height: 0">
+      <div style="width: 190px; display: flex; flex-direction: column; gap: 6px">
+        <div style="font-size: 18px; font-weight: 900; border-bottom: 2px solid #1a1a1a; padding-bottom: 2px">校園簡訊</div>
+        <div style="font-size: 14px; line-height: 1.7; text-align: justify">◆下週三是全校大掃除日，請同學記得帶抹布。</div>
+        <div style="font-size: 14px; line-height: 1.7; text-align: justify; border-top: 1px dotted #888; padding-top: 4px">◆圖書室新進一批繪本，歡迎下課時間來借閱。</div>
+        <div style="font-size: 14px; line-height: 1.7; text-align: justify; border-top: 1px dotted #888; padding-top: 4px">◆天氣變冷了，上學請多穿一件外套。</div>
+      </div>
+      <div class="tap" style="flex: 1; position: relative; border: 2.5px solid #1a1a1a; background: #ffffff; width: 363px; height: 249px"><b class="a slot2" style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;text-align:center;padding:6px 30px;color:#d6261f;font-family:'Noto Sans TC',sans-serif;font-weight:900;font-size:22px;line-height:1.35">廣告要有：<br>賣什麼？好在哪裡？<br>一句吸引人的話</b>
+        <span style="position: absolute; top: 6px; left: 6px; width: 24px; height: 24px; border-radius: 50%; background: #1a1a1a; color: #fff; display: flex; align-items: center; justify-content: center; font-family: 'Noto Sans TC', sans-serif; font-size: 13px; font-weight: 900">4</span>
+        <span style="position: absolute; top: 0; right: 0; font-family: 'Noto Sans TC', sans-serif; font-size: 12px; font-weight: 700; color: #ffffff; background: #1a1a1a; padding: 2px 10px">廣告</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- 頁尾 -->
+  <div style="display: flex; justify-content: space-between; align-items: center; font-size: 13px; color: #444; border-top: 1px solid #999; padding-top: 8px">
+    <span>讀報學習單</span>
+    <span style="font-weight: 700; color: #1a1a1a">— 第 2 頁 —</span>
+    <span>老師媽咪／范范老師</span>
+  </div>
+</div></div></div></div>
+</main>
+<div id="stage" aria-hidden="true"></div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script>
+{
+const $=s=>document.querySelector(s), $$=(s,r=document)=>[...r.querySelectorAll(s)];
+const msg=$('#msg');
+const vis=(el,on)=>{el.style.visibility=on?'visible':'hidden';el.setAttribute('visibility',on?'visible':'hidden')};
+const isOn=el=>el.style.visibility==='visible';
+const flip=el=>el&&vis(el,!isOn(el));
+$$('.a').forEach(a=>vis(a,false));
+document.addEventListener('click',e=>{
+  const s=e.target.closest('.slot,.tap');
+  if(s){flip(s.querySelector('.a'));return}
+  const r=e.target.closest('.lrow');
+  if(r){flip(document.querySelector('.ln[data-i="'+r.dataset.i+'"]'))}
+});
+$('#all').addEventListener('click',()=>$$('main .a').forEach(a=>vis(a,true)));
+$('#none').addEventListener('click',()=>$$('main .a').forEach(a=>vis(a,false)));
+
+const fit=()=>$$('.holder').forEach(h=>{const k=Math.min(1,h.clientWidth/794);const sc=h.firstElementChild;sc.style.transform='scale('+k+')';h.style.height=(1123*k)+'px'});
+const ro=new ResizeObserver(fit);ro.observe(document.body);fit();
+
+let downloads=null;
+const pdfBtns=[$('#pdfS'),$('#pdfT')];
+pdfBtns.forEach(b=>b.disabled=true);
+if(window.claude&&window.claude.use){
+  window.claude.use('downloads').then(d=>{downloads=d;if(d)pdfBtns.forEach(b=>b.disabled=false);else{pdfBtns.forEach(b=>b.hidden=true);msg.textContent='這個畫面不能下載檔案，請在 claude.ai 開啟這個網頁再匯出。'}}).catch(()=>{pdfBtns.forEach(b=>b.hidden=true)});
+}else{downloads={save:async({filename,data})=>{window.__pdf.save(filename);return{status:'saved'}}};pdfBtns.forEach(b=>b.disabled=false)}
+
+async function makePdf(withAns){
+  if(!downloads||!window.html2canvas||!window.jspdf){msg.textContent='匯出工具還沒準備好，請稍後再試一次。';return}
+  pdfBtns.forEach(b=>b.disabled=true);msg.textContent='正在製作 PDF，請稍等……';
+  try{
+    await document.fonts.ready;
+    const pdf=new window.jspdf.jsPDF({unit:'mm',format:'a4',orientation:'portrait'});
+    const stage=$('#stage');
+    const sheets=$$('main .sheet');
+    for(let i=0;i<sheets.length;i++){
+      stage.innerHTML='';
+      const c=sheets[i].cloneNode(true);c.style.boxShadow='none';
+      $$('.a',c).forEach(a=>vis(a,withAns));
+      stage.appendChild(c);
+      const cv=await html2canvas(c,{scale:2,backgroundColor:'#ffffff',useCORS:true});
+      if(i)pdf.addPage();
+      pdf.addImage(cv.toDataURL('image/jpeg',0.92),'JPEG',0,0,210,297);
+    }
+    stage.innerHTML='';
+    window.__pdf=pdf;const blob=pdf.output('blob');
+    await downloads.save({filename:withAns?'讀報學習單_解答版.pdf':'讀報學習單_學生版.pdf',data:blob});
+    msg.textContent='PDF 已經存好了！';
+  }catch(err){
+    const code=err&&err.code;
+    msg.textContent=code==='declined'?'已取消下載。':code==='rate_limited'?'下載視窗已經開著，請先處理它再試一次。':code==='host_unavailable'?'這個 App 不能存檔，請用電腦或瀏覽器開啟再匯出。':'匯出時出了問題，請再試一次。';
+  }finally{pdfBtns.forEach(b=>b.disabled=false)}
+}
+$('#pdfS').addEventListener('click',()=>makePdf(false));
+$('#pdfT').addEventListener('click',()=>makePdf(true));
+}
+</script>
+</body>
+</html>

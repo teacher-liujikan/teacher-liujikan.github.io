@@ -1,0 +1,353 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>讀報小學堂</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Bpmf+Huninn&display=swap" rel="stylesheet">
+<style>
+/* VOICE: 給三年級的親切小老師，句子短、鼓勵多
+   IDEA: 一張像真的一樣的報紙頭版：可以點、可以拆成拼圖再拼回去
+   PICTURE: 大大的報紙頭版本身（直排內文、紅色報頭、框線廣告）
+   COLOUR and TYPE: 奶油杏底、新聞紙米白、墨灰字、珊瑚紅報頭、薄荷綠答對、天空藍拖曳；全頁粉圓注音字型
+   LAYOUT: 四個分頁；平板橫拿時報紙在左、說明或拼圖盒在右 */
+:root{color-scheme:light dark;--bg:light-dark(#fff4e2,#2a2633);--band:light-dark(#ffffff,#37313f);--main:light-dark(#ffe6c9,#211d29);--tab:light-dark(#ffd9ad,#4a4255);--line:light-dark(#f2c89b,#5c5266);--ink:light-dark(#3d3a4b,#f6efe3);--np:#f7f3e8;--pi:#2f2d38;--red:#ef6f5e;--mast:#d94a3d;--blue:#5b9bd5;--ok:#4fae84;--soft:light-dark(#9a7454,#cdbfa9);--f:"Bpmf Huninn","Huninn",system-ui,sans-serif}
+:root[data-theme=light]{color-scheme:light}:root[data-theme=dark]{color-scheme:dark}
+*{box-sizing:border-box;min-width:0}
+body{margin:0;background:var(--bg);color:var(--ink);font:18px/1.75 var(--f);overflow-x:clip}
+h1{font:400 clamp(30px,4.4vw,46px)/1.15 var(--f);margin:0;text-wrap:balance}
+h2{font:400 26px/1.3 var(--f);margin:0 0 6px}
+p{margin:0 0 10px}
+header{padding:20px max(4vw,16px) 8px;display:flex;flex-wrap:wrap;gap:8px 24px;align-items:end;justify-content:space-between}
+header p{margin:0;color:var(--soft)}
+nav{display:flex;flex-wrap:wrap;gap:8px;padding:8px max(4vw,16px) 0}
+nav button{font:400 18px var(--f);min-height:50px;padding:6px 18px;border-radius:16px 16px 0 0;border:3px solid var(--line);border-bottom:0;background:var(--tab);color:var(--ink);cursor:pointer}
+nav button[aria-selected=true]{background:var(--red);border-color:var(--red);color:#fff}
+main{background:var(--main);border-top:4px solid var(--red);padding:max(2vw,12px) max(3vw,12px) 40px;min-height:70vh}
+section{display:none;max-width:1280px;margin:0 auto}
+section.on{display:block}
+.wrap{display:grid;grid-template-columns:minmax(0,1.7fr) minmax(0,1fr);gap:20px;align-items:start}
+.card{background:var(--band);border-radius:22px;padding:18px 20px;color:var(--ink);box-shadow:0 6px 0 var(--line)}
+.btn{font:400 18px var(--f);min-height:50px;padding:6px 20px;border-radius:99px;border:3px solid var(--line);background:var(--bg);color:var(--ink);cursor:pointer}
+.btn.dark{background:var(--red);border-color:var(--red);color:#fff}
+button:focus-visible,input:focus-visible,textarea:focus-visible{outline:4px solid var(--blue);outline-offset:2px}
+.row{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
+.msg{min-height:1.7em;margin:8px 0}
+
+/* ===== 報紙 ===== */
+.paper{background:var(--np);color:var(--pi);padding:14px 14px 10px;border-radius:3px;box-shadow:0 1px 0 #ddd5c3,0 10px 0 var(--line),0 14px 28px rgba(0,0,0,.12);display:grid;gap:6px 10px;
+ grid-template-columns:repeat(12,minmax(0,1fr));
+ grid-template-areas:"tou tou tou tou tou jing jing jing jing ad ad ad" "head head head head head head head head head head head head" "pic pic pic pic pic body body body body body body body" "s2 s2 s2 s2 s2 s2 s2 p2 p2 p2 p2 p2" "foot foot foot foot foot foot foot foot foot foot foot foot";
+ background-image:linear-gradient(transparent 0,transparent),radial-gradient(#e8e1cf 1px,transparent 1px);background-size:auto,5px 5px}
+.paper.noextra{grid-template-areas:"tou tou tou tou tou jing jing jing jing ad ad ad" "head head head head head head head head head head head head" "pic pic pic pic pic body body body body body body body"}
+.z{grid-area:var(--a);position:relative;border:2px solid transparent;border-radius:3px;padding:4px 6px}
+.learn .z{cursor:pointer}.learn .z:hover,.learn .z.pick{border-color:var(--red);background:rgba(239,111,94,.1)}
+.z.dim{opacity:.15}.z.hl{border:4px solid var(--red);background:rgba(239,111,94,.12)}
+.z-tou{display:flex;flex-direction:column;gap:4px;justify-content:center;border-bottom:3px double var(--pi);border-radius:0}
+.z-tou .name{font:400 clamp(22px,2.5vw,32px)/1.1 var(--f);color:var(--mast);-webkit-text-stroke:1px var(--mast);letter-spacing:2px;white-space:nowrap}
+.z-tou .meta{font-size:11px;line-height:1.5;color:#555;border-top:1px solid #999;padding-top:3px}
+.z-jing{font-size:14px;line-height:1.7;border-bottom:3px double var(--pi);border-radius:0}
+.z-jing b{display:block;font-weight:400;font-size:12px;background:var(--pi);color:var(--np);padding:0 6px;width:max-content;border-radius:2px}
+.z-jing span{float:right;color:var(--mast)}
+.z-ad{border:2px solid var(--mast);background:#fff9ec;font-size:14px;line-height:1.5;text-align:center;display:grid;place-content:center;gap:2px;padding:6px}
+.z-ad .big{font-size:17px;color:var(--mast)}
+.z-head{font:400 clamp(20px,2.3vw,28px)/1.35 var(--f);-webkit-text-stroke:1.2px var(--pi);border-top:2px solid var(--pi);border-radius:0;padding-top:6px;letter-spacing:1px}
+.z-body{writing-mode:vertical-rl;font-size:15px;line-height:1.9;height:310px;padding-bottom:14px;overflow:hidden;text-align:justify;column-rule:1px solid #ccc}
+.z-body .rep{color:#666}
+.z-pic{display:flex;flex-direction:column;gap:4px}
+.z-pic svg,.z-pic canvas{display:block;width:100%;flex:1;min-height:200px;border:1px solid #bbb;background:#dff1ff}
+.capt{font-size:13px;line-height:1.6;color:#444}
+.z-s2{display:grid;grid-template-columns:auto 1fr;gap:8px;border-top:2px solid var(--pi);border-radius:0;padding-top:6px}
+.z-s2 .h2{writing-mode:vertical-rl;font-size:24px;-webkit-text-stroke:.8px var(--pi);line-height:1.3}
+.z-s2 .t{writing-mode:vertical-rl;font-size:14px;line-height:1.9;height:190px;overflow:hidden}
+.z-p2{border-top:2px solid var(--pi);border-radius:0;padding-top:6px}
+.z-p2 svg{width:100%;height:150px;display:block;border:1px solid #bbb}
+.z-foot{font-size:11px;color:#555;border-top:3px double var(--pi);border-radius:0;display:flex;justify-content:space-between;flex-wrap:wrap}
+.tag{position:absolute;top:-14px;left:6px;z-index:2;background:var(--red);color:#fff;font-size:14px;line-height:1.6;padding:0 8px;border-radius:99px;display:none;writing-mode:horizontal-tb;-webkit-text-stroke:0}
+.showtags .tag{display:block}
+#info h2{color:var(--red)}
+#info .tip{background:var(--bg);border-radius:14px;padding:8px 12px}
+.chips{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
+.chips button{font:400 17px var(--f);min-height:46px;padding:4px 14px;border-radius:99px;border:2px solid var(--line);background:transparent;color:var(--ink);cursor:pointer}
+.chips button.seen{background:var(--ok);border-color:var(--ok);color:#fff}
+
+/* ===== 拼圖 ===== */
+.hole>*{visibility:hidden}
+.hole{border-color:transparent!important;background:none!important}
+.hole::before{content:"";position:absolute;inset:0;z-index:1;border-radius:3px;border:3px dashed #c9ab84;background:repeating-linear-gradient(45deg,#efe7d4 0 8px,#e9dfc8 8px 16px)}
+.hole .q{visibility:visible;position:absolute;inset:0;z-index:2;display:grid;place-items:center;writing-mode:horizontal-tb;font-size:34px;color:#a8865e;-webkit-text-stroke:0}
+.hole.near::before{border-color:var(--blue);background:#e3efff}
+.hole.bad::before{border-color:var(--red)}
+.hole.bad{animation:shake .4s}
+.z.done{animation:pop .45s}
+@keyframes pop{0%{transform:scale(1.06);box-shadow:0 0 0 6px var(--ok)}100%{transform:none;box-shadow:0 0 0 0 transparent}}
+@keyframes shake{25%{transform:translateX(-6px)}75%{transform:translateX(6px)}}
+.box{display:flex;flex-wrap:wrap;gap:16px;justify-content:center;padding:8px 0;min-height:120px}
+.pc{width:150px;height:110px;overflow:hidden;position:relative;background:var(--np);border-radius:4px;cursor:grab;touch-action:none;box-shadow:0 5px 0 #d3c4a6,0 8px 14px rgba(0,0,0,.15);transform:rotate(var(--r));clip-path:polygon(0 4%,8% 0,22% 3%,40% 0,58% 3%,76% 0,92% 3%,100% 0,98% 30%,100% 55%,97% 80%,100% 100%,80% 97%,60% 100%,40% 97%,20% 100%,0 97%,3% 70%,0 45%,3% 20%)}
+.pc.gone{visibility:hidden}
+.pc .in{position:absolute;left:0;top:0;transform-origin:0 0;pointer-events:none;color:var(--pi)}
+.float{position:fixed;z-index:50;pointer-events:none;background:var(--np);color:var(--pi);box-shadow:0 18px 30px rgba(0,0,0,.3);border-radius:3px;opacity:.95;transition:none}
+.float.fly{transition:left .3s ease,top .3s ease,opacity .3s}
+.done-tag{position:absolute;right:6px;bottom:6px;z-index:3;background:var(--ok);color:#fff;font-size:14px;padding:0 8px;border-radius:99px;writing-mode:horizontal-tb;-webkit-text-stroke:0;line-height:1.6}
+.prog{height:16px;background:var(--bg);border-radius:99px;overflow:hidden;margin:6px 0}
+.prog i{display:block;height:100%;width:0;background:var(--ok);transition:width .4s}
+
+
+/* ===== 真報紙圖片 ===== */
+.ip{position:relative;border-radius:3px;box-shadow:0 10px 0 var(--line),0 14px 28px rgba(0,0,0,.12);overflow:hidden;line-height:0;user-select:none;-webkit-user-select:none}
+.ip img{width:100%;display:block;pointer-events:none}
+.hs{position:absolute;border:3px solid transparent;border-radius:4px;line-height:1.6}
+.learn .hs{cursor:pointer}.learn .hs:hover,.learn .hs.pick{border-color:var(--red);background:rgba(239,111,94,.14)}
+.hs .tag{top:4px;left:4px}
+.hs.hl{border:5px solid var(--red);background:rgba(239,111,94,.1)}
+.hs.dim{background:rgba(255,253,248,.82)}
+.ip .hole::before{content:none}
+.ip .hole{background:repeating-linear-gradient(45deg,#efe7d4 0 8px,#e9dfc8 8px 16px)!important;border:3px dashed #c9ab84!important;display:grid;place-items:center;color:#a8865e;font-size:34px}
+.ip .hole.near{background:#e3efff!important;border-color:var(--blue)!important}
+.ip .hole.bad{border-color:var(--red)!important}
+.ip .fill{position:absolute;animation:pop .45s;border-radius:4px;pointer-events:none}
+.pc.img{clip-path:polygon(0 4%,8% 0,22% 3%,40% 0,58% 3%,76% 0,92% 3%,100% 0,98% 30%,100% 55%,97% 80%,100% 100%,80% 97%,60% 100%,40% 97%,20% 100%,0 97%,3% 70%,0 45%,3% 20%)}
+.cropbg{background-image:url(paper.jpg);background-repeat:no-repeat}
+/* ===== 考考你 ===== */
+.opts{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:12px 0}
+.opts button{font:400 21px var(--f);min-height:62px;border-radius:18px;border:3px solid var(--line);background:#fffdf8;color:var(--pi);cursor:pointer}
+.opts button.right{background:var(--ok);color:#fff;border-color:var(--ok)}
+.opts button.wrong{background:var(--red);color:#fff;border-color:var(--red)}
+.score{font-size:44px}
+
+/* ===== 小編輯 ===== */
+.form{display:grid;gap:10px}
+.form label{display:grid;gap:4px}
+.form input,.form textarea{font:16px var(--f);padding:8px 12px;border-radius:12px;border:2px solid var(--line);background:#fffdf8;color:var(--pi);min-height:46px}
+.form textarea{min-height:90px;resize:vertical}
+.colors{display:flex;gap:8px;flex-wrap:wrap}
+.colors button{width:44px;height:44px;border-radius:50%;border:3px solid #fff;box-shadow:0 0 0 2px var(--line);cursor:pointer}
+.colors button.on{outline:4px solid var(--blue);outline-offset:2px}
+#editPaper canvas{background:#fff}
+@media (prefers-reduced-motion:reduce){.z.done,.hole.bad{animation:none}.float.fly{transition:none}}
+@media(max-width:900px){.wrap{grid-template-columns:minmax(0,1fr)}}
+@media(max-width:600px){.paper,.paper.noextra{grid-template-areas:"tou tou tou tou tou tou tou tou tou tou tou tou" "jing jing jing jing jing jing jing ad ad ad ad ad" "head head head head head head head head head head head head" "pic pic pic pic pic pic pic pic pic pic pic pic" "body body body body body body body body body body body body" "s2 s2 s2 s2 s2 s2 s2 s2 s2 s2 s2 s2" "p2 p2 p2 p2 p2 p2 p2 p2 p2 p2 p2 p2" "foot foot foot foot foot foot foot foot foot foot foot foot"}.opts{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<header>
+ <h1>讀報小學堂：一起認識報紙</h1>
+ <p>報紙的 6 個基本元素：點一點、拼一拼、考一考，最後當小編輯！</p>
+ <a class="btn dark" href="review/" style="display:inline-flex;align-items:center;text-decoration:none">學習單檢討（老師用）</a>
+</header>
+<nav role="tablist">
+ <button role="tab" data-t="s1" aria-selected="true">① 認識報紙</button>
+ <button role="tab" data-t="s2" aria-selected="false">② 報紙拼圖</button>
+ <button role="tab" data-t="s3" aria-selected="false">③ 考考你</button>
+ <button role="tab" data-t="s4" aria-selected="false">④ 我是小編輯</button>
+</nav>
+<main>
+<section id="s1" class="on">
+ <div class="wrap">
+  <div id="learnPaper"></div>
+  <div class="card" id="info">
+   <h2>點報紙上的任何一塊</h2>
+   <p>報紙頭版有 6 個基本元素，每一塊都有自己的名字和工作。點點看，把 6 個都找出來！</p>
+   <p class="tip">小祕訣：先看大標題和照片，就能猜到新聞在說什麼。</p>
+   <div class="chips" id="chips"></div>
+   <div class="row" style="margin-top:14px"><button class="btn" id="tagBtn">顯示全部名稱</button><span id="seenTxt" class="msg"></span></div>
+  </div>
+ </div>
+</section>
+
+<section id="s2">
+ <div class="wrap">
+  <div id="puzPaper"></div>
+  <div class="card" style="position:sticky;top:10px">
+   <h2>把報紙拼回去！</h2>
+   <p>報紙被剪成 6 塊了。用手指按住一塊，拖到報紙上對的位置，放對了就會黏上去。</p>
+   <div class="prog"><i id="prog"></i></div>
+   <p class="msg" id="pMsg">已拼好 0／6</p>
+   <div class="box" id="box"></div>
+   <div class="row"><button class="btn" id="pReset">重新拼一次</button></div>
+  </div>
+ </div>
+</section>
+
+<section id="s3">
+ <div class="wrap">
+  <div id="quizPaper"></div>
+  <div class="card">
+   <h2 id="qTitle">紅框框起來的是什麼？</h2>
+   <p id="qNo"></p>
+   <div class="opts" id="opts"></div>
+   <p class="msg" id="qMsg"></p>
+   <div class="row"><button class="btn dark" id="qNext">下一題</button><button class="btn" id="qAgain">重新開始</button></div>
+  </div>
+ </div>
+</section>
+
+<section id="s4">
+ <div class="wrap">
+  <div>
+   <div id="editPaper"></div>
+   <div class="row" style="margin-top:12px"><span>畫筆顏色</span><div class="colors" id="colors"></div><button class="btn" id="clearPic">清除圖片</button></div>
+  </div>
+  <div class="card">
+   <h2>換你當小記者！</h2>
+   <p>寫下班上最近發生的事，報紙會馬上變成你的。新聞圖片可以用手指畫。</p>
+   <div class="form" id="form">
+    <label>報紙名字（報頭）<input id="f-tou" maxlength="7" value="三年級日報"></label>
+    <label>新聞標題<input id="f-head" maxlength="18" placeholder="例如：胡麻發芽了"></label>
+    <label>新聞報導的開頭<input id="f-rep" maxlength="20" placeholder="例如：記者 林小華／教室報導"></label>
+    <label>新聞報導（只寫發生的事：人、事、時、地、物）<textarea id="f-body" maxlength="160"></textarea></label>
+    <label>新聞圖片的說明<input id="f-cap" maxlength="30" placeholder="說明你畫的圖片"></label>
+    <label>廣告<input id="f-ad" maxlength="20" placeholder="例如：班級圖書角 歡迎借書"></label>
+   </div>
+  </div>
+ </div>
+</section>
+</main>
+
+<script>
+{
+const P={
+ tou:{n:'報頭',d:'寫著報紙的名字，還有報號、發行地址、電話等發行資料。',t:'看一眼報頭，就知道是哪一份報紙。',h:'報頭在左上角，紅色的報紙名字最醒目。'},
+ jing:{n:'精選提要',d:'推薦今天的重點新聞和精采內容，告訴你在第幾版。',t:'它就像報紙的小目錄。',h:'精選提要在報頭的右邊。'},
+ ad:{n:'廣告',d:'報社收費或做公益，幫忙推廣商品、想法或服務。',t:'廣告不是新聞喔！',h:'廣告有框線，在右上角。'},
+ head:{n:'新聞標題',d:'用短短的字，說出新聞的主題和重點。',t:'字越大，表示新聞越重要。',h:'新聞標題是一整排、字最大的。'},
+ pic:{n:'新聞圖片',d:'用照片讓大家看到新聞現場，再用短短的文字說明人、事、時、地、物。',t:'先看圖片和說明，再讀報導，更容易懂。',h:'新聞圖片在標題下面的左邊，下面有說明文字。'},
+ body:{n:'新聞報導',d:'只寫出事情本身，不放記者自己的想法。開頭會寫「記者○○○報導」。',t:'看到「記者○○○報導」，就知道這是新聞報導。',h:'新聞報導是直直排的文字，在圖片右邊。'}
+};
+const K=Object.keys(P);
+const W=1086,H=1448;
+const B={tou:[38,40,482,248],jing:[488,46,778,242],ad:[784,46,1062,246],head:[28,268,1062,388],pic:[28,400,528,900],body:[530,398,1062,885]};
+const B2=[['head',948,915,1062,1335],['body',415,915,945,1335],['pic',28,920,418,1368]];
+const $=s=>document.querySelector(s);
+const pos=b=>`left:${b[0]/W*100}%;top:${b[1]/H*100}%;width:${(b[2]-b[0])/W*100}%;height:${(b[3]-b[1])/H*100}%`;
+const crop=b=>{const bw=b[2]-b[0],bh=b[3]-b[1];return `background-size:${W/bw*100}% ${H/bh*100}%;background-position:${b[0]/(W-bw)*100}% ${b[1]/(H-bh)*100}%`};
+const hs=(k,b,cls='')=>`<div class="hs ${cls}" data-k="${k}" style="${pos(b)}"><span class="tag">${P[k].n}</span></div>`;
+const imgPaper=(cls,extra)=>`<div class="ip ${cls}"><img src="paper.jpg" alt="小記者日報頭版">${K.map(k=>hs(k,B[k])).join('')}${extra?B2.map(([k,...b])=>hs(k,b)).join(''):''}</div>`;
+const shuffle=a=>{a=a.slice();for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a};
+
+document.querySelectorAll('nav button').forEach(b=>b.onclick=()=>{
+ document.querySelectorAll('nav button').forEach(x=>x.setAttribute('aria-selected',x===b));
+ document.querySelectorAll('section').forEach(s=>s.classList.toggle('on',s.id===b.dataset.t));
+ if(b.dataset.t==='s4')sizeCanvas();
+});
+
+/* ① 認識 */
+const seen=new Set();
+$('#learnPaper').innerHTML=imgPaper('learn',true);
+$('#chips').innerHTML=K.map(k=>`<button data-k="${k}">${P[k].n}</button>`).join('');
+const show=k=>{
+ seen.add(k);
+ document.querySelectorAll('#learnPaper .hs').forEach(z=>z.classList.toggle('pick',z.dataset.k===k));
+ document.querySelectorAll('#chips button').forEach(c=>c.classList.toggle('seen',seen.has(c.dataset.k)));
+ $('#info h2').textContent=P[k].n;$('#info p').textContent=P[k].d;$('#info .tip').textContent='小祕訣：'+P[k].t;
+ $('#seenTxt').textContent=seen.size===K.length?'太棒了！6 個都找到了，去「報紙拼圖」吧！':`已找到 ${seen.size}／6`;
+};
+$('#learnPaper').onclick=e=>{const z=e.target.closest('.hs');if(z)show(z.dataset.k)};
+$('#chips').onclick=e=>{const c=e.target.closest('button');if(c)show(c.dataset.k)};
+$('#tagBtn').onclick=()=>{const p=$('#learnPaper .ip');p.classList.toggle('showtags');$('#tagBtn').textContent=p.classList.contains('showtags')?'隱藏名稱':'顯示全部名稱'};
+
+/* ② 拼圖 */
+let done=new Set();
+const tilt=['-4deg','3deg','-2deg','5deg','-5deg','2deg'];
+const buildPuzzle=()=>{
+ done=new Set();
+ $('#puzPaper').innerHTML=`<div class="ip"><img src="paper.jpg" alt="小記者日報頭版">${K.map(k=>`<div class="hs hole" data-s="${k}" style="${pos(B[k])}">?</div>`).join('')}</div>`;
+ $('#box').innerHTML=shuffle(K).map((k,i)=>{const b=B[k],bw=b[2]-b[0],bh=b[3]-b[1],sc=Math.min(150/bw,120/bh);return `<div class="pc img cropbg" data-k="${k}" style="--r:${tilt[i]};width:${Math.round(bw*sc)}px;height:${Math.round(bh*sc)}px;${crop(b)}" aria-label="報紙碎片"></div>`}).join('');
+ updProg();
+};
+const updProg=()=>{$('#prog').style.width=done.size/K.length*100+'%';$('#pMsg').textContent=done.size===K.length?'全部拼好了！你把報紙拼回來了，真厲害！':`已拼好 ${done.size}／6`};
+let drag=null;
+$('#box').addEventListener('pointerdown',e=>{
+ const pc=e.target.closest('.pc');if(!pc||drag)return;e.preventDefault();
+ const k=pc.dataset.k,hole=$(`#puzPaper [data-s="${k}"]`),r=hole.getBoundingClientRect();
+ const f=document.createElement('div');f.className='float cropbg';f.setAttribute('style',crop(B[k]));
+ f.style.width=r.width+'px';f.style.height=r.height+'px';
+ document.body.appendChild(f);pc.classList.add('gone');
+ drag={k,pc,f,w:r.width,h:r.height,id:e.pointerId};moveF(e);
+ try{pc.setPointerCapture(e.pointerId)}catch(_){}
+});
+const holeAt=(x,y)=>[...document.querySelectorAll('#puzPaper .hole')].find(h=>{const r=h.getBoundingClientRect();return x>=r.left&&x<=r.right&&y>=r.top&&y<=r.bottom});
+const moveF=e=>{const d=drag;d.f.style.left=(e.clientX-d.w/2)+'px';d.f.style.top=(e.clientY-d.h/2)+'px';
+ document.querySelectorAll('#puzPaper .hole').forEach(h=>h.classList.remove('near'));
+ const h=holeAt(e.clientX,e.clientY);if(h)h.classList.add('near')};
+addEventListener('pointermove',e=>{if(drag&&e.pointerId===drag.id)moveF(e)});
+const endDrag=e=>{
+ if(!drag||e.pointerId!==drag.id)return;const d=drag;drag=null;
+ document.querySelectorAll('#puzPaper .hole').forEach(h=>h.classList.remove('near'));
+ const h=holeAt(e.clientX,e.clientY);
+ if(h&&h.dataset.s===d.k){
+  const r=h.getBoundingClientRect();d.f.classList.add('fly');d.f.style.left=r.left+'px';d.f.style.top=r.top+'px';
+  setTimeout(()=>{d.f.remove();const st=h.getAttribute('style');h.remove();$('#puzPaper .ip').insertAdjacentHTML('beforeend',`<div class="fill" style="${st}"><span class="done-tag">✔ ${P[d.k].n}</span></div>`);d.pc.remove();done.add(d.k);updProg()},300);
+ }else{
+  if(h){h.classList.remove('bad');void h.offsetWidth;h.classList.add('bad');$('#pMsg').textContent=`這裡不是它的位置喔！提示：${P[d.k].h}`}
+  const r=d.pc.getBoundingClientRect();d.f.classList.add('fly');d.f.style.opacity='0';d.f.style.left=r.left+'px';d.f.style.top=r.top+'px';
+  setTimeout(()=>{d.f.remove();d.pc.classList.remove('gone')},300);
+ }
+};
+addEventListener('pointerup',endDrag);addEventListener('pointercancel',endDrag);
+$('#pReset').onclick=buildPuzzle;
+buildPuzzle();
+
+/* ③ 考考你 */
+$('#quizPaper').innerHTML=imgPaper('',false);
+let order=[],qi=0,score=0,ans=false;
+const startQuiz=()=>{order=shuffle(K);qi=0;score=0;askQ()};
+const askQ=()=>{
+ ans=false;const k=order[qi];
+ document.querySelectorAll('#quizPaper .hs').forEach(z=>{z.classList.toggle('hl',z.dataset.k===k);z.classList.toggle('dim',z.dataset.k!==k)});
+ const opts=shuffle([k,...shuffle(K.filter(x=>x!==k)).slice(0,3)]);
+ $('#qTitle').textContent='紅框框起來的是什麼？';
+ $('#qNo').textContent=`第 ${qi+1} 題／共 ${order.length} 題　答對 ${score} 題`;
+ $('#opts').innerHTML=opts.map(o=>`<button data-k="${o}">${P[o].n}</button>`).join('');
+ $('#qMsg').textContent='';$('#qNext').style.display='none';
+};
+$('#opts').onclick=e=>{
+ const b=e.target.closest('button');if(!b||ans)return;ans=true;const k=order[qi];
+ if(b.dataset.k===k){score++;b.classList.add('right');$('#qMsg').textContent='答對了！'+P[k].d}
+ else{b.classList.add('wrong');$('#opts').querySelector(`[data-k="${k}"]`).classList.add('right');$('#qMsg').textContent='再想想！這是「'+P[k].n+'」：'+P[k].d}
+ $('#qNo').textContent=`第 ${qi+1} 題／共 ${order.length} 題　答對 ${score} 題`;
+ $('#qNext').style.display='';$('#qNext').textContent=qi===order.length-1?'看成績':'下一題';
+};
+$('#qNext').onclick=()=>{
+ if(qi<order.length-1){qi++;askQ();return}
+ document.querySelectorAll('#quizPaper .hs').forEach(z=>z.classList.remove('hl','dim'));
+ $('#qTitle').textContent='你的成績';$('#qNo').innerHTML=`<span class="score">${score}／${order.length}</span>`;
+ $('#opts').innerHTML='';$('#qNext').style.display='none';
+ $('#qMsg').textContent=score===order.length?'全對！你是讀報小達人！':score>=4?'很厲害！再玩一次挑戰全對。':'回到「認識報紙」再點點看，你一定可以！';
+};
+$('#qAgain').onclick=startQuiz;startQuiz();
+
+/* 小編輯用的 HTML 報紙 */
+const paper=(cls,data)=>`<div class="paper ${cls} noextra">${K.map(k=>`<div class="z z-${k}" style="--a:${k}" data-k="${k}"><span class="tag">${P[k].n}</span>${data[k]}</div>`).join('')}</div>`;
+/* ④ 小編輯 */
+const roc=()=>{const d=new Date();return `中華民國${d.getFullYear()-1911}年${d.getMonth()+1}月${d.getDate()}日　星期${'日一二三四五六'[d.getDay()]}`};
+const ED={tou:'',jing:'<b>今日精選</b>班級大小事<span>2版</span><br>我的好書推薦<span>3版</span>',ad:'',head:'',pic:'<canvas id="cv" aria-label="用手指畫新聞圖片"></canvas><div class="capt"></div>',body:''};
+$('#editPaper').innerHTML=paper('',ED);
+const esc=s=>s.replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const v=id=>$('#f-'+id).value.trim();
+const ph=t=>`<span style="opacity:.4">${t}</span>`;
+const tag=k=>`<span class="tag">${P[k].n}</span>`;
+const sync=()=>{
+ $('#editPaper .z-tou').innerHTML=tag('tou')+`<div class="name">${v('tou')?esc(v('tou')):ph('報紙名字')}</div><div class="meta">${roc()}<br>第1號</div>`;
+ $('#editPaper .z-head').innerHTML=tag('head')+(v('head')?esc(v('head')):ph('在這裡寫新聞標題'));
+ $('#editPaper .z-body').innerHTML=tag('body')+`<span class="rep">${v('rep')?'【'+esc(v('rep'))+'】':ph('【記者○○○報導】')}</span>`+(v('body')?esc(v('body')):ph('寫下發生了什麼事……'));
+ $('#editPaper .capt').innerHTML=v('cap')?'▲'+esc(v('cap')):ph('▲說明你畫的圖片');
+ $('#editPaper .z-ad').innerHTML=tag('ad')+(v('ad')?`<div class="big">${esc(v('ad'))}</div>`:ph('廣告'));
+};
+$('#form').oninput=sync;sync();
+const cols=['#3d3a4b','#ef6f5e','#5b9bd5','#4fae84','#f5a623','#a0704a'];let pen=cols[0];
+$('#colors').innerHTML=cols.map((c,i)=>`<button style="background:${c}" data-c="${c}" class="${i?'':'on'}" aria-label="顏色 ${i+1}"></button>`).join('');
+$('#colors').onclick=e=>{const b=e.target.closest('button');if(!b)return;pen=b.dataset.c;document.querySelectorAll('#colors button').forEach(x=>x.classList.toggle('on',x===b))};
+const cv=$('#cv'),cx=cv.getContext('2d');let drawing=false,last=null;
+function sizeCanvas(){const r=cv.getBoundingClientRect();if(!r.width)return;const img=cv.width>1?cv.toDataURL():null;cv.width=r.width*2;cv.height=r.height*2;cx.fillStyle='#fff';cx.fillRect(0,0,cv.width,cv.height);if(img){const i=new Image();i.onload=()=>cx.drawImage(i,0,0,cv.width,cv.height);i.src=img}}
+const pt=e=>{const r=cv.getBoundingClientRect();return[(e.clientX-r.left)*cv.width/r.width,(e.clientY-r.top)*cv.height/r.height]};
+cv.style.touchAction='none';
+cv.onpointerdown=e=>{drawing=true;last=pt(e);cv.setPointerCapture(e.pointerId)};
+cv.onpointermove=e=>{if(!drawing)return;const p=pt(e);cx.strokeStyle=pen;cx.lineWidth=8;cx.lineCap='round';cx.beginPath();cx.moveTo(...last);cx.lineTo(...p);cx.stroke();last=p};
+cv.onpointerup=cv.onpointercancel=()=>{drawing=false};
+$('#clearPic').onclick=()=>{cx.fillStyle='#fff';cx.fillRect(0,0,cv.width,cv.height)};
+}
+</script>
+</body>
+</html>
