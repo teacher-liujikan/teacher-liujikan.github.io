@@ -1,0 +1,251 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="robots" content="noindex">
+<title>小紅帽森林冒險音樂台</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700;900&display=swap">
+<style>
+html{-webkit-text-size-adjust:100%}body{margin:0}
+/* Layout: a stage-manager cue sheet — one card per cue in show order, the next cue glowing, big play buttons a teacher can hit while watching the kids */
+:root{
+  --bg:#f5f0e8; --panel:#ffffff; --fg:#2a2420; --muted:#6f655c; --line:#e2d8ca;
+  --accent:#b8322a; --accent-soft:#f6dcd8; --go:#2f7a4c; --go-soft:#dcefe2; --warn:#a86a00; --warn-soft:#fbefd4;
+  --zh:"Noto Sans TC","PingFang TC","Microsoft JhengHei",sans-serif;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#1b1715;--panel:#26201d;--fg:#f1e9df;--muted:#b3a698;--line:#3d342e;--accent:#ef6e63;--accent-soft:#4a2724;--go:#6cc48b;--go-soft:#203a2a;--warn:#f0b54a;--warn-soft:#3d3018;color-scheme:dark}}
+:root[data-theme="dark"]{--bg:#1b1715;--panel:#26201d;--fg:#f1e9df;--muted:#b3a698;--line:#3d342e;--accent:#ef6e63;--accent-soft:#4a2724;--go:#6cc48b;--go-soft:#203a2a;--warn:#f0b54a;--warn-soft:#3d3018;color-scheme:dark}
+body{background:var(--bg);color:var(--fg);font-family:var(--zh);font-size:17px;line-height:1.55}
+.wrap{max-width:960px;margin:0 auto;padding-block:20px 60px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));display:grid;gap:16px}
+header{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:flex-end;gap:10px}
+h1{margin:0;font-size:clamp(24px,4vw,34px);font-weight:900;text-wrap:balance}
+.sub{margin:0;color:var(--muted);font-size:15px}
+.keys{font-size:14px;color:var(--muted)}
+.keys kbd{font-family:inherit;border:1px solid var(--line);border-bottom-width:2px;border-radius:6px;padding:0 6px;background:var(--panel)}
+
+.now{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background:var(--panel);border:2px solid var(--line);border-radius:16px;padding:12px 16px;display:grid;grid-template-columns:minmax(0,1fr) auto;gap:6px 14px;align-items:center;box-shadow:0 6px 18px rgba(0,0,0,.08)}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:10;background:var(--bg)}
+.now .lbl{font-size:13px;font-weight:700;color:var(--muted);letter-spacing:.08em}
+.now .ttl{font-size:clamp(18px,2.6vw,24px);font-weight:900;min-width:0}
+.now .bar{grid-column:1/-1;height:10px;background:var(--line);border-radius:99px;overflow:hidden}
+.now .bar i{display:block;height:100%;width:0;background:var(--go);transition:width .25s linear}
+.now .t{font-variant-numeric:tabular-nums;color:var(--muted);font-size:14px}
+.now .stop{font:inherit;font-weight:900;font-size:18px;border:none;border-radius:12px;padding:10px 18px;background:var(--accent);color:#fff;cursor:pointer}
+.now .stop:disabled{background:var(--line);color:var(--muted);cursor:default}
+
+.cues{display:grid;gap:12px;counter-reset:cue}
+.cue{background:var(--panel);border:2px solid var(--line);border-radius:16px;padding:14px 16px;display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:4px 14px;align-items:center;transition:border-color .2s,box-shadow .2s}
+.cue.next{border-color:var(--go);box-shadow:0 0 0 4px var(--go-soft)}
+.cue.playing{border-color:var(--accent);box-shadow:0 0 0 4px var(--accent-soft)}
+.cue.done{opacity:.6}
+.num{grid-row:1/3;width:44px;height:44px;border-radius:50%;display:grid;place-items:center;font-weight:900;font-size:20px;background:var(--bg);border:2px solid var(--line);font-variant-numeric:tabular-nums}
+.cue.next .num{background:var(--go);border-color:var(--go);color:#fff}
+.cue.playing .num{background:var(--accent);border-color:var(--accent);color:#fff}
+.head{display:flex;flex-wrap:wrap;align-items:baseline;gap:4px 10px;min-width:0}
+.act{font-size:13px;font-weight:700;color:var(--accent);background:var(--accent-soft);border-radius:99px;padding:1px 10px}
+.name{font-size:clamp(19px,2.6vw,24px);font-weight:900}
+.dur{font-size:14px;color:var(--muted);font-variant-numeric:tabular-nums}
+.when{grid-column:2;font-size:16px;min-width:0}
+.when b{color:var(--go);font-weight:700}
+.when q{font-weight:700;quotes:"「" "」"}
+.after{grid-column:2;font-size:14px;color:var(--muted)}
+.play{grid-row:1/4;grid-column:3;font:inherit;font-weight:900;font-size:20px;border:none;border-radius:14px;padding:16px 22px;min-width:120px;background:var(--go);color:#fff;cursor:pointer}
+.play.stopmode{background:var(--accent)}
+.play:disabled{background:var(--line);color:var(--muted);cursor:not-allowed}
+.missing{grid-column:2;font-size:14px;color:var(--warn);background:var(--warn-soft);border-radius:8px;padding:2px 10px;justify-self:start}
+.vid{grid-column:1/-1;display:none;gap:8px;justify-items:center;margin-top:8px}
+.vid.show{display:grid}
+.vid video{max-height:55vh;max-width:100%;border-radius:12px;background:#000}
+.speed{display:flex;gap:8px;flex-wrap:wrap;justify-content:center}
+.speed button{font:inherit;font-weight:700;border:2px solid var(--line);background:var(--panel);color:var(--fg);border-radius:99px;padding:4px 14px;cursor:pointer}
+.speed button.on{border-color:var(--go);background:var(--go-soft)}
+button:focus-visible{outline:3px solid #f2b632;outline-offset:2px}
+
+details{background:var(--panel);border:2px solid var(--line);border-radius:16px;padding:12px 16px}
+summary{font-weight:900;cursor:pointer;font-size:18px}
+.set{display:grid;gap:10px;margin-top:12px}
+.row{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.3fr);gap:10px;align-items:center}
+.row select{font:inherit;padding:6px 8px;border-radius:10px;border:2px solid var(--line);background:var(--bg);color:var(--fg);min-width:0;max-width:100%}
+.files{display:grid;gap:8px;margin-top:6px}
+.file{display:flex;flex-wrap:wrap;gap:8px 12px;align-items:center;font-size:15px}
+.file button{font:inherit;font-weight:700;border:2px solid var(--line);background:var(--bg);color:var(--fg);border-radius:10px;padding:4px 12px;cursor:pointer}
+.note{font-size:14px;color:var(--muted);margin:0}
+@media (max-width:560px){.cue{grid-template-columns:auto minmax(0,1fr)}.play{grid-row:auto;grid-column:1/-1;width:100%}.row{grid-template-columns:1fr}}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+</head>
+<body>
+
+
+<div class="wrap">
+  <header>
+    <div>
+      <h1>小紅帽森林冒險・音樂台</h1>
+      <p class="sub">照演出順序排好，綠框是下一個要播的。看到「時機」那句台詞說完，就按播放。</p>
+    </div>
+    <div class="keys"><kbd>空白鍵</kbd> 播放／停止下一個　<kbd>↑</kbd><kbd>↓</kbd> 換一個</div>
+  </header>
+
+  <div class="now" aria-live="polite">
+    <div><div class="lbl">正在播放</div><div class="ttl" id="nowTitle">（還沒播放）</div></div>
+    <button class="stop" id="stopBtn" disabled>■ 停止</button>
+    <div class="bar"><i id="nowBar"></i></div>
+    <div class="t" id="nowTime">0:00 / 0:00</div>
+  </div>
+
+  <div class="cues" id="cues"></div>
+
+  <details id="settings">
+    <summary>音檔設定（每一個時機用哪個檔案）</summary>
+    <div class="set">
+      <p class="note">傳上來的檔名沒有顯示出來，下面是我依長度和聲音判斷的。如果哪一首配錯了，在這裡換掉就好，這台電腦會記住。</p>
+      <div id="map"></div>
+      <div class="files" id="files"></div>
+    </div>
+  </details>
+</div>
+
+<audio id="audio" preload="auto"></audio>
+
+<script>
+const SRC={
+  A:{label:"音檔 A（17 秒，有人聲的歌）",src:"media/track-a.mp3"},
+  B:{label:"音檔 B（51 秒，舞曲）",src:"media/track-b.mp3"},
+  C:{label:"音檔 C（5 秒，三聲嗶嗶）",src:"media/track-c.mp3"},
+  V:{label:"影片：晚安大小姐 0.75 倍速練習版（46 秒）",src:"media/ojosama.mp4",video:true},
+};
+const CUES=[
+ {id:"jungle1",act:"第二幕",name:"叢林歌（遇到小豬）",def:"A",when:["小紅帽：",["大家一起出發吧！"],"　全體：",["出發！"]," 說完"],after:"全班排隊唱跳，唱到「What's that?」定格，側台發出豬叫聲。"},
+ {id:"alarm",act:"第三幕",name:"國家級地震警報",def:"C",when:["大野狼：",["（累倒在地）這房子……也太硬了吧……"]," 說完"],after:"台上的人愣住、左右張望；左側台 9～16 號準備上場。"},
+ {id:"quake",act:"第三幕",name:"地震舞",def:"B",when:["全體：",["趴下！掩護！穩住！"]," 說完"],after:"9～16 號從左側台上場跳舞，三隻小豬在原位趴下、掩護、穩住。"},
+ {id:"jungle2",act:"第四幕",name:"叢林歌（遇到巫婆）",def:"A",when:["三隻小豬：",["我們也要去！"],"　五個人從左邊下場後"],after:"全班從左邊排隊上場，唱到「What's that?」定格，右側台傳來巫婆笑聲。"},
+ {id:"tooth",act:"第五幕",name:"刷牙歌",def:"",when:["大野狼：",["那……刷牙要怎麼刷？"],"　全體：",["我們教你！"]," 說完"],after:"1～8 號跳刷牙歌，大野狼在最前面慢半拍學。"},
+ {id:"jungle3",act:"第六幕",name:"叢林歌（遇到奶奶）",def:"A",when:["小紅帽：",["糟糕，奶奶還在等我們！大家出發！"]," 說完"],after:"全班（奶奶除外）排隊唱，唱到「What's that?」定格，右側台傳來奶奶的叫聲。"},
+ {id:"ojosama",act:"第六幕",name:"Good Night Ojosama 副歌",def:"V",when:["小紅帽：",["晚安，我親愛的奶奶。"],"　全班做睡覺動作、停兩秒後"],after:"左側台的小朋友上場，全班排三排一起跳。"},
+];
+const KEY="ojosama-cue-map-v1";
+let map={};try{map=JSON.parse(localStorage.getItem(KEY)||"{}")}catch(e){}
+const srcOf=c=>(c.id in map?map[c.id]:c.def);
+
+const audio=document.getElementById("audio");
+let current=null, nextIdx=0, fadeTimer=null, rate=1;
+const els={};
+
+function fmt(s){if(!isFinite(s))return"0:00";s=Math.max(0,Math.round(s));return Math.floor(s/60)+":"+String(s%60).padStart(2,"0")}
+
+function render(){
+  const box=document.getElementById("cues");box.innerHTML="";
+  CUES.forEach((c,i)=>{
+    const k=srcOf(c),s=SRC[k];
+    const d=document.createElement("div");d.className="cue";d.id="cue-"+c.id;
+    const when=c.when.map(p=>Array.isArray(p)?`<q>${p[0]}</q>`:p).join("");
+    d.innerHTML=`<div class="num">${i+1}</div>
+      <div class="head"><span class="act">${c.act}</span><span class="name">${c.name}</span><span class="dur" data-dur></span></div>
+      <button class="play" ${s?"":"disabled"}>▶ 播放</button>
+      <div class="when"><b>時機：</b>${when}</div>
+      <div class="after">播放時：${c.after}</div>
+      ${s?"":`<div class="missing">還沒有這首的音檔，請在下方「音檔設定」選一個，或再傳給我</div>`}
+      ${s&&s.video?`<div class="vid"><video playsinline preload="metadata" src="${s.src}"></video><div class="speed"><button data-rate="1" class="on">練習速度（影片原本的 0.75 倍）</button><button data-rate="1.3333">正常速度</button></div></div>`:""}`;
+    box.appendChild(d);
+    const btn=d.querySelector(".play");
+    btn.addEventListener("click",()=>{if(current===c.id)stop();else play(i)});
+    d.querySelectorAll(".speed button").forEach(b=>b.addEventListener("click",()=>{
+      rate=+b.dataset.rate;d.querySelectorAll(".speed button").forEach(x=>x.classList.toggle("on",x===b));
+      const v=d.querySelector("video");if(v)v.playbackRate=rate;
+    }));
+    els[c.id]={card:d,btn,video:d.querySelector("video"),vid:d.querySelector(".vid")};
+    if(s){const m=s.video?d.querySelector("video"):new Audio();if(!s.video){m.preload="metadata";m.src=s.src}
+      m.addEventListener("loadedmetadata",()=>{d.querySelector("[data-dur]").textContent=fmt(m.duration)+(s.video?"（影片）":"")});}
+  });
+  mark();
+}
+
+function media(){return current&&els[current].video?els[current].video:audio}
+
+function play(i){
+  stop(true);
+  const c=CUES[i],s=SRC[srcOf(c)];if(!s)return;
+  current=c.id;nextIdx=Math.min(i+1,CUES.length-1);
+  const e=els[c.id];
+  let m;
+  if(s.video){e.vid.classList.add("show");m=e.video;m.currentTime=0;m.playbackRate=rate}
+  else{m=audio;m.src=s.src;m.dataset.k="";m.currentTime=0}
+  m.volume=1;
+  const p=m.play();if(p&&p.catch)p.catch(()=>{});
+  e.card.dataset.played="1";
+  document.getElementById("nowTitle").textContent=`${i+1}．${c.act}・${c.name}`;
+  document.getElementById("stopBtn").disabled=false;
+  mark();
+  e.card.scrollIntoView({block:"nearest",behavior:"smooth"});
+}
+
+function stop(instant){
+  if(!current)return;
+  const m=media(),id=current;
+  clearInterval(fadeTimer);
+  current=null;
+  document.getElementById("nowTitle").textContent="（已停止）";
+  document.getElementById("stopBtn").disabled=true;mark();
+  const end=()=>{clearInterval(fadeTimer);try{m.pause()}catch(e){}try{m.volume=1}catch(e){}};
+  if(instant){end();return}
+  /* 快速淡出；平板（iPad）不能調音量，所以最多 0.5 秒一定停 */
+  const t0=Date.now();
+  fadeTimer=setInterval(()=>{try{m.volume=Math.max(0,m.volume-0.15)}catch(e){}if(m.volume<=0.02||Date.now()-t0>500)end()},50);
+}
+
+function mark(){
+  CUES.forEach((c,i)=>{const e=els[c.id];if(!e)return;
+    e.card.classList.toggle("playing",current===c.id);
+    e.card.classList.toggle("next",!current&&i===nextIdx);
+    e.card.classList.toggle("done",current!==c.id&&e.card.dataset.played==="1"&&i<nextIdx);
+    e.btn.textContent=current===c.id?"■ 停止":"▶ 播放";
+    e.btn.classList.toggle("stopmode",current===c.id);
+  });
+}
+
+function tick(){
+  if(current){const m=media();
+    document.getElementById("nowBar").style.width=(m.duration?m.currentTime/m.duration*100:0)+"%";
+    document.getElementById("nowTime").textContent=fmt(m.currentTime)+" / "+fmt(m.duration);
+    if(m.ended){current=null;document.getElementById("nowTitle").textContent="（播完了）";document.getElementById("stopBtn").disabled=true;mark()}
+  }
+  requestAnimationFrame(tick);
+}
+requestAnimationFrame(tick);
+
+document.getElementById("stopBtn").addEventListener("click",()=>stop());
+document.addEventListener("keydown",e=>{
+  if(e.target.closest("select"))return;
+  if(e.key===" "){e.preventDefault();if(current)stop();else play(nextIdx)}
+  else if(e.key==="ArrowDown"){e.preventDefault();nextIdx=Math.min(CUES.length-1,nextIdx+1);mark();els[CUES[nextIdx].id].card.scrollIntoView({block:"nearest",behavior:"smooth"})}
+  else if(e.key==="ArrowUp"){e.preventDefault();nextIdx=Math.max(0,nextIdx-1);mark();els[CUES[nextIdx].id].card.scrollIntoView({block:"nearest",behavior:"smooth"})}
+});
+
+/* settings */
+function renderSettings(){
+  const m=document.getElementById("map");m.innerHTML="";
+  CUES.forEach((c,i)=>{
+    const r=document.createElement("div");r.className="row";
+    const id="sel-"+c.id;
+    r.innerHTML=`<label for="${id}">${i+1}．${c.act}・${c.name}</label><select id="${id}"><option value="">（還沒有音檔）</option>${Object.entries(SRC).map(([k,s])=>`<option value="${k}">${s.label}</option>`).join("")}</select>`;
+    const sel=r.querySelector("select");sel.value=srcOf(c);
+    sel.addEventListener("change",()=>{map[c.id]=sel.value;try{localStorage.setItem(KEY,JSON.stringify(map))}catch(e){}stop(true);render()});
+    m.appendChild(r);
+  });
+  const f=document.getElementById("files");
+  f.innerHTML=`<p class="note">先聽聽看每個檔案：</p>`+Object.entries(SRC).filter(([k,s])=>!s.video).map(([k,s])=>`<div class="file"><span>${s.label}</span><button data-k="${k}">▶ 試聽</button></div>`).join("");
+  f.querySelectorAll("button").forEach(b=>b.addEventListener("click",()=>{
+    stop(true);
+    if(!audio.paused&&audio.dataset.k===b.dataset.k){audio.pause();b.textContent="▶ 試聽";return}
+    f.querySelectorAll("button").forEach(x=>x.textContent="▶ 試聽");
+    audio.src=SRC[b.dataset.k].src;audio.dataset.k=b.dataset.k;audio.currentTime=0;audio.volume=1;
+    const p=audio.play();if(p&&p.catch)p.catch(()=>{});b.textContent="■ 停止";
+    audio.onended=()=>{b.textContent="▶ 試聽"};
+  }));
+}
+render();renderSettings();
+</script>
+
+</body>
+</html>
