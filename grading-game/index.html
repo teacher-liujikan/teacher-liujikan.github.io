@@ -94,6 +94,10 @@ button.big:focus-visible,.opt:focus-visible{outline:3px solid var(--gold);outlin
 .end .rank{font:700 clamp(24px,4vw,34px)/1.2 "Iansui",serif;margin:10px 0 6px;color:#2a1d12}
 .end p{color:#555;margin:4px 0}
 .hud[hidden]{display:none}
+.wrap{position:relative}
+.tally{position:absolute;right:max(4vw,12px);top:clamp(14px,3vw,32px);display:flex;align-items:baseline;gap:6px;background:#fffdf6;color:#2a1d12;border-radius:999px;padding:8px 18px;box-shadow:0 3px 0 #b9a688;white-space:nowrap}
+.tally[hidden]{display:none}.tally small{font-size:14px;font-weight:700;color:#5a3e24}.tally b{font:900 26px/1 "Noto Sans TC",sans-serif;color:var(--red);font-variant-numeric:tabular-nums}
+@media(max-width:860px){.tally{position:static;width:max-content;margin:0 0 10px auto;padding:6px 14px}.tally b{font-size:22px}.tally small{font-size:13px}}
 .line{position:relative}.dirt{position:absolute;inset:0;pointer-events:none;z-index:4}
 .cr{position:absolute;height:4px;border-radius:3px;transform:rotate(var(--r));transition:transform .5s ease-out,opacity .5s;box-shadow:0 1px 1px rgba(0,0,0,.25)}
 .rc{position:absolute;width:17px;height:9px;border-radius:50%;background:radial-gradient(circle at 35% 30%,#fff,#efe9d6);border:1px solid #cfc7ae;transform:rotate(var(--r));box-shadow:1px 2px 2px rgba(0,0,0,.3);transition:opacity .15s}
@@ -116,6 +120,7 @@ footer{text-align:center;color:var(--muted);font-size:13px;margin-top:26px}
 <body>
 <svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs><filter id="wob0"><feTurbulence type="fractalNoise" baseFrequency="0.04" numOctaves="2" seed="2"/><feDisplacementMap in="SourceGraphic" scale="4"/></filter><filter id="wob1"><feTurbulence type="fractalNoise" baseFrequency="0.03" numOctaves="2" seed="7"/><feDisplacementMap in="SourceGraphic" scale="5"/></filter><filter id="wob2"><feTurbulence type="fractalNoise" baseFrequency="0.05" numOctaves="2" seed="11"/><feDisplacementMap in="SourceGraphic" scale="3.5"/></filter><filter id="wob3"><feTurbulence type="fractalNoise" baseFrequency="0.035" numOctaves="2" seed="19"/><feDisplacementMap in="SourceGraphic" scale="4.5"/></filter></defs></svg>
 <div class="wrap">
+  <div class="tally" id="tally" hidden aria-live="polite"><small>大家已經批改了</small><b id="tallyN">0</b><small>本作業</small></div>
   <h1>批改作業小遊戲：<span>測試你的國字腦</span></h1>
   <p class="sub">你是今天的國語老師！拿起紅筆，把學生寫錯的字圈出來，再幫他改正確。</p>
   <div class="hud" id="hud" hidden>
@@ -332,6 +337,7 @@ function bigCheck(){
 }
 
 function start(hd){
+  tallyHit();
   audio();hard=!!hd;
   const gen=BANK.filter(b=>!b.h),hp=BANK.filter(b=>b.h),ge=shuf(gen.filter(b=>b.e.length)),go=shuf(gen.filter(b=>!b.e.length));
   const err=shuf(hp.filter(b=>b.e.length)).slice(0,Math.random()<.5?1:2).concat(ge),ok=shuf(BANK.filter(b=>!b.e.length));
@@ -507,10 +513,14 @@ function rules(){
    <div><b>⑤ 算分方式</b>圈對 +5、改對 +5、圈錯 −5，全對又快還有加分。</div></div></div>`;
   act.innerHTML=`<button class="big" id="st">開始改第一本</button>`;$("st").onclick=()=>start();
 }
+const TALLY_ON=/(^|\.)github\.io$/.test(location.hostname),TALLY="https://abacus.jasoncameron.dev",TKEY="teacher-liujikan/grading-game-rounds";
+function tallyShow(v){if(typeof v!=="number"||!isFinite(v))return;$("tallyN").textContent=(v*10).toLocaleString("zh-TW");$("tally").hidden=false}
+function tallyGet(){if(!TALLY_ON)return;fetch(TALLY+"/get/"+TKEY).then(r=>r.status===404?{value:0}:r.ok?r.json():null).then(j=>j&&tallyShow(+j.value)).catch(()=>{})}
+function tallyHit(){if(!TALLY_ON)return;fetch(TALLY+"/hit/"+TKEY).then(r=>r.ok?r.json():null).then(j=>j&&tallyShow(+j.value)).catch(()=>{})}
+tallyGet();
 $("snd").onclick=()=>{snd=!snd;$("snd").textContent="聲音："+(snd?"開":"關");if(snd)audio()};
 intro();
 }
 </script>
-<script data-goatcounter="https://teacher-liujikan.goatcounter.com/count" async src="//gc.zgo.at/count.js"></script>
 </body>
 </html>
