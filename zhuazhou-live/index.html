@@ -31,7 +31,7 @@ button,input,textarea{font:inherit;color:inherit}
 .who button{border:0;background:#fff;border-radius:999px;padding:6px 14px;cursor:pointer;font-size:15px}
 .foot{text-align:center;margin-top:30px}.foot button{border:0;background:none;color:#a0909b;font-size:13px;text-decoration:underline;cursor:pointer}
 
-/* 宾客 */
+/* 賓客 */
 .hero{text-align:center;padding:26px 0 18px}
 .hero .k{font-size:14px;letter-spacing:3px;color:#5b6f6d}
 .hero h1{font-size:48px;color:var(--rose);letter-spacing:4px;line-height:1.15;margin:6px 0}
@@ -251,7 +251,7 @@ function rankFor(g,key,recs){
   return {key,list,win};
 }
 
-/* ==================== 宾客端 ==================== */
+/* ==================== 賓客端 ==================== */
 let me=LS.get(LK+'-me',''), myAns=LS.get(LK+'-ans',{}), mySent=LS.get(LK+'-sent',{});
 let G={st:null,ver:-1,photo:null,photoV:null,fails:0,draft:{}};
 const app=$('app');
@@ -370,7 +370,7 @@ function hLogin(){
   app.innerHTML=`<div class="wrap"><form class="card" id="hf"><b class="h" style="font-size:26px">主持人入口</b>
   <p class="small" style="margin:6px 0 12px">用國語學習站老師後台的那組密碼。</p>
   <div class="row"><input class="inp" style="font-size:20px" id="hk" type="password" autocomplete="current-password" aria-label="密碼"><button class="btn" style="width:auto">登入</button></div>
-  <p class="msg bad" id="he"></p><button type="button" class="btn ghost" id="hb" style="margin-top:8px">回到宾客畫面</button></form></div>`;
+  <p class="msg bad" id="he"></p><button type="button" class="btn ghost" id="hb" style="margin-top:8px">回到賓客畫面</button></form></div>`;
   $('hb').onclick=()=>{history.replaceState(null,'',location.pathname);document.body.classList.remove('host');gStart()};
   $('hf').onsubmit=async e=>{e.preventDefault();const k=$('hk').value;$('he').textContent='登入中…';
     try{await API.check(k)}catch(err){const m=String(err&&err.message||'');$('he').textContent=/key|pin|pass|auth|denied|forbid|wrong|unauthor/i.test(m)?'密碼不對。':errText(err);return}
@@ -397,19 +397,19 @@ function goPh(i){const p=PH[Math.max(0,Math.min(PH.length-1,i))];hPush({ph:p.id,
 function hRender(){
   if(!document.body.classList.contains('host'))return;
   const ph=curPh(),i=PH.indexOf(ph),st=H.st;
-  const stName={ready:'說明中（宾客看到「主持人說明中」）',open:'作答中',lock:'已停止作答',reveal:'已公布答案'}[st.s];
+  const stName={ready:'說明中（賓客看到「主持人說明中」）',open:'作答中',lock:'已停止作答',reveal:'已公布答案'}[st.s];
   const guestSees=ph.id==='welcome'?'歡迎畫面＋請大家先想祝福':ph.game?`${ph.short}・${stName}`:ph.id==='bless'?'祝福時間':'大合照・謝謝大家';
   app.innerHTML=`
   <div class="top"><button id="pv" aria-label="上一關">◀</button><div class="ttl"><b class="h">${esc(ph.t)}</b><span>${i+1} / ${PH.length}</span></div><button id="nx" aria-label="下一關">▶</button><button id="mn" aria-label="選單">⋯</button></div>
   <div class="steps">${PH.map((p,j)=>`<button data-j="${j}" class="${j===i?'on':j<i?'done':''}">${j+1}. ${p.short}</button>`).join('')}</div>
   <div class="hw">
-  ${H.err?`<div class="err">${esc(H.err)}</div>`:''}${!ONLINE?`<div class="err" style="background:#fff3cd;color:#6b5000">測試模式：資料只存在這個瀏覽器。用同一台電腦另開分頁（不加 #host）就能看宾客畫面。</div>`:''}
-  <div class="sec"><h3>宾客手機現在看到</h3><div class="now"><span class="lamp ${ph.game?st.s:''}"></span><b>${esc(guestSees)}</b></div></div>
+  ${H.err?`<div class="err">${esc(H.err)}</div>`:''}${!ONLINE?`<div class="err" style="background:#fff3cd;color:#6b5000">測試模式：資料只存在這個瀏覽器。用同一台電腦另開分頁（不加 #host）就能看賓客畫面。</div>`:''}
+  <div class="sec"><h3>賓客手機現在看到</h3><div class="now"><span class="lamp ${ph.game?st.s:''}"></span><b>${esc(guestSees)}</b></div></div>
   <div class="sec" id="ctlsec">${hCtrl(ph,st)}</div>
   <div class="sec"><h3><span>📝 講稿</span><span><button class="fsb" id="fm">A－</button> <button class="fsb" id="fp">A＋</button></span></h3><div class="script" style="--fs:${H.fs}px">${ph.script}</div></div>
   ${ph.id==='g'?hItems():''}
   <div class="sec" id="anssec">${hAnswers(ph)}</div>
-  ${ph.id==='welcome'?`<div class="sec"><h3>宾客掃這個 QR code</h3><div class="qrbox"><div id="qrc"></div><div class="small" style="word-break:break-all">${esc(location.href.split('#')[0])}</div></div></div>`:''}
+  ${ph.id==='welcome'?`<div class="sec"><h3>賓客掃這個 QR code</h3><div class="qrbox"><div id="qrc"></div><div class="small" style="word-break:break-all">${esc(location.href.split('#')[0])}</div></div></div>`:''}
   </div><div id="mod"></div>`;
   $('pv').onclick=()=>goPh(i-1);$('nx').onclick=()=>goPh(i+1);$('mn').onclick=hMenu;
   app.querySelectorAll('[data-j]').forEach(b=>b.onclick=()=>{const j=+b.dataset.j;if(j!==i)goPh(j)});
@@ -447,7 +447,7 @@ function hCtrl(ph,st){
     <div style="margin-top:6px;font-size:15px">${R.list.map(x=>`${R.win.includes(x.seat)?'🏆':'・'}${esc(nameOf(x.seat))} ${esc(KIND[ph.kind].fmt(x.v))}${ph.kind!=='item'?`（差 ${esc(KIND[ph.kind].diff(x.d))}）`:''}`).join('<br>')}</div></div>`;
     const nx=PH[PH.indexOf(ph)+1];if(nx)h+=`<button class="btn teal" id="go1" ${dis}>下一個：${esc(nx.short)} ▶</button>`;
   }
-  if(ph.id==='m')h+=`<div style="border-top:1px dashed var(--line);margin-top:6px;padding-top:10px"><div class="small">題目照片（開放作答時會出現在宾客手機上）</div>
+  if(ph.id==='m')h+=`<div style="border-top:1px dashed var(--line);margin-top:6px;padding-top:10px"><div class="small">題目照片（開放作答時會出現在賓客手機上）</div>
     <div class="row" style="margin-top:6px;font-size:15px">${H.photo?`<img src="${H.photo}" style="width:72px;height:72px;object-fit:cover;border-radius:10px">`:''}<label class="btn ghost" style="font-size:16px;padding:10px">${st.pv?'換一張照片':'選擇照片'}<input type="file" accept="image/*" id="phf" hidden></label></div><p class="small" id="phm">${st.pv?'✓ 照片已經放好':'還沒放照片'}</p></div>`;
   return h+'</div>';
 }
@@ -518,9 +518,9 @@ async function uploadPhoto(file){
 function hMenu(){
   const m=$('mod');
   m.innerHTML=`<div class="modal" id="mm"><div class="mbox"><b class="h" style="font-size:24px">選單</b>
-  <div class="ctrl" style="margin-top:14px"><button class="btn ghost" id="m1">看宾客畫面（這支手機）</button>
+  <div class="ctrl" style="margin-top:14px"><button class="btn ghost" id="m1">看賓客畫面（這支手機）</button>
   <button class="btn ghost" id="m2">全部重來（清掉答案、回到開場）</button><button class="btn ghost" id="m3">登出</button><button class="btn" id="mx">關閉</button></div>
-  <p class="small" style="margin-top:12px">「全部重來」適合前一天測試完使用：宾客手機上的答案和得獎紀錄都會清空。</p></div></div>`;
+  <p class="small" style="margin-top:12px">「全部重來」適合前一天測試完使用：賓客手機上的答案和得獎紀錄都會清空。</p></div></div>`;
   $('mx').onclick=()=>m.innerHTML='';
   $('m1').onclick=()=>{window.open(location.pathname,'_blank')};
   $('m3').onclick=()=>{try{sessionStorage.removeItem(LK+'-hk')}catch(e){}H.key=null;clearInterval(H.iv);history.replaceState(null,'',location.pathname);document.body.classList.remove('host');gStart()};
@@ -531,7 +531,7 @@ function hMenu(){
     await hPush({ph:'welcome',s:'ready',res:{},reset:Date.now()});await hLoad();hRender()};
 }
 
-/* 致詞感謝：每家送了什麼（存在後台，換手機也看得到；宾客畫面不會顯示） */
+/* 致詞感謝：每家送了什麼（存在後台，換手機也看得到；賓客畫面不會顯示） */
 H.thx=LS.get(LK+'-thx',{});H.thxEdit=false;
 async function thxLoad(){try{const j=await API.mine(C_PHOTO,THX_SEAT);const r=(j.recs||[]).find(x=>x&&x.stage==='thanks');if(r&&r.thx){H.thx=r.thx;LS.set(LK+'-thx',H.thx);if($('thx')&&!H.thxEdit)thxRender()}}catch(e){}}
 function thxRender(){
