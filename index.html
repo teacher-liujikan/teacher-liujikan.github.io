@@ -383,7 +383,16 @@ const num=p=>String(POSTS.length-POSTS.indexOf(p)).padStart(2,"0");
 const postmark=p=>`<svg class="pm" viewBox="0 0 130 72" aria-hidden="true"><g fill="none" stroke="currentColor" stroke-width="2"><circle cx="36" cy="36" r="32"/><circle cx="36" cy="36" r="25"/><path d="M72 18q7-6 14 0t14 0t14 0t14 0M72 30q7-6 14 0t14 0t14 0t14 0M72 42q7-6 14 0t14 0t14 0t14 0M72 54q7-6 14 0t14 0t14 0t14 0"/></g><text x="36" y="34" text-anchor="middle" font-size="12" font-weight="700" fill="currentColor" font-family="Noto Sans TC,sans-serif">新上架</text><text x="36" y="48" text-anchor="middle" font-size="10" fill="currentColor" font-family="IBM Plex Mono,monospace">${p.date.slice(5).replace("-",".")}</text></svg>`;
 /* 郵票：紙邊＋作品畫面（stamps/代號.jpg，沒有圖就顯示科目色塊和大字）＋科目＋編號 */
 const stamp=(p,eager)=>{const c=cat(p.c[0]);return `<div class="stamp" style="--ca:${c.a};--cx:${c.b}"><svg class="pp" viewBox="0 0 400 280" aria-hidden="true"><rect width="400" height="280" fill="#FFFDF6" mask="url(#perf)"/></svg><div class="sf" aria-hidden="true">${esc(p.g)}</div><img class="si" src="stamps/${p.id}.jpg" alt="「${esc(p.t)}」的畫面" ${eager?"":'loading="lazy"'} onerror="this.remove()"><span class="sc">${esc(p.c[0])}</span><span class="sn" aria-hidden="true"><i>No.</i>${num(p)}</span>${isNew(p)?postmark(p):""}</div>`};
-const meta=p=>`<span class="mono"><span>No.${num(p)}</span><span>${esc(p.c.join("／"))}</span><span class="dt">${fmt(p.date)}</span>${vid(p)?"<span>▶ 影片</span>":""}</span>`;
+/* 每個作品的瀏覽次數：讀 GoatCounter 這個作品網址的次數（還沒有數字就不顯示） */
+const pvPath=p=>p.u&&p.u.startsWith(G)?"/"+p.u.slice(G.length):"";
+const PV={};
+const pvShow=(el,n)=>{if(n){el.textContent="👀 "+n+" 次";el.hidden=false}};
+const pvLoad=el=>{const k=el.dataset.pv;
+  if(!(k in PV))PV[k]=fetch("https://teacher-liujikan.goatcounter.com/counter/"+encodeURIComponent(k)+".json").then(r=>r.ok?r.json():null).then(d=>d&&d.count&&d.count!=="0"?d.count:"").catch(()=>"");
+  PV[k].then(n=>pvShow(el,n))};
+const pvIO="IntersectionObserver" in window?new IntersectionObserver(es=>es.forEach(e=>{if(e.isIntersecting){pvIO.unobserve(e.target);pvLoad(e.target.querySelector(".pv"))}}),{rootMargin:"300px"}):null;
+const fillPV=root=>root.querySelectorAll(".pv[data-pv]").forEach(el=>pvIO?pvIO.observe(el.parentElement):pvLoad(el));
+const meta=p=>`<span class="mono"><span>No.${num(p)}</span><span>${esc(p.c.join("／"))}</span><span class="dt">${fmt(p.date)}</span>${vid(p)?"<span>▶ 影片</span>":""}${pvPath(p)?`<span class="pv" data-pv="${esc(pvPath(p))}" hidden></span>`:""}</span>`;
 
 const item=(p,first)=>first?
  `<a class="it first" href="#/p/${p.id}">${stamp(p,1)}<div class="tx">${meta(p)}<h3>${esc(p.t)}</h3><p>${esc(p.d)}</p><span class="go">看介紹 →</span></div></a>`:
@@ -395,6 +404,7 @@ function renderHome(k){
   $("tabs").innerHTML=`<a class="tab" href="#/" aria-current="${!k}">全部<sup>${POSTS.length}</sup></a>`+
     CATS.map(c=>{const n=POSTS.filter(p=>p.c.includes(c.k)).length;return n?`<a class="tab" href="#/c/${encodeURIComponent(c.k)}" aria-current="${k===c.k}">${c.k}<sup>${n}</sup></a>`:""}).join("");
   $("grid").innerHTML=list.map((p,i)=>item(p,i===0&&!k)).join("");
+  fillPV($("grid"));
 }
 
 function renderPost(p){
@@ -420,6 +430,7 @@ function renderPost(p){
   $("share").addEventListener("click",e=>{const b=e.currentTarget;const done=()=>{b.textContent="已複製連結";setTimeout(()=>b.textContent="複製這篇的連結",1500)};
     try{navigator.clipboard.writeText(location.href).then(done,()=>prompt("複製這個連結：",location.href))}catch(err){b.textContent=location.href}});
   const bk=$("post").querySelector('a[href="#books"]'); if(bk)bk.addEventListener("click",e=>{e.preventDefault();$("books").scrollIntoView({behavior:"smooth",block:"start"})});
+  fillPV($("post"));
 }
 
 let prev="";
