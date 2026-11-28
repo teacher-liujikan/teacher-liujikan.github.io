@@ -141,6 +141,7 @@ const PH=[
 <span class="cue">開始前：看下面「已進場」，確認大家都掃了 QR code、點好自己是誰。</span>
 <p>各位親愛的家人，大家早安！歡迎來到<b class="say">「宸宸抓周宴」</b>！</p>
 <p>謝謝台南阿公阿嬤、芬園阿公阿婆、舅舅舅媽、叔叔嬸嬸，今天特地來陪宸宸過一歲生日。</p>
+<div id="thx"></div>
 <p>這一年，宸宸從一個只會哭、只會睡的小嬰兒，長成會爬、會笑、會黏人的小飯粒。他的每一步，都有大家的照顧和疼愛，真的很謝謝大家。</p>
 <p>今天我們準備了幾個小關卡。請大家<b class="say">手機上的網頁先不要關掉</b>，等一下題目會直接跳到你的手機上，猜得最接近的前兩名都有小禮物喔！</p>
 <p>另外先偷偷預告：活動最後，會請<b class="say">每一位家人對宸宸說一句祝福</b>，大家可以先在心裡想一想，要跟宸宸說什麼。</p>
@@ -197,11 +198,13 @@ const PH=[
 <p>謝謝大家今天來陪宸宸過一歲生日！請大家慢慢享用餐點！</p>`}
 ];
 const GAMES=PH.filter(p=>p.game);
+// 致詞時要感謝的對象（以家為單位）。每家送了什麼，在主持人頁「開場」那一關填
+const THX_GROUPS=['台南阿公阿嬤','芬園阿公阿婆','舅舅舅媽','叔叔嬸嬸'];
 
 /* ==================== 後台（和競猜卡同一個 Cloudflare 後台） ==================== */
 const API_URL='https://guoyu-class.tina12345920.workers.dev/api';
 const C_MAIN='三甲-ZZ1129', C_PHOTO='三甲-ZZ1129P';   // 照片另外存，主持人輪詢時才不會一直下載大圖
-const ST_SEAT=30, PHOTO_SEAT=31;                      // 主持人狀態、題目照片存的編號
+const ST_SEAT=30, PHOTO_SEAT=31, THX_SEAT=32;                      // 主持人狀態、題目照片存的編號
 const PIN_HASH='f1e0be5a4902c004c18be85f94107c6717c41ff00bb5c716458c52a3a15fb9d6';
 const LK='zzlive';
 const ONLINE=/(^|\.)github\.io$/.test(location.hostname);
@@ -377,7 +380,7 @@ async function hStart(){
   try{const j=await API.mine(C_MAIN,ST_SEAT);H.st=(j.recs||[]).find(x=>x&&x.stage==='ctl')||null}catch(e){}
   if(!H.st)H.st={seat:ST_SEAT,stage:'ctl',ph:'welcome',s:'ready',res:{},v:0};
   H.st.res=H.st.res||{};
-  await hLoad();hRender();
+  await hLoad();hRender();thxLoad();
   clearInterval(H.iv);H.iv=setInterval(async()=>{if(document.hidden||!H.key)return;await hLoad();hRefresh()},2500);
   clearInterval(H.tk);H.tk=setInterval(swTick,100);
 }
@@ -412,6 +415,7 @@ function hRender(){
   app.querySelectorAll('[data-j]').forEach(b=>b.onclick=()=>{const j=+b.dataset.j;if(j!==i)goPh(j)});
   $('fm').onclick=()=>{H.fs=Math.max(15,H.fs-2);LS.set(LK+'-fs',H.fs);hRender()};$('fp').onclick=()=>{H.fs=Math.min(34,H.fs+2);LS.set(LK+'-fs',H.fs);hRender()};
   hBindCtrl(ph,st);
+  if($('thx'))thxRender();
   if(ph.id==='g')app.querySelectorAll('[data-item]').forEach(b=>b.onclick=()=>itemModal(b.dataset.item));
   if($('qrc')){try{new QRCode($('qrc'),{text:location.href.split('#')[0],width:130,height:130,correctLevel:QRCode.CorrectLevel.M})}catch(e){}}
 }
@@ -525,6 +529,29 @@ function hMenu(){
     for(const f of FAMILY){try{await API.save(C_MAIN,f.seat,'live',{seat:f.seat,stage:'live',ans:{},at:0,cleared:1})}catch(e){}}
     H.keys={};LS.set(LK+'-keys',{});H.sw={run:false,t0:0,acc:0};
     await hPush({ph:'welcome',s:'ready',res:{},reset:Date.now()});await hLoad();hRender()};
+}
+
+/* 致詞感謝：每家送了什麼（存在後台，換手機也看得到；宾客畫面不會顯示） */
+H.thx=LS.get(LK+'-thx',{});H.thxEdit=false;
+async function thxLoad(){try{const j=await API.mine(C_PHOTO,THX_SEAT);const r=(j.recs||[]).find(x=>x&&x.stage==='thanks');if(r&&r.thx){H.thx=r.thx;LS.set(LK+'-thx',H.thx);if($('thx')&&!H.thxEdit)thxRender()}}catch(e){}}
+function thxRender(){
+  const box=$('thx');if(!box)return;
+  const filled=THX_GROUPS.filter(g=>(H.thx[g]||'').trim());
+  if(H.thxEdit){
+    box.innerHTML=`<div style="background:var(--sun);border-radius:14px;padding:12px;margin:0 0 .8em;font-size:16px;line-height:1.5">
+    <b>🎁 每家送了什麼？</b><div class="small" style="margin:2px 0 8px">例如：金手鍊、紅包、學步車……沒填的那家致詞時就不會念</div>
+    ${THX_GROUPS.map(g=>`<label style="display:block;margin-bottom:8px">${esc(g)}<input data-thx="${esc(g)}" value="${esc(H.thx[g]||'')}" maxlength="40" style="display:block;width:100%;border:2px solid var(--line);border-radius:10px;padding:8px;font-size:17px;margin-top:2px"></label>`).join('')}
+    <button class="btn" id="thxs" style="font-size:17px;padding:11px">儲存</button><p class="small" id="thxm" style="text-align:center;margin-top:6px"></p></div>`;
+    $('thxs').onclick=async()=>{box.querySelectorAll('[data-thx]').forEach(i=>H.thx[i.dataset.thx]=i.value.trim());LS.set(LK+'-thx',H.thx);
+      $('thxm').textContent='儲存中…';
+      try{await API.save(C_PHOTO,THX_SEAT,'thanks',{seat:THX_SEAT,stage:'thanks',thx:H.thx,at:Date.now()});H.thxEdit=false;thxRender()}
+      catch(e){$('thxm').textContent='已存在這支手機，但後台沒存到（'+errText(e)+'）';setTimeout(()=>{H.thxEdit=false;thxRender()},1800)}};
+    return;
+  }
+  box.innerHTML=(filled.length?`<p>也謝謝大家為宸宸準備的禮物：</p>${filled.map(g=>`<p style="padding-left:.8em;border-left:4px solid var(--pink)">謝謝<b class="say">${esc(g)}</b>送的<b class="say">${esc(H.thx[g])}</b>，</p>`).join('')}<p>大家的心意，我們都會好好收著，等宸宸長大再告訴他！</p>`
+    :`<span class="cue">🎁 這裡可以加上「每家送了什麼」，致詞時一起感謝 → 按下面「填寫」</span>`)
+    +`<button class="fsb" id="thxe" style="margin:-.2em 0 .9em">🎁 ${filled.length?'修改每家送的禮物':'填寫每家送的禮物'}</button>`;
+  $('thxe').onclick=()=>{H.thxEdit=true;thxRender()};
 }
 
 /* ==================== 啟動 ==================== */
