@@ -1,0 +1,537 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex">
+<title>宸宸抓周宴</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Huninn&family=Noto+Sans+TC:wght@400;700&display=swap" rel="stylesheet">
+<style>
+:root{--ink:#3f3340;--sub:#6a5a66;--rose:#a8385e;--pink:#f7b8c9;--pink2:#fde4ec;--mint:#d6f1ee;--teal:#2f6f6b;--sun:#ffe7a3;--cream:#fff6ee;--line:#f0d9e1}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+body{font-family:"Noto Sans TC",sans-serif;color:var(--ink);background:var(--cream);min-height:100vh;font-size:18px;line-height:1.5}
+.h{font-family:"Huninn","Noto Sans TC",sans-serif;font-weight:400}
+button,input,textarea{font:inherit;color:inherit}
+.wrap{max-width:520px;margin:0 auto;padding:20px 16px calc(40px + env(safe-area-inset-bottom))}
+.card{background:#fff;border-radius:22px;padding:18px;margin-bottom:14px;border:1.5px solid var(--line)}
+.btn{border:0;border-radius:999px;background:var(--rose);color:#fff;font-size:20px;padding:15px 24px;cursor:pointer;width:100%;display:block}
+.btn.teal{background:var(--teal)}.btn.ghost{background:#fff;color:var(--rose);border:2px solid var(--rose)}
+.btn:disabled{opacity:.35}
+.msg{text-align:center;margin-top:10px;font-size:16px;min-height:1.4em}
+.bad{color:#b3261e}.ok{color:var(--teal)}
+.grid{display:grid;gap:8px}.g2{grid-template-columns:repeat(2,1fr)}.g3{grid-template-columns:repeat(3,1fr)}.g4{grid-template-columns:repeat(4,1fr)}
+.opt{border:2px solid var(--line);background:#fff;border-radius:16px;min-height:56px;padding:6px 4px;font-size:20px;cursor:pointer;line-height:1.2}
+.opt small{display:block;font-size:13px;color:var(--sub)}
+.opt[aria-pressed=true]{background:var(--pink);border-color:var(--rose);font-weight:700}
+.row{display:flex;align-items:center;gap:8px;font-size:20px}
+.inp{flex:1;min-width:0;border:2px solid var(--line);border-radius:16px;padding:12px;font-size:28px;background:#fff;text-align:center}
+.inp:focus{outline:none;border-color:var(--rose)}
+.who{display:flex;align-items:center;justify-content:space-between;background:var(--sun);border-radius:999px;padding:8px 8px 8px 18px;margin-bottom:14px;font-size:17px}
+.who button{border:0;background:#fff;border-radius:999px;padding:6px 14px;cursor:pointer;font-size:15px}
+.foot{text-align:center;margin-top:30px}.foot button{border:0;background:none;color:#a0909b;font-size:13px;text-decoration:underline;cursor:pointer}
+
+/* 宾客 */
+.hero{text-align:center;padding:26px 0 18px}
+.hero .k{font-size:14px;letter-spacing:3px;color:#5b6f6d}
+.hero h1{font-size:48px;color:var(--rose);letter-spacing:4px;line-height:1.15;margin:6px 0}
+.hero p{color:var(--sub)}
+.star{font-size:60px;line-height:1;animation:float 3s ease-in-out infinite;display:inline-block}
+@keyframes float{50%{transform:translateY(-8px)}}
+.tag{display:inline-block;background:var(--teal);color:#fff;border-radius:999px;padding:4px 14px;font-size:15px}
+.qt{font-size:30px;line-height:1.3;margin:10px 0 4px}
+.wait{text-align:center;color:var(--sub);padding:10px 0}
+.dots::after{content:"";animation:dots 1.4s steps(4) infinite}
+@keyframes dots{0%{content:""}25%{content:"．"}50%{content:"．．"}75%{content:"．．．"}}
+.big{font-size:clamp(34px,10vw,52px);line-height:1.15;color:var(--rose);word-break:keep-all}
+.ansbox{background:var(--pink2);border-radius:20px;padding:16px;text-align:center;margin:12px 0}
+.rk{display:flex;justify-content:space-between;align-items:center;gap:8px;padding:9px 12px;border-radius:14px;font-size:18px}
+.rk:nth-child(odd){background:#faf3f6}
+.rk>span:first-child{white-space:nowrap}.rk>span:last-child{text-align:right}.rk small{display:block}
+.rk.win{background:var(--sun);font-weight:700}
+.rk.me{outline:2px solid var(--rose)}
+.prize{background:linear-gradient(135deg,#ffe7a3,#f9c2d2);border-radius:22px;padding:18px;text-align:center;margin:12px 0;animation:pop .6s cubic-bezier(.2,1.4,.4,1) both}
+@keyframes pop{from{transform:scale(.7);opacity:0}to{transform:none;opacity:1}}
+.photo{width:100%;border-radius:18px;display:block;border:6px solid #fff;box-shadow:0 6px 18px rgba(120,60,90,.15)}
+.net{position:fixed;left:50%;bottom:10px;transform:translateX(-50%);background:#3f3340;color:#fff;border-radius:999px;padding:6px 14px;font-size:13px;z-index:9;display:none}
+
+/* 主持人 */
+body.host{background:#f7f3f5}
+.top{position:sticky;top:0;z-index:5;background:#3f3340;color:#fff;padding:10px 14px calc(10px);display:flex;align-items:center;gap:8px}
+.top .ttl{flex:1;min-width:0}.top .ttl b{display:block;font-size:19px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.top .ttl span{font-size:12px;opacity:.75}
+.top button{border:0;border-radius:12px;background:rgba(255,255,255,.15);color:#fff;font-size:18px;min-width:46px;height:44px;cursor:pointer}
+.steps{display:flex;gap:6px;overflow-x:auto;padding:10px 14px;background:#fff;border-bottom:1px solid var(--line)}
+.steps button{flex-shrink:0;border:1.5px solid var(--line);background:#fff;border-radius:999px;padding:6px 12px;font-size:14px;cursor:pointer}
+.steps button.on{background:var(--rose);border-color:var(--rose);color:#fff}
+.steps button.done{color:#a0909b}
+.hw{max-width:640px;margin:0 auto;padding:14px 14px 80px}
+.sec{background:#fff;border-radius:18px;padding:14px 16px;margin-bottom:12px}
+.sec>h3{font-size:14px;color:var(--sub);font-weight:400;margin-bottom:8px;display:flex;justify-content:space-between;align-items:center;gap:8px}
+.now{display:flex;align-items:center;gap:10px;font-size:16px}
+.lamp{width:12px;height:12px;border-radius:50%;background:#bbb;flex-shrink:0}
+.lamp.open{background:#2bb673;box-shadow:0 0 0 4px #d5f3e4}.lamp.lock{background:#f0a020}.lamp.reveal{background:var(--rose)}
+.script{font-size:var(--fs,21px);line-height:1.75}
+.script p{margin-bottom:.7em}
+.script .cue{display:block;font-size:.72em;color:var(--teal);background:var(--mint);border-radius:10px;padding:4px 10px;margin:.2em 0 .6em;line-height:1.5}
+.script .say{color:var(--rose)}
+.fsb{border:1.5px solid var(--line);background:#fff;border-radius:10px;padding:2px 10px;font-size:14px;cursor:pointer}
+.ctrl{display:grid;gap:8px}
+.ctrl .btn{font-size:19px;padding:14px}
+.alist{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:6px}
+.alist.wide{grid-template-columns:1fr}
+.ai{display:flex;justify-content:space-between;align-items:center;gap:6px;padding:8px 10px;border-radius:12px;background:#faf3f6;font-size:16px}
+.ai span{white-space:nowrap}.ai b{text-align:right;font-size:15px}
+.ai b{font-weight:700}.ai.none{color:#b0a0aa}.ai.win{background:var(--sun)}
+.cnt{font-size:15px;color:var(--sub)}
+.sw{text-align:center}
+.sw .t{font-size:64px;font-family:"Huninn",sans-serif;line-height:1.1}
+.sw .r{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-top:8px}
+.items{display:grid;grid-template-columns:repeat(2,1fr);gap:8px}
+.item{border:2px solid var(--line);background:#fff;border-radius:14px;padding:10px 8px;cursor:pointer;text-align:left;display:flex;flex-direction:column;gap:2px}
+.item b{font-family:"Huninn",sans-serif;font-weight:400;font-size:21px}.item span{font-size:13px;color:var(--sub)}
+.item.on{background:var(--pink);border-color:var(--rose)}
+.modal{position:fixed;inset:0;background:rgba(43,31,40,.6);display:flex;align-items:flex-end;justify-content:center;z-index:20}
+.mbox{background:#fff;border-radius:24px 24px 0 0;padding:22px 20px calc(22px + env(safe-area-inset-bottom));width:min(640px,100%);max-height:92vh;overflow:auto;animation:up .3s ease both}
+@keyframes up{from{transform:translateY(40px);opacity:0}}
+.mbox .nm{font-size:54px;color:var(--rose);line-height:1.1}
+.mbox .bl{font-size:30px;color:var(--teal);margin:4px 0 12px}
+.err{background:#fde8e6;color:#8c1d14;border-radius:12px;padding:8px 12px;font-size:14px;margin-bottom:10px}
+.small{font-size:14px;color:var(--sub)}
+.qrbox{display:flex;gap:14px;align-items:center}
+.qrbox #qrc{background:#fff;padding:6px;border-radius:10px;border:1px solid var(--line)}
+</style>
+</head>
+<body>
+<div id="app"></div>
+<div class="net" id="net">網路有點慢，重新連線中…</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<script>
+/* ==================== 要改的地方 ==================== */
+const TITLE='宸宸抓周宴', SUBTITLE='忻願成真抓周趣・宸星閃耀慶生辰';
+// 家人名單：seat 只是後台編號，畫面上只顯示稱呼
+const FAMILY=[
+  {seat:1,name:'台南阿公'},{seat:2,name:'台南阿嬤'},{seat:3,name:'芬園阿公'},{seat:4,name:'芬園阿婆'},
+  {seat:5,name:'舅舅'},{seat:6,name:'舅媽'},{seat:7,name:'叔叔'},{seat:8,name:'嬸嬸'}
+];
+// 抓周物品：名稱、四字寓意、主持人點一下要念的話
+const ITEMS=[
+  {n:'聽診器',b:'懸壺濟世',say:'宸宸抓到了聽診器！代表「懸壺濟世」。以後可能會當醫生，有一顆照顧別人的心，也會把全家人的健康都顧得好好的！'},
+  {n:'獎盃',b:'奪冠高手',say:'宸宸抓到了獎盃！代表「奪冠高手」。以後做什麼都有拚勁，比賽常常拿第一名，是我們家的冠軍寶貝！'},
+  {n:'放大鏡',b:'探索科學',say:'宸宸抓到了放大鏡！代表「探索科學」。對世界充滿好奇心，喜歡觀察、喜歡發問，以後可能會成為科學家！'},
+  {n:'手機',b:'科技達人',say:'宸宸抓到了手機！代表「科技達人」。以後是走在時代最前面的科技高手，家裡的 3C 問題通通交給他！'},
+  {n:'算盤',b:'精打細算',say:'宸宸抓到了算盤！代表「精打細算」。數學好、頭腦清楚，很會理財，以後家裡的帳就交給他管了！'},
+  {n:'調色盤',b:'藝術天分',say:'宸宸抓到了調色盤！代表「藝術天分」。很有美感和創意，以後可能是畫家、設計師，把生活過得很有色彩！'},
+  {n:'警槍',b:'守護正義',say:'宸宸抓到了警槍！代表「守護正義」。勇敢又有責任感，以後會保護大家，是正義的小英雄！'},
+  {n:'足球',b:'運動健將',say:'宸宸抓到了足球！代表「運動健將」。身體健康、活力滿滿，以後在球場上跑來跑去，是運動場上的明星！'},
+  {n:'印章',b:'當家作主',say:'宸宸抓到了印章！代表「當家作主」。有主見、能做決定，以後可能當老闆、當主管，是能扛起大事的人！'},
+  {n:'法官槌',b:'公正明理',say:'宸宸抓到了法官槌！代表「公正明理」。做人正直、講道理，以後可能當法官、律師，主持公道！'},
+  {n:'書本',b:'好學多聞',say:'宸宸抓到了書本！代表「好學多聞」。喜歡讀書、喜歡學習，滿腹學問，以後一定很會念書！'},
+  {n:'金元寶',b:'財源滾滾',say:'宸宸抓到了金元寶！代表「財源滾滾」。以後財運亨通、不愁吃穿，阿公阿嬤以後就等著享福囉！'},
+  {n:'蔥',b:'聰明伶俐',say:'宸宸抓到了蔥！「蔥」就是「聰」，代表「聰明伶俐」。頭腦好、反應快，一點就通！'},
+  {n:'蒜',b:'能寫會算',say:'宸宸抓到了蒜！「蒜」就是「算」，代表「能寫會算」。計算能力一級棒，做事有條有理！'},
+  {n:'芹菜',b:'勤勞認真',say:'宸宸抓到了芹菜！「芹」就是「勤」，代表「勤勞認真」。做事腳踏實地、努力不懈，以後一定會成功！'},
+  {n:'虎頭鞋',b:'虎虎生風',say:'宸宸抓到了虎頭鞋！代表「虎虎生風」。身體健壯、平安長大，走到哪裡都精神飽滿、威風凜凜！'}
+];
+const ITEM=Object.fromEntries(ITEMS.map(x=>[x.n,x]));
+
+/* 流程：每一關的主持人講稿。cue＝提醒自己的動作（不用念），say＝重點句 */
+const PH=[
+  {id:'welcome',t:'歡迎・開場致詞',short:'開場',script:`
+<span class="cue">開始前：看下面「已進場」，確認大家都掃了 QR code、點好自己是誰。</span>
+<p>各位親愛的家人，大家早安！歡迎來到<b class="say">「宸宸抓周宴」</b>！</p>
+<p>謝謝台南阿公阿嬤、芬園阿公阿婆、舅舅舅媽、叔叔嬸嬸，今天特地來陪宸宸過一歲生日。</p>
+<p>這一年，宸宸從一個只會哭、只會睡的小嬰兒，長成會爬、會笑、會黏人的小飯粒。他的每一步，都有大家的照顧和疼愛，真的很謝謝大家。</p>
+<p>今天我們準備了幾個小關卡。請大家<b class="say">手機上的網頁先不要關掉</b>，等一下題目會直接跳到你的手機上，猜得最接近的前兩名都有小禮物喔！</p>
+<p>另外先偷偷預告：活動最後，會請<b class="say">每一位家人對宸宸說一句祝福</b>，大家可以先在心裡想一想，要跟宸宸說什麼。</p>
+<p>那我們就開始第一關吧！</p>
+<span class="cue">念完 → 按下方「進入活動一」，再按「開放作答」。</span>`},
+  {id:'w',game:1,t:'活動一・猜體重',short:'猜體重',kind:'kg',q:'宸宸現在幾公斤幾公克？',script:`
+<span class="cue">先按「開放作答」，大家手機會出現題目。</span>
+<p>第一關：<b class="say">猜猜宸宸現在有多重！</b></p>
+<p>我們先請每一位家人輪流抱一下宸宸，感受一下他的重量——要用心感受喔！</p>
+<span class="cue">讓宸宸傳一圈。</span>
+<p>都抱過了嗎？請在手機上輸入：<b class="say">幾公斤、幾公克</b>，輸入好按送出。</p>
+<span class="cue">看「作答情況」，大家都送出了 → 按「停止作答」。</span>
+<p>好，時間到！答案揭曉，我們請宸宸——上秤！</p>
+<span class="cue">在下方輸入秤出來的數字 → 按「公布答案」。</span>
+<p>最接近的前兩名是……（看下方名單念出來）恭喜！請上來領獎！</p>`},
+  {id:'s',game:2,t:'活動二・爬到聰明門',short:'聰明門',kind:'sec',q:'宸宸從起點到聰明門，要花幾秒？',script:`
+<span class="cue">先按「開放作答」。</span>
+<p>第二關：宸宸要從起點出發，<b class="say">一路爬到聰明門</b>！</p>
+<p>請大家猜猜看，他要花<b class="say">幾秒鐘</b>？在手機上輸入秒數。</p>
+<span class="cue">大家都送出 → 按「停止作答」，把宸宸放到起點。</span>
+<p>大家準備好幫宸宸加油！預備——開始！</p>
+<span class="cue">用下面的碼表計時，到了按「停」→「填入答案」→「公布答案」。</span>
+<p>宸宸花了 ○○ 秒！最接近的前兩名是……恭喜！</p>`},
+  {id:'t',game:3,t:'活動三・猜牙齒',short:'猜牙齒',kind:'teeth',q:'宸宸嘴巴裡現在長了幾顆牙？',script:`
+<span class="cue">先按「開放作答」。</span>
+<p>第三關：大家平常看宸宸笑，有沒有注意他的小牙齒？</p>
+<p>請猜猜看：<b class="say">宸宸現在長了幾顆牙？</b></p>
+<span class="cue">大家都送出 → 「停止作答」。</span>
+<p>來，宸宸，嘴巴張開～讓大家看看！</p>
+<p>答案是 ○ 顆！最接近的前兩名是……恭喜！</p>`},
+  {id:'m',game:4,t:'活動四・猜照片月份',short:'猜照片',kind:'month',q:'這張照片是宸宸幾個月大的時候？',script:`
+<span class="cue">照片要先在下方「題目照片」放好（可以前一天就放）。按「開放作答」，照片會出現在大家手機上。</span>
+<p>第四關：<b class="say">請看手機上的照片！</b></p>
+<p>這是宸宸以前的照片，請大家猜猜看，<b class="say">他當時幾個月大</b>？</p>
+<span class="cue">大家都送出 → 「停止作答」→ 輸入答案 → 「公布答案」。</span>
+<p>答案是 ○ 個月！最接近的前兩名是……恭喜！</p>`},
+  {id:'g',game:5,t:'活動五・猜抓周',short:'猜抓周',kind:'item',q:'宸宸第一個會抓起什麼？',script:`
+<span class="cue">先按「開放作答」，讓大家邊聽介紹邊選。</span>
+<p>接下來就是今天的重頭戲——<b class="say">抓周</b>！</p>
+<p>桌上這些物品，每一樣都代表一個祝福。（可以點下方物品，一樣一樣介紹）</p>
+<p>請大家在手機上選：<b class="say">你覺得宸宸第一個會抓起什麼？</b>猜對的人都有獎品！</p>
+<span class="cue">大家都選好 → 「停止作答」→ 把宸宸放到抓周墊。</span>
+<p>宸宸，去選一個你最喜歡的吧！大家一起幫他加油！</p>
+<span class="cue">宸宸抓起來的那一刻，點下方那樣物品 → 念寓意 → 按「宸宸抓到這個，公布」。</span>`},
+  {id:'bless',t:'祝福時間',short:'祝福',script:`
+<p>最後一關，不用手機了！</p>
+<p>剛剛請大家想的祝福，想好了嗎？我們把麥克風傳下去，請<b class="say">每一位家人對宸宸說一句祝福</b>。</p>
+<span class="cue">建議順序（可自己調）：台南阿公 → 台南阿嬤 → 芬園阿公 → 芬園阿婆 → 舅舅 → 舅媽 → 叔叔 → 嬸嬸 → 最後爸爸媽媽。</span>
+<p>謝謝大家的祝福，我們都幫宸宸收下了！</p>`},
+  {id:'pic',t:'大合照',short:'大合照',script:`
+<p>最後，我們要留下今天的紀念——<b class="say">大合照</b>！</p>
+<p>請大家到前面來，阿公阿嬤坐中間，宸宸在最前面～</p>
+<span class="cue">先拍全部人，再分家拍。</span>
+<p>謝謝大家今天來陪宸宸過一歲生日！請大家慢慢享用餐點！</p>`}
+];
+const GAMES=PH.filter(p=>p.game);
+
+/* ==================== 後台（和競猜卡同一個 Cloudflare 後台） ==================== */
+const API_URL='https://guoyu-class.tina12345920.workers.dev/api';
+const C_MAIN='三甲-ZZ1129', C_PHOTO='三甲-ZZ1129P';   // 照片另外存，主持人輪詢時才不會一直下載大圖
+const ST_SEAT=30, PHOTO_SEAT=31;                      // 主持人狀態、題目照片存的編號
+const PIN_HASH='f1e0be5a4902c004c18be85f94107c6717c41ff00bb5c716458c52a3a15fb9d6';
+const LK='zzlive';
+const ONLINE=/(^|\.)github\.io$/.test(location.hostname);
+const $=id=>document.getElementById(id);
+const esc=s=>String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const LS={get(k,d){try{const v=localStorage.getItem(k);return v?JSON.parse(v):d}catch(e){return d}},set(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}}};
+async function pinOK(s){try{const b=await crypto.subtle.digest('SHA-256',new TextEncoder().encode(String(s)));return Array.from(new Uint8Array(b)).map(x=>x.toString(16).padStart(2,'0')).join('')===PIN_HASH}catch(e){return false}}
+const Remote={
+  async get(p){const r=await fetch(API_URL+'?'+new URLSearchParams(Object.assign({_:Date.now()},p)).toString(),{cache:'no-store'});const j=await r.json();if(!j.ok)throw new Error(j.err||'error');return j},
+  async post(b){const r=await fetch(API_URL,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify(b)});const j=await r.json();if(!j.ok)throw new Error(j.err||'error');return j},
+  mine:(c,s)=>Remote.get({a:'mine',c,s}),
+  all:(c,k)=>Remote.get({a:'all',c,k}),
+  save:(c,s,stage,rec)=>Remote.post({a:'save',c,s,stage,rec}),
+  check:k=>Remote.get({a:'check',c:C_MAIN,k})
+};
+/* 不在 GitHub 網址上（自己電腦測試）時：存在這個瀏覽器，同一台電腦開兩個分頁就能互相連動 */
+const Local={
+  db(){return LS.get(LK+'-demo',{})},
+  async mine(c,s){const d=Local.db()[c]||{};return {ok:1,recs:Object.keys(d).filter(k=>k.split('|')[0]===String(s)).map(k=>d[k])}},
+  async all(c,k){if(!await pinOK(k))throw new Error('key');return {ok:1,recs:Object.values(Local.db()[c]||{})}},
+  async save(c,s,stage,rec){const d=Local.db();d[c]=d[c]||{};d[c][s+'|'+stage]=rec;LS.set(LK+'-demo',d);return {ok:1}},
+  async check(k){if(!await pinOK(k))throw new Error('key');return {ok:1}}
+};
+const API=ONLINE?Remote:Local;
+const nameOf=s=>{const p=FAMILY.find(f=>String(f.seat)===String(s));return p?p.name:s+' 號'};
+const errText=e=>{const m=String(e&&e.message||'');return (e instanceof TypeError||/fetch|network|load/i.test(m))?'連不上網路，請再按一次。':'後台回覆：'+m};
+
+/* ==================== 答案的格式與比較 ==================== */
+const KIND={
+  kg:{fmt:v=>{v=+v;const kg=Math.floor(v/1000),g=Math.round(v-kg*1000);return `${kg} 公斤 ${g} 公克`},diff:d=>{d=Math.round(d);return d>=1000?`${Math.floor(d/1000)} 公斤 ${d%1000} 公克`:`${d} 公克`}},
+  sec:{fmt:v=>`${+v} 秒`,diff:d=>`${Math.round(d*10)/10} 秒`},
+  teeth:{fmt:v=>`${+v} 顆`,diff:d=>`${d} 顆`},
+  month:{fmt:v=>+v===0?'未滿 1 個月':`${+v} 個月`,diff:d=>`${d} 個月`},
+  item:{fmt:v=>String(v),diff:()=>''}
+};
+function rankFor(g,key,recs){
+  const list=[];
+  recs.forEach(r=>{const v=r.ans&&r.ans[g.id];if(v===undefined||v===null||v==='')return;
+    if(g.kind==='item')list.push({seat:r.seat,v,d:String(v)===String(key)?0:1});
+    else{const n=parseFloat(v);if(!isNaN(n))list.push({seat:r.seat,v:n,d:Math.abs(n-key)})}});
+  list.sort((a,b)=>a.d-b.d||a.seat-b.seat);
+  list.forEach(x=>x.rank=1+list.filter(y=>y.d<x.d-1e-9).length);
+  const win=g.kind==='item'?list.filter(x=>x.d===0).map(x=>x.seat):list.filter(x=>x.rank<=2).map(x=>x.seat);
+  return {key,list,win};
+}
+
+/* ==================== 宾客端 ==================== */
+let me=LS.get(LK+'-me',''), myAns=LS.get(LK+'-ans',{}), mySent=LS.get(LK+'-sent',{});
+let G={st:null,ver:-1,photo:null,photoV:null,fails:0,draft:{}};
+const app=$('app');
+
+function gStart(){document.body.classList.remove('host');gRender();gPoll();clearInterval(G.iv);G.iv=setInterval(gPoll,2000)}
+async function gPoll(){
+  if(document.hidden||location.hash==='#host')return;
+  try{const j=await API.mine(C_MAIN,ST_SEAT);const r=(j.recs||[]).find(x=>x&&x.stage==='ctl');G.fails=0;$('net').style.display='none';
+    const v=r?r.v:0;
+    if(v!==G.ver){G.ver=v;G.st=r||null;
+      if(r&&r.reset&&LS.get(LK+'-reset',0)!==r.reset){LS.set(LK+'-reset',r.reset);myAns={};mySent={};me='';LS.set(LK+'-me','');LS.set(LK+'-ans',myAns);LS.set(LK+'-sent',mySent)}
+      gRender()}
+    if(G.st&&G.st.ph==='m'&&G.st.pv&&G.photoV!==G.st.pv)loadPhoto(G.st.pv);
+  }catch(e){if(++G.fails>=3)$('net').style.display='block'}
+}
+async function loadPhoto(pv){try{const j=await API.mine(C_PHOTO,PHOTO_SEAT);const r=(j.recs||[]).find(x=>x&&x.stage==='photo');if(r&&r.img){G.photo=r.img;G.photoV=pv;gRender()}}catch(e){}}
+
+function gWho(){
+  app.innerHTML=`<div class="wrap"><div class="hero"><div class="star">⭐</div><div class="k">${SUBTITLE}</div><h1 class="h">${TITLE}</h1><p>歡迎來陪宸宸過一歲生日！</p></div>
+  <div class="card"><b class="h" style="font-size:24px">請先點你是誰</b>
+  <div class="grid g2" style="margin-top:12px">${FAMILY.map(f=>`<button class="opt h" data-s="${f.seat}" aria-pressed="${String(f.seat)===String(me)}">${esc(f.name)}</button>`).join('')}</div></div>
+  <div class="foot"><button id="hl">主持人入口</button></div></div>`;
+  app.querySelectorAll('[data-s]').forEach(b=>b.onclick=async()=>{
+    if(me!==b.dataset.s){myAns={};mySent={}}
+    me=b.dataset.s;LS.set(LK+'-me',me);
+    try{const j=await API.mine(C_MAIN,me);const r=(j.recs||[]).find(x=>x&&x.stage==='live');if(r&&r.ans){myAns=r.ans;mySent=Object.fromEntries(Object.keys(r.ans).map(k=>[k,true]))}}catch(e){}
+    LS.set(LK+'-ans',myAns);LS.set(LK+'-sent',mySent);
+    API.save(C_MAIN,me,'live',{seat:+me,stage:'live',ans:myAns,at:Date.now()}).catch(()=>{}); // 讓主持人看到「已進場」
+    gRender()});
+  $('hl').onclick=()=>{location.hash='host'};
+}
+
+function gRender(){
+  if(document.body.classList.contains('host'))return;
+  if(!me)return gWho();
+  const st=G.st||{ph:'welcome',s:'ready'}, ph=PH.find(p=>p.id===st.ph)||PH[0];
+  const whoBar=`<div class="who"><span>我是 <b class="h" style="font-size:21px">${esc(nameOf(me))}</b></span><button id="chg">換人</button></div>`;
+  let h='';
+  if(ph.id==='welcome'){
+    h=`<div class="hero"><div class="star">⭐</div><div class="k">${SUBTITLE}</div><h1 class="h">${TITLE}</h1><p>歡迎來陪宸宸過一歲生日！</p></div>
+    <div class="card" style="text-align:center"><div class="wait">主持人準備開場<span class="dots"></span></div><p class="small">這個網頁請不要關掉，等一下題目會自己跳出來。</p></div>
+    <div class="card" style="background:var(--mint);border-color:#bfe2de"><b class="h" style="font-size:20px">🎤 先偷偷想一想</b><p style="margin-top:6px">活動最後，會請每一位家人對宸宸說一句祝福。你想對宸宸說什麼呢？</p></div>`;
+  } else if(ph.game){
+    h=gGame(ph,st);
+  } else if(ph.id==='bless'){
+    h=`<div class="hero"><div class="star">🎤</div><h1 class="h" style="font-size:42px">祝福時間</h1></div>
+    <div class="card" style="text-align:center;font-size:20px">麥克風傳到你手上的時候，<br>請對宸宸說一句祝福 💕</div>`;
+  } else {
+    h=`<div class="hero"><div class="star">📸</div><h1 class="h" style="font-size:42px">大合照！</h1><p>請大家到前面集合～</p></div>
+    <div class="card" style="text-align:center;font-size:19px">謝謝你今天來陪宸宸過一歲生日！<br>請慢慢享用餐點 🍰</div>${gMyScore()}`;
+  }
+  app.innerHTML=`<div class="wrap">${whoBar}${h}</div>`;
+  $('chg').onclick=()=>{me='';LS.set(LK+'-me','');gWho()};
+  gBind(ph,st);
+}
+function gMyScore(){
+  const res=(G.st&&G.st.res)||{};const got=GAMES.filter(g=>res[g.id]&&res[g.id].win.map(String).includes(String(me)));
+  return got.length?`<div class="prize"><b class="h" style="font-size:22px">🎁 你今天得獎了 ${got.length} 次！</b><div style="margin-top:4px">${got.map(g=>g.short).join('、')}</div></div>`:'';
+}
+function gGame(g,st){
+  const head=`<div style="text-align:center;margin:6px 0 12px"><span class="tag">${esc(g.t.split('・')[0])}</span><div class="qt h">${esc(g.q)}</div></div>`;
+  const photo=g.id==='m'&&st.s!=='ready'?(G.photo?`<img class="photo" src="${G.photo}" alt="題目照片" style="margin-bottom:12px">`:`<div class="card wait">照片載入中<span class="dots"></span>（也可以看主持人手上的照片）</div>`):'';
+  const mine=myAns[g.id], has=mine!==undefined&&mine!=='';
+  if(st.s==='ready') return `${head}<div class="card" style="text-align:center"><div class="star" style="font-size:44px">👂</div><div class="wait" style="font-size:20px">主持人說明中<span class="dots"></span></div><p class="small">聽完說明，題目就會開放作答</p></div>`;
+  if(st.s==='open'){
+    return `${head}${photo}<div class="card">${gField(g)}</div>
+    <button class="btn" id="send">${mySent[g.id]?'改好了，再送出一次':'送出答案'}</button>
+    <p class="msg ${mySent[g.id]?'ok':''}" id="msg">${mySent[g.id]?`✓ 已送出：${esc(KIND[g.kind].fmt(mine))}（停止作答前都可以改）`:''}</p>`;
+  }
+  if(st.s==='lock') return `${head}${photo}<div class="card" style="text-align:center"><div class="small">你的答案</div><div class="big h">${has?esc(KIND[g.kind].fmt(mine)):'沒有作答'}</div>
+    <div class="wait" style="margin-top:10px">停止作答，等待揭曉<span class="dots"></span></div></div>`;
+  // reveal
+  const R=st.res&&st.res[g.id];if(!R)return head;
+  const mineR=R.list.find(x=>String(x.seat)===String(me)), iWin=R.win.map(String).includes(String(me));
+  const item=g.kind==='item'?ITEM[R.key]:null;
+  return `${head}${photo}
+  <div class="ansbox"><div class="small">答案揭曉</div><div class="big h">${esc(KIND[g.kind].fmt(R.key))}</div>${item?`<div class="h" style="font-size:28px;color:var(--teal);margin-top:4px">${esc(item.b)}</div>`:''}</div>
+  ${iWin?`<div class="prize"><div style="font-size:40px">🎉</div><b class="h" style="font-size:26px">恭喜你得獎！</b><div>請到主持人那裡領獎品</div></div>`
+    :`<div class="card" style="text-align:center">${mineR?`你猜 <b>${esc(KIND[g.kind].fmt(mineR.v))}</b>${g.kind==='item'?'，差一點點！':`，差了 <b>${esc(KIND[g.kind].diff(mineR.d))}</b>`}`:'這題你沒有作答'}</div>`}
+  <div class="card"><b class="h" style="font-size:20px">${g.kind==='item'?'猜對的人':'最接近的前兩名'}：<span style="color:var(--rose)">${R.win.length?R.win.map(s=>esc(nameOf(s))).join('、'):'沒有人'}</span></b>
+  <div style="margin-top:10px">${R.list.map(x=>`<div class="rk ${R.win.includes(x.seat)?'win':''} ${String(x.seat)===String(me)?'me':''}"><span>${R.win.includes(x.seat)?'🏆 ':''}${esc(nameOf(x.seat))}</span><span>${esc(KIND[g.kind].fmt(x.v))}${g.kind!=='item'?`<small class="small">（差 ${esc(KIND[g.kind].diff(x.d))}）</small>`:''}</span></div>`).join('')}</div></div>`;
+}
+function gField(g){
+  const v=myAns[g.id];
+  if(g.kind==='kg'){const kg=v!==undefined&&v!==''?Math.floor(v/1000):'',gr=v!==undefined&&v!==''?Math.round(v-Math.floor(v/1000)*1000):'';
+    return `<div class="row"><input class="inp" id="kg" type="number" inputmode="numeric" min="0" max="30" value="${kg}" placeholder="9"><span>公斤</span></div>
+    <div class="row" style="margin-top:10px"><input class="inp" id="gr" type="number" inputmode="numeric" min="0" max="999" value="${gr}" placeholder="500"><span>公克</span></div>`}
+  if(g.kind==='sec')return `<div class="row"><input class="inp" id="num" type="number" inputmode="decimal" min="0" step="0.1" value="${v??''}" placeholder="30"><span>秒</span></div>`;
+  if(g.kind==='teeth')return `<div class="grid g4">${Array.from({length:17},(_,i)=>`<button class="opt h" data-v="${i}" aria-pressed="${String(v)===String(i)}">${i}<small>顆</small></button>`).join('')}</div>`;
+  if(g.kind==='month')return `<div class="grid g3">${Array.from({length:13},(_,i)=>`<button class="opt h" data-v="${i}" aria-pressed="${String(v)===String(i)}">${i===0?'未滿1':i}<small>個月</small></button>`).join('')}</div>`;
+  return `<div class="grid g2">${ITEMS.map(x=>`<button class="opt h" data-v="${esc(x.n)}" aria-pressed="${String(v)===x.n}">${esc(x.n)}<small>${esc(x.b)}</small></button>`).join('')}</div>`;
+}
+function gBind(g,st){
+  if(!g.game||st.s!=='open')return;
+  let pick=myAns[g.id];
+  app.querySelectorAll('[data-v]').forEach(b=>b.onclick=()=>{pick=b.dataset.v;app.querySelectorAll('[data-v]').forEach(x=>x.setAttribute('aria-pressed',String(x===b)))});
+  $('send').onclick=async()=>{
+    let val;
+    if(g.kind==='kg'){const kg=parseInt($('kg').value,10),gr=parseInt($('gr').value||'0',10);if(isNaN(kg)||kg<0||kg>30||isNaN(gr)||gr<0||gr>999){return gMsg('請輸入公斤（0～30）和公克（0～999）','bad')}val=kg*1000+gr}
+    else if(g.kind==='sec'){const n=parseFloat($('num').value);if(isNaN(n)||n<0||n>3600)return gMsg('請輸入秒數','bad');val=Math.round(n*10)/10}
+    else{if(pick===undefined||pick==='')return gMsg('先點一個答案喔','bad');val=g.kind==='item'?pick:+pick}
+    if(G.st&&(G.st.ph!==g.id||G.st.s!=='open'))return gMsg('已經停止作答了','bad');
+    $('send').disabled=true;gMsg('送出中…');
+    const ans=Object.assign({},myAns,{[g.id]:val});
+    try{await API.save(C_MAIN,me,'live',{seat:+me,stage:'live',ans,at:Date.now()});myAns=ans;mySent[g.id]=true;LS.set(LK+'-ans',myAns);LS.set(LK+'-sent',mySent);gRender()}
+    catch(e){$('send').disabled=false;gMsg(errText(e),'bad')}
+  };
+}
+function gMsg(t,c){const m=$('msg');if(m){m.textContent=t;m.className='msg '+(c||'')}}
+
+/* ==================== 主持人端（網址加 #host） ==================== */
+let H={key:null,st:null,recs:[],err:null,keys:LS.get(LK+'-keys',{}),sw:{run:false,t0:0,acc:0},fs:LS.get(LK+'-fs',21),busy:false};
+function hLogin(){
+  document.body.classList.add('host');clearInterval(G.iv);
+  try{const k=sessionStorage.getItem(LK+'-hk');if(k){H.key=k;return hStart()}}catch(e){}
+  app.innerHTML=`<div class="wrap"><form class="card" id="hf"><b class="h" style="font-size:26px">主持人入口</b>
+  <p class="small" style="margin:6px 0 12px">用國語學習站老師後台的那組密碼。</p>
+  <div class="row"><input class="inp" style="font-size:20px" id="hk" type="password" autocomplete="current-password" aria-label="密碼"><button class="btn" style="width:auto">登入</button></div>
+  <p class="msg bad" id="he"></p><button type="button" class="btn ghost" id="hb" style="margin-top:8px">回到宾客畫面</button></form></div>`;
+  $('hb').onclick=()=>{history.replaceState(null,'',location.pathname);document.body.classList.remove('host');gStart()};
+  $('hf').onsubmit=async e=>{e.preventDefault();const k=$('hk').value;$('he').textContent='登入中…';
+    try{await API.check(k)}catch(err){const m=String(err&&err.message||'');$('he').textContent=/key|pin|pass|auth|denied|forbid|wrong|unauthor/i.test(m)?'密碼不對。':errText(err);return}
+    H.key=k;try{sessionStorage.setItem(LK+'-hk',k)}catch(_){}hStart()};
+}
+async function hStart(){
+  try{const j=await API.mine(C_MAIN,ST_SEAT);H.st=(j.recs||[]).find(x=>x&&x.stage==='ctl')||null}catch(e){}
+  if(!H.st)H.st={seat:ST_SEAT,stage:'ctl',ph:'welcome',s:'ready',res:{},v:0};
+  H.st.res=H.st.res||{};
+  await hLoad();hRender();
+  clearInterval(H.iv);H.iv=setInterval(async()=>{if(document.hidden||!H.key)return;await hLoad();hRefresh()},2500);
+  clearInterval(H.tk);H.tk=setInterval(swTick,100);
+}
+async function hLoad(){try{const j=await API.all(C_MAIN,H.key);H.recs=(j.recs||[]).filter(r=>r&&r.stage==='live'&&FAMILY.some(f=>String(f.seat)===String(r.seat)));H.err=null}catch(e){H.err='連不上後台，畫面是上一次的資料。'}}
+async function hPush(patch){
+  const nx=Object.assign({},H.st,patch,{seat:ST_SEAT,stage:'ctl',v:(H.st.v||0)+1,at:Date.now()});
+  H.busy=true;hRender();
+  try{await API.save(C_MAIN,ST_SEAT,'ctl',nx);H.st=nx;H.err=null}catch(e){H.err='切換沒有成功：'+errText(e)+' 請再按一次。'}
+  H.busy=false;hRender();
+}
+const curPh=()=>PH.find(p=>p.id===H.st.ph)||PH[0];
+function goPh(i){const p=PH[Math.max(0,Math.min(PH.length-1,i))];hPush({ph:p.id,s:'ready'})}
+
+function hRender(){
+  if(!document.body.classList.contains('host'))return;
+  const ph=curPh(),i=PH.indexOf(ph),st=H.st;
+  const stName={ready:'說明中（宾客看到「主持人說明中」）',open:'作答中',lock:'已停止作答',reveal:'已公布答案'}[st.s];
+  const guestSees=ph.id==='welcome'?'歡迎畫面＋請大家先想祝福':ph.game?`${ph.short}・${stName}`:ph.id==='bless'?'祝福時間':'大合照・謝謝大家';
+  app.innerHTML=`
+  <div class="top"><button id="pv" aria-label="上一關">◀</button><div class="ttl"><b class="h">${esc(ph.t)}</b><span>${i+1} / ${PH.length}</span></div><button id="nx" aria-label="下一關">▶</button><button id="mn" aria-label="選單">⋯</button></div>
+  <div class="steps">${PH.map((p,j)=>`<button data-j="${j}" class="${j===i?'on':j<i?'done':''}">${j+1}. ${p.short}</button>`).join('')}</div>
+  <div class="hw">
+  ${H.err?`<div class="err">${esc(H.err)}</div>`:''}${!ONLINE?`<div class="err" style="background:#fff3cd;color:#6b5000">測試模式：資料只存在這個瀏覽器。用同一台電腦另開分頁（不加 #host）就能看宾客畫面。</div>`:''}
+  <div class="sec"><h3>宾客手機現在看到</h3><div class="now"><span class="lamp ${ph.game?st.s:''}"></span><b>${esc(guestSees)}</b></div></div>
+  <div class="sec" id="ctlsec">${hCtrl(ph,st)}</div>
+  <div class="sec"><h3><span>📝 講稿</span><span><button class="fsb" id="fm">A－</button> <button class="fsb" id="fp">A＋</button></span></h3><div class="script" style="--fs:${H.fs}px">${ph.script}</div></div>
+  ${ph.id==='g'?hItems():''}
+  <div class="sec" id="anssec">${hAnswers(ph)}</div>
+  ${ph.id==='welcome'?`<div class="sec"><h3>宾客掃這個 QR code</h3><div class="qrbox"><div id="qrc"></div><div class="small" style="word-break:break-all">${esc(location.href.split('#')[0])}</div></div></div>`:''}
+  </div><div id="mod"></div>`;
+  $('pv').onclick=()=>goPh(i-1);$('nx').onclick=()=>goPh(i+1);$('mn').onclick=hMenu;
+  app.querySelectorAll('[data-j]').forEach(b=>b.onclick=()=>{const j=+b.dataset.j;if(j!==i)goPh(j)});
+  $('fm').onclick=()=>{H.fs=Math.max(15,H.fs-2);LS.set(LK+'-fs',H.fs);hRender()};$('fp').onclick=()=>{H.fs=Math.min(34,H.fs+2);LS.set(LK+'-fs',H.fs);hRender()};
+  hBindCtrl(ph,st);
+  if(ph.id==='g')app.querySelectorAll('[data-item]').forEach(b=>b.onclick=()=>itemModal(b.dataset.item));
+  if($('qrc')){try{new QRCode($('qrc'),{text:location.href.split('#')[0],width:130,height:130,correctLevel:QRCode.CorrectLevel.M})}catch(e){}}
+}
+function hRefresh(){ // 輪詢時只更新作答名單，不打斷正在輸入的答案
+  const a=$('anssec');if(a)a.innerHTML=hAnswers(curPh());
+  const c=$('cntline');if(c){const g=curPh();c.textContent=answeredLine(g)}
+}
+function answeredLine(g){const n=H.recs.filter(r=>r.ans&&r.ans[g.id]!==undefined&&r.ans[g.id]!=='').length;return `已作答 ${n} / ${FAMILY.length} 人`}
+
+function hCtrl(ph,st){
+  const dis=H.busy?'disabled':'';
+  if(!ph.game){
+    const nx=PH[PH.indexOf(ph)+1];
+    return `<h3>控制</h3><div class="ctrl">${nx?`<button class="btn" id="go1" ${dis}>${ph.id==='welcome'?'致詞完畢 → 進入活動一':'下一個：'+esc(nx.short)}</button>`:'<p class="small">這是最後一個環節囉！🎉</p>'}</div>`;
+  }
+  const key=H.keys[ph.id];
+  let h=`<h3><span>控制</span><span class="cnt" id="cntline">${answeredLine(ph)}</span></h3><div class="ctrl">`;
+  if(st.s==='ready')h+=`<button class="btn teal" id="open" ${dis}>▶ 開放作答</button>`;
+  if(st.s==='open')h+=`<button class="btn" id="lock" ${dis}>■ 停止作答</button>`;
+  if(st.s==='lock'||st.s==='reveal'){
+    if(ph.kind==='sec')h+=`<div class="sw"><div class="t" id="swt">0.0</div><div class="small">秒・聰明門碼表</div><div class="r"><button class="btn teal" id="sws">${H.sw.run?'停':'開始'}</button><button class="btn ghost" id="swr">歸零</button><button class="btn ghost" id="swu">填入答案</button></div></div>`;
+    h+=`<div style="margin-top:6px"><div class="small" style="margin-bottom:6px">正確答案</div>${hKeyField(ph,key)}</div>
+    <button class="btn" id="rev" ${dis}>${st.s==='reveal'?'改好答案，重新公布':'🎉 公布答案'}</button>`;
+    if(st.s==='lock')h+=`<button class="btn ghost" id="reopen" ${dis}>重新開放作答</button>`;
+  }
+  if(st.s==='reveal'){
+    const R=st.res[ph.id];
+    if(R)h+=`<div class="prize" style="text-align:left"><div class="small">答案：${esc(KIND[ph.kind].fmt(R.key))}</div><b class="h" style="font-size:24px">${ph.kind==='item'?'猜對的人':'前兩名'}：${R.win.length?R.win.map(s=>esc(nameOf(s))).join('、'):'沒有人'}</b>
+    <div style="margin-top:6px;font-size:15px">${R.list.map(x=>`${R.win.includes(x.seat)?'🏆':'・'}${esc(nameOf(x.seat))} ${esc(KIND[ph.kind].fmt(x.v))}${ph.kind!=='item'?`（差 ${esc(KIND[ph.kind].diff(x.d))}）`:''}`).join('<br>')}</div></div>`;
+    const nx=PH[PH.indexOf(ph)+1];if(nx)h+=`<button class="btn teal" id="go1" ${dis}>下一個：${esc(nx.short)} ▶</button>`;
+  }
+  if(ph.id==='m')h+=`<div style="border-top:1px dashed var(--line);margin-top:6px;padding-top:10px"><div class="small">題目照片（開放作答時會出現在宾客手機上）</div>
+    <div class="row" style="margin-top:6px;font-size:15px">${H.photo?`<img src="${H.photo}" style="width:72px;height:72px;object-fit:cover;border-radius:10px">`:''}<label class="btn ghost" style="font-size:16px;padding:10px">${st.pv?'換一張照片':'選擇照片'}<input type="file" accept="image/*" id="phf" hidden></label></div><p class="small" id="phm">${st.pv?'✓ 照片已經放好':'還沒放照片'}</p></div>`;
+  return h+'</div>';
+}
+function hKeyField(g,key){
+  if(g.kind==='kg'){const has=key!==undefined&&key!=='';return `<div class="row"><input class="inp" id="kkg" type="number" inputmode="numeric" value="${has?Math.floor(key/1000):''}" placeholder="公斤"><span style="font-size:16px">公斤</span><input class="inp" id="kgr" type="number" inputmode="numeric" value="${has?Math.round(key%1000):''}" placeholder="公克"><span style="font-size:16px">公克</span></div>`}
+  if(g.kind==='item')return `<div class="small" style="padding:8px;background:var(--pink2);border-radius:12px">${key?`宸宸抓到：<b class="h" style="font-size:22px">${esc(key)}</b>（${esc(ITEM[key].b)}）`:'請在下方「抓周物品」點宸宸抓到的那一樣'}</div>`;
+  return `<div class="row"><input class="inp" id="knum" type="number" inputmode="decimal" step="${g.kind==='sec'?'0.1':'1'}" value="${key??''}"><span style="font-size:18px">${{sec:'秒',teeth:'顆',month:'個月'}[g.kind]}</span></div>`;
+}
+function readKey(g){
+  if(g.kind==='kg'){const a=parseInt($('kkg').value,10),b=parseInt($('kgr').value||'0',10);return isNaN(a)?null:a*1000+(isNaN(b)?0:b)}
+  if(g.kind==='item')return H.keys[g.id]||null;
+  const n=parseFloat($('knum').value);return isNaN(n)?null:n;
+}
+function hBindCtrl(ph,st){
+  const on=(id,f)=>{const el=$(id);if(el)el.onclick=f};
+  on('go1',()=>goPh(PH.indexOf(ph)+1));
+  on('open',()=>hPush({s:'open'}));
+  on('lock',()=>hPush({s:'lock'}));
+  on('reopen',()=>hPush({s:'open'}));
+  on('rev',async()=>{const k=readKey(ph);if(k===null){alertMsg('先填正確答案喔');return}
+    H.keys[ph.id]=k;LS.set(LK+'-keys',H.keys);await hLoad();
+    const res=Object.assign({},H.st.res,{[ph.id]:rankFor(ph,k,H.recs)});hPush({s:'reveal',res})});
+  ['kkg','kgr','knum'].forEach(id=>{const el=$(id);if(el)el.oninput=()=>{const k=readKey(ph);if(k!==null){H.keys[ph.id]=k;LS.set(LK+'-keys',H.keys)}}});
+  on('sws',()=>{const s=H.sw;if(s.run){s.acc+=Date.now()-s.t0;s.run=false}else{s.t0=Date.now();s.run=true}$('sws').textContent=s.run?'停':'開始'});
+  on('swr',()=>{H.sw={run:false,t0:0,acc:0};$('sws').textContent='開始';swTick()});
+  on('swu',()=>{const s=H.sw,t=(s.acc+(s.run?Date.now()-s.t0:0))/1000;if(s.run){s.acc+=Date.now()-s.t0;s.run=false;$('sws').textContent='開始'}$('knum').value=Math.round(t*10)/10;H.keys[ph.id]=Math.round(t*10)/10;LS.set(LK+'-keys',H.keys)});
+  const f=$('phf');if(f)f.onchange=()=>uploadPhoto(f.files[0]);
+  swTick();
+}
+function swTick(){const el=$('swt');if(!el)return;const s=H.sw;el.textContent=((s.acc+(s.run?Date.now()-s.t0:0))/1000).toFixed(1)}
+function alertMsg(t){const m=$('mod');if(!m)return;m.innerHTML=`<div class="modal" id="mm"><div class="mbox" style="text-align:center"><p style="font-size:20px">${esc(t)}</p><button class="btn" style="margin-top:14px" id="mok">好</button></div></div>`;$('mok').onclick=()=>m.innerHTML=''}
+
+function hAnswers(ph){
+  if(ph.id==='welcome'){
+    const ids=new Set(H.recs.filter(r=>!r.cleared).map(r=>String(r.seat)));
+    return `<h3><span>已進場（點好自己是誰）</span><span class="cnt">${ids.size} / ${FAMILY.length} 人</span></h3><div class="alist">${FAMILY.map(f=>`<div class="ai ${ids.has(String(f.seat))?'':'none'}"><span>${esc(f.name)}</span><b>${ids.has(String(f.seat))?'✓':'—'}</b></div>`).join('')}</div>`;
+  }
+  if(!ph.game){return `<h3>今天的得獎紀錄</h3>${hWinners()}`}
+  const R=H.st.s==='reveal'&&H.st.res[ph.id];
+  return `<h3><span>作答情況（每 2.5 秒更新）</span><span class="cnt">${answeredLine(ph)}</span></h3><div class="alist ${ph.kind==='kg'?'wide':''}">${FAMILY.map(f=>{const r=H.recs.find(x=>String(x.seat)===String(f.seat));const v=r&&r.ans?r.ans[ph.id]:undefined;const has=v!==undefined&&v!=='';
+    return `<div class="ai ${has?'':'none'} ${R&&R.win.includes(f.seat)?'win':''}"><span>${esc(f.name)}</span><b>${has?esc(KIND[ph.kind].fmt(v)):'—'}</b></div>`}).join('')}</div>`;
+}
+function hWinners(){
+  const res=H.st.res||{};const rows=GAMES.filter(g=>res[g.id]).map(g=>`<div class="ai"><span>${g.short}</span><b>${res[g.id].win.map(s=>esc(nameOf(s))).join('、')||'沒有人'}</b></div>`);
+  return rows.length?`<div style="display:grid;gap:6px">${rows.join('')}</div>`:'<p class="small">還沒有公布任何答案</p>';
+}
+function hItems(){
+  const key=H.keys.g;
+  return `<div class="sec"><h3>抓周物品（點一下看寓意）</h3><div class="items">${ITEMS.map(x=>`<button class="item ${key===x.n?'on':''}" data-item="${esc(x.n)}"><b>${esc(x.n)}</b><span>${esc(x.b)}</span></button>`).join('')}</div></div>`;
+}
+function itemModal(n){
+  const x=ITEM[n],m=$('mod'),st=H.st;
+  m.innerHTML=`<div class="modal" id="mm"><div class="mbox"><div class="nm h">${esc(x.n)}</div><div class="bl h">${esc(x.b)}</div>
+  <div class="script" style="--fs:${Math.max(22,H.fs)}px"><p>${esc(x.say)}</p></div>
+  <div class="ctrl" style="margin-top:14px">${st.s==='lock'||st.s==='reveal'?`<button class="btn" id="grab">🎉 宸宸抓到這個，公布！</button>`:st.s==='open'?`<p class="small">（現在是介紹時間。宸宸真的抓到時，要先按「停止作答」，再點物品公布。）</p>`:''}
+  <button class="btn ghost" id="mx">關閉</button></div></div></div>`;
+  $('mx').onclick=()=>m.innerHTML='';$('mm').onclick=e=>{if(e.target.id==='mm')m.innerHTML=''};
+  const gb=$('grab');if(gb)gb.onclick=async()=>{H.keys.g=n;LS.set(LK+'-keys',H.keys);m.innerHTML='';await hLoad();
+    const res=Object.assign({},H.st.res,{g:rankFor(curPh(),n,H.recs)});hPush({s:'reveal',res})};
+}
+async function uploadPhoto(file){
+  if(!file)return;$('phm').textContent='處理中…';
+  const img=await new Promise(res=>{const rd=new FileReader();rd.onload=()=>{const im=new Image();im.onload=()=>{const k=Math.min(1,720/Math.max(im.width,im.height)),c=document.createElement('canvas');c.width=Math.round(im.width*k);c.height=Math.round(im.height*k);c.getContext('2d').drawImage(im,0,0,c.width,c.height);res(c.toDataURL('image/jpeg',.72))};im.onerror=()=>res(null);im.src=rd.result};rd.onerror=()=>res(null);rd.readAsDataURL(file)});
+  if(!img){$('phm').textContent='這張照片讀不出來，換一張試試';return}
+  try{await API.save(C_PHOTO,PHOTO_SEAT,'photo',{seat:PHOTO_SEAT,stage:'photo',img,at:Date.now()});H.photo=img;await hPush({pv:Date.now()})}
+  catch(e){$('phm').textContent='上傳失敗（'+errText(e)+'）。當天可以改成拿手機給大家看。'}
+}
+function hMenu(){
+  const m=$('mod');
+  m.innerHTML=`<div class="modal" id="mm"><div class="mbox"><b class="h" style="font-size:24px">選單</b>
+  <div class="ctrl" style="margin-top:14px"><button class="btn ghost" id="m1">看宾客畫面（這支手機）</button>
+  <button class="btn ghost" id="m2">全部重來（清掉答案、回到開場）</button><button class="btn ghost" id="m3">登出</button><button class="btn" id="mx">關閉</button></div>
+  <p class="small" style="margin-top:12px">「全部重來」適合前一天測試完使用：宾客手機上的答案和得獎紀錄都會清空。</p></div></div>`;
+  $('mx').onclick=()=>m.innerHTML='';
+  $('m1').onclick=()=>{window.open(location.pathname,'_blank')};
+  $('m3').onclick=()=>{try{sessionStorage.removeItem(LK+'-hk')}catch(e){}H.key=null;clearInterval(H.iv);history.replaceState(null,'',location.pathname);document.body.classList.remove('host');gStart()};
+  $('m2').onclick=async()=>{if(!$('m2').dataset.sure){$('m2').dataset.sure=1;$('m2').textContent='確定要全部重來？再按一次';return}
+    m.innerHTML='';
+    for(const f of FAMILY){try{await API.save(C_MAIN,f.seat,'live',{seat:f.seat,stage:'live',ans:{},at:0,cleared:1})}catch(e){}}
+    H.keys={};LS.set(LK+'-keys',{});H.sw={run:false,t0:0,acc:0};
+    await hPush({ph:'welcome',s:'ready',res:{},reset:Date.now()});await hLoad();hRender()};
+}
+
+/* ==================== 啟動 ==================== */
+function route(){if(location.hash==='#host')hLogin();else{document.body.classList.remove('host');clearInterval(H.iv);gStart()}}
+addEventListener('hashchange',route);
+addEventListener('visibilitychange',()=>{if(!document.hidden&&!document.body.classList.contains('host'))gPoll()});
+route();
+</script>
+</body>
+</html>
