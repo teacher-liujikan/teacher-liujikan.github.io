@@ -2,7 +2,7 @@
 <html lang="zh-Hant">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
 <title>批改作業小遊戲：測試你的國字腦</title>
 <meta property="og:title" content="批改作業小遊戲：測試你的國字腦">
 <meta property="og:description" content="當一天國語老師，拿紅筆圈出學生作業的錯字，看看你的國字腦有多強！">
@@ -15,6 +15,9 @@
    COLOUR/TYPE: desk wood, paper white, grid green, red-pen accent; LXGW WenKai for handwriting, Noto Sans TC for UI
    LAYOUT: modest top bar (score, notebook count, timer), notebook in the middle, action button under it */
 :root{color-scheme:light dark;--bg:light-dark(#d9b48a,#2b1f16);--bg2:light-dark(#c99f72,#22180f);--ink:light-dark(#2a1d12,#f3e7d8);--paper:#fffdf6;--grid:#7fb38f;--gridl:#cfe5d4;--pencil:#3b3a3f;--red:#d7263d;--gold:#f2b134;--muted:light-dark(#6a4e35,#c9b39a)}
+html,body{overflow-x:hidden;max-width:100%;overscroll-behavior-x:none;touch-action:manipulation;-webkit-text-size-adjust:100%}
+.wrap{overflow-x:clip}
+button{touch-action:manipulation}
 :root[data-theme=light]{color-scheme:light}:root[data-theme=dark]{color-scheme:dark}
 *{box-sizing:border-box;min-width:0}
 body{margin:0;min-height:100vh;color:var(--ink);font:16px/1.55 "Noto Sans TC",system-ui,sans-serif;overflow-x:clip;
@@ -521,6 +524,8 @@ tallyGet();
 $("snd").onclick=()=>{snd=!snd;$("snd").textContent="聲音："+(snd?"開":"關");if(snd)audio()};
 intro();
 }
+
+;["gesturestart","gesturechange"].forEach(t=>document.addEventListener(t,e=>e.preventDefault(),{passive:false}));
 </script>
 </body>
 </html>
